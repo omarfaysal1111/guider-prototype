@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import {
   Home, Users, Plus, MessageSquare, Settings, Dumbbell, Apple,
-  TrendingUp, Bell, Search, Filter, Flame, Camera, Clock, Edit3,
+  TrendingUp, Bell, BellOff, Search, Filter, Flame, Camera, Clock, Edit3,
   Trash2, GripVertical, Check, Send, ChevronLeft, ChevronRight,
   CheckCircle2, AlertTriangle, X, User, LogOut, Lock, FileText,
   HelpCircle, Mail, CreditCard, Upload, Star, Award, Target, Activity,
@@ -9,9 +9,511 @@ import {
   Archive, MoreVertical, RefreshCw, UserPlus, Circle, BarChart2,
   Calendar, ArrowUpDown, UserX, UserCheck, Hash,
   Play, Repeat, Video, Image, Minus, RotateCcw, Save, Clipboard,
-  Shield, Globe, Smartphone, Moon, Sun, Key, Download, ToggleLeft, ToggleRight, Wifi,
+  Shield, Globe, Smartphone, Moon, Sun, Monitor, Phone, Key, Download, ToggleLeft, ToggleRight, Wifi,
   Droplets, Goal, Scale, Leaf, Trophy
 } from "lucide-react";
+
+// ─── Language Store ───
+let _lang = "English";
+const AR_DICT = {
+  'Home': 'الرئيسية',
+  'Trainees': 'المتدربون',
+  'Create': 'إنشاء',
+  'Chat': 'المحادثة',
+  'More': 'المزيد',
+  'Today': 'اليوم',
+  'Workout': 'تمرين',
+  'Nutrition': 'تغذية',
+  'Progress': 'التقدم',
+  'Settings': 'الإعدادات',
+  'Profile': 'الملف الشخصي',
+  'Back': 'رجوع',
+  'Done': 'تم',
+  'Close': 'إغلاق',
+  'Back to Home': 'العودة للرئيسية',
+  'Back to Sign In': 'العودة لتسجيل الدخول',
+  'Save': 'حفظ',
+  'Cancel': 'إلغاء',
+  'Confirm': 'تأكيد',
+  'Delete': 'حذف',
+  'Edit': 'تعديل',
+  'Add': 'إضافة',
+  'Remove': 'إزالة',
+  'Send': 'إرسال',
+  'Search': 'بحث',
+  'Continue': 'متابعة',
+  'Submit': 'إرسال',
+  'Update': 'تحديث',
+  'Upload': 'رفع',
+  'Download': 'تنزيل',
+  'Share': 'مشاركة',
+  'Connect': 'اتصال',
+  'Allow': 'سماح',
+  'Deny': 'رفض',
+  'Change': 'تغيير',
+  'Resume': 'استمرار',
+  'Skip': 'تخطي',
+  'Undo': 'تراجع',
+  'Clear': 'مسح',
+  'Preview': 'معاينة',
+  'View all': 'عرض الكل',
+  'Show Less': 'عرض أقل',
+  'Show More': 'عرض المزيد',
+  'Save Changes': 'حفظ التغييرات',
+  'Update Password': 'تحديث كلمة المرور',
+  'Log Out': 'تسجيل الخروج',
+  'Sign Out': 'تسجيل الخروج',
+  'Get Started': 'ابدأ الآن',
+  'Next': 'التالي',
+  'Skip Rest': 'تخطي الراحة',
+  'Start from Scratch': 'البدء من الصفر',
+  'Build Workout': 'بناء تمرين',
+  'Active': 'نشط',
+  'Pending': 'قيد الانتظار',
+  'Inactive': 'غير نشط',
+  'Completed': 'مكتمل',
+  'Skipped': 'تم التخطي',
+  'SKIPPED': 'تم التخطي',
+  'Not logged': 'لم يُسجَّل',
+  'Rest day': 'يوم راحة',
+  'All': 'الكل',
+  'Attention': 'يحتاج انتباهاً',
+  'Draft': 'مسودة',
+  'Logged': 'مسجّل',
+  'Good morning': 'صباح الخير',
+  'Good afternoon': 'مساء الخير',
+  'Good evening': 'مساء النور',
+  'Your Personal Coaching Platform': 'منصتك الشخصية للتدريب',
+  'Welcome to guider.': 'مرحباً في Guider.',
+  'Welcome Back': 'مرحباً بعودتك',
+  'Train smarter. Together.': 'تدرّب بذكاء. معاً.',
+  'Welcome back, Coach': 'مرحباً بعودتك، مدرب',
+  'Welcome back, Trainee': 'مرحباً بعودتك، متدرب',
+  "Welcome! Let's Get Started": 'مرحباً! لنبدأ',
+  'Reset your password': 'إعادة تعيين كلمة المرور',
+  'Join guider.': 'انضم إلى Guider.',
+  "I'm a Coach": 'أنا مدرب',
+  "I'm a Trainee": 'أنا متدرب',
+  'Manage clients, create plans & track progress': 'أدر العملاء وابنِ الخطط وتتبع التقدم',
+  'Follow plans, log workouts & hit your goals': 'اتبع الخطط وسجّل تمارينك وحقق أهدافك',
+  'Check your email': 'تحقق من بريدك الإلكتروني',
+  'Email': 'البريد الإلكتروني',
+  'Password': 'كلمة المرور',
+  'Email Address': 'عنوان البريد الإلكتروني',
+  'Current Password': 'كلمة المرور الحالية',
+  'New Password': 'كلمة المرور الجديدة',
+  'Confirm New Password': 'تأكيد كلمة المرور الجديدة',
+  'Password Strength': 'قوة كلمة المرور',
+  'Passwords do not match': 'كلمات المرور غير متطابقة',
+  'Sign In': 'تسجيل الدخول',
+  'Sign Up': 'إنشاء حساب',
+  'Create Account': 'إنشاء حساب',
+  'Forgot Password?': 'نسيت كلمة المرور؟',
+  'Demo Mode': 'وضع التجربة',
+  'First Name ': 'الاسم الأول',
+  'Gym / Studio Name ': 'النادي / الاستوديو',
+  "Don't have an account? ": 'ليس لديك حساب؟ ',
+  'Already have an account? ': 'لديك حساب بالفعل؟ ',
+  'Terms & Conditions': 'الشروط والأحكام',
+  'Privacy Policy': 'سياسة الخصوصية',
+  'Manage your coaching practice': 'أدر ممارستك التدريبية',
+  'Build personalized workout & nutrition plans': 'ابنِ خطط تمرين وتغذية مخصصة',
+  "Monitor your clients' adherence & results": 'راقب التزام عملائك ونتائجهم',
+  "You're ready to start coaching": 'أنت مستعد لبدء التدريب',
+  'Your fitness journey starts here': 'رحلتك اللياقية تبدأ هنا',
+  'Receive personalized workouts & meals': 'تلقَّ تمارين ووجبات مخصصة',
+  'Log workouts, meals & weight': 'سجّل تمارينك ووجباتك ووزنك',
+  "Let's transform your fitness": 'لنحوّل لياقتك',
+  'Create Plans': 'إنشاء الخطط',
+  'Track Progress': 'تتبع التقدم',
+  'Get a Plan': 'احصل على خطة',
+  'All Set!': 'جاهز!',
+  "Today's Overview": 'نظرة عامة على اليوم',
+  'Active Trainees': 'المتدربون النشطون',
+  'Sessions Today': 'جلسات اليوم',
+  'Avg Workout Adherence': 'متوسط التزام التمرين',
+  'Avg Nutrition Adherence': 'متوسط التزام التغذية',
+  'Needs Attention': 'يحتاج انتباهاً',
+  "Today's Sessions": 'جلسات اليوم',
+  'Top Performers': 'أفضل المتدربين',
+  'Recent Activity': 'النشاط الأخير',
+  'Pending Invitations': 'الدعوات المعلقة',
+  'View Profile': 'عرض الملف',
+  'No activity yet': 'لا نشاط بعد',
+  'No pending invitations': 'لا توجد دعوات معلقة',
+  'Add New Trainee': 'إضافة متدرب جديد',
+  'Invite Trainee': 'دعوة متدرب',
+  'Send Invite': 'إرسال الدعوة',
+  'Archive Trainee': 'أرشفة المتدرب',
+  'Reactivate Trainee': 'إعادة تفعيل المتدرب',
+  'Delete Trainee Permanently': 'حذف المتدرب نهائياً',
+  'All Trainees': 'جميع المتدربين',
+  'Select Trainee': 'اختر متدرباً',
+  'Trainee Info': 'معلومات المتدرب',
+  'Adherence': 'الالتزام',
+  'Weight': 'الوزن',
+  'Day Streak': 'أيام متتالية',
+  'Overview': 'نظرة عامة',
+  'Plans': 'الخطط',
+  'Details': 'التفاصيل',
+  'Workout Progress': 'تقدم التمرين',
+  'Nutrition Progress': 'تقدم التغذية',
+  'Goals': 'الأهداف',
+  'Milestones': 'الإنجازات',
+  'Achievements': 'الإنجازات',
+  'Coach Notes': 'ملاحظات المدرب',
+  'Trainee Feedback': 'ملاحظات المتدرب',
+  'Body Measurements': 'قياسات الجسم',
+  'Measurements': 'القياسات',
+  'Progress Photos': 'صور التقدم',
+  'InBody Reports': 'تقارير InBody',
+  'Weight Trend': 'منحنى الوزن',
+  'This Week': 'هذا الأسبوع',
+  'View Health & Training History': 'عرض السجل الصحي والتدريبي',
+  'Coach Notes & Tips': 'ملاحظات المدرب ونصائحه',
+  'Workout Plans': 'خطط التمرين',
+  'Nutrition Plans': 'خطط التغذية',
+  'Breakfast': 'الإفطار',
+  'Lunch': 'الغداء',
+  'Dinner': 'العشاء',
+  'Snack': 'وجبة خفيفة',
+  'Meals': 'الوجبات',
+  'Calories': 'السعرات الحرارية',
+  'Protein': 'البروتين',
+  'Carbs': 'الكربوهيدرات',
+  'Fat': 'الدهون',
+  'Water': 'الماء',
+  'Macros': 'المغذيات الكبرى',
+  'Target': 'الهدف',
+  'Remaining': 'المتبقي',
+  'Eaten': 'مستهلك',
+  'Log Meal': 'تسجيل الوجبة',
+  'Add Food': 'إضافة طعام',
+  'All meals logged!': 'تم تسجيل جميع الوجبات!',
+  'No meals planned yet': 'لا وجبات مخططة بعد',
+  "Today's Nutrition": 'تغذية اليوم',
+  'Nutrition Complete!': 'اكتملت التغذية!',
+  'Nutrition Plan Builder': 'منشئ خطة التغذية',
+  'Daily Calorie Target': 'هدف السعرات اليومي',
+  'Water Intake': 'استهلاك الماء',
+  'Water (L)': 'الماء (لتر)',
+  'Workouts': 'التمارين',
+  'Exercises': 'التمارين',
+  'All Exercises': 'جميع التمارين',
+  'Sets': 'المجموعات',
+  'Reps': 'التكرارات',
+  'Rest': 'الراحة',
+  'Rest Period': 'فترة الراحة',
+  'Duration': 'المدة',
+  'Minutes': 'دقائق',
+  'Start Workout': 'بدء التمرين',
+  'Log Workout': 'تسجيل التمرين',
+  'Finish Workout': 'إنهاء التمرين',
+  'Rest Day': 'يوم راحة',
+  'No workout today': 'لا تمرين اليوم',
+  'New Workout Plan': 'خطة تمرين جديدة',
+  'New Nutrition Plan': 'خطة تغذية جديدة',
+  'Workout Plan': 'خطة تمرين',
+  'Nutrition Plan': 'خطة تغذية',
+  'Save Plan': 'حفظ الخطة',
+  'Add Exercise': 'إضافة تمرين',
+  'Add Set': 'إضافة مجموعة',
+  'Workout complete!': 'اكتمل التمرين!',
+  'Great work!': 'عمل رائع!',
+  'Workout Complete!': 'اكتمل التمرين!',
+  'Workout Summary': 'ملخص التمرين',
+  'Workout Builder': 'منشئ التمرين',
+  "Today's Workout": 'تمرين اليوم',
+  'No exercises found': 'لا تمارين موجودة',
+  'My Drafts': 'مسوداتي',
+  'No draft workouts yet': 'لا مسودات تمارين بعد',
+  'No draft nutrition plans yet': 'لا مسودات خطط غذائية بعد',
+  'Weight Log': 'سجل الوزن',
+  'Log Weight': 'تسجيل الوزن',
+  'Weight Loss': 'خسارة الوزن',
+  'Weight Goal Progress': 'تقدم هدف الوزن',
+  'Messages': 'الرسائل',
+  'Mark all read': 'تحديد الكل كمقروء',
+  'Quick Replies': 'ردود سريعة',
+  'No messages yet': 'لا رسائل بعد',
+  'Start your conversation!': 'ابدأ محادثتك!',
+  'Notifications': 'الإشعارات',
+  'Do Not Disturb': 'عدم الإزعاج',
+  'Language': 'اللغة',
+  'Theme': 'المظهر',
+  'Units': 'الوحدات',
+  'Security': 'الأمان',
+  'App Preferences': 'تفضيلات التطبيق',
+  'Help': 'المساعدة',
+  'Subscription': 'الاشتراك',
+  'Credentials': 'الشهادات',
+  'Account Information': 'معلومات الحساب',
+  'Profile, email, password': 'الملف الشخصي، البريد، كلمة المرور',
+  'Push, email, Do Not Disturb': 'الإشعارات، البريد، عدم الإزعاج',
+  'Theme, units, language': 'المظهر، الوحدات، اللغة',
+  'Subscription & Billing': 'الاشتراك والفواتير',
+  'Pro Plan · Renews Mar 15': 'الخطة المميزة · تتجدد 15 مارس',
+  'Security & Privacy': 'الأمان والخصوصية',
+  '2FA, devices, data': 'المصادقة الثنائية، الأجهزة، البيانات',
+  'Change Password': 'تغيير كلمة المرور',
+  'Privacy Settings': 'إعدادات الخصوصية',
+  'Contact Support': 'التواصل مع الدعم',
+  'Rate the App': 'تقييم التطبيق',
+  'Delete Account': 'حذف الحساب',
+  'Two-Factor Authentication': 'المصادقة الثنائية',
+  "Today's Plan": 'خطة اليوم',
+  'My Coach': 'مدربي',
+  'Weekly Goals': 'الأهداف الأسبوعية',
+  'My Badges': 'شاراتي',
+  'Weight Chart': 'مخطط الوزن',
+  'Reminders': 'التذكيرات',
+  'Add Reminder': 'إضافة تذكير',
+  'No reminders': 'لا تذكيرات',
+  'Meals Logged': 'وجبات مسجلة',
+  'What would you like to create?': 'ماذا تريد أن تنشئ؟',
+  'Monday': 'الاثنين',
+  'Tuesday': 'الثلاثاء',
+  'Wednesday': 'الأربعاء',
+  'Thursday': 'الخميس',
+  'Friday': 'الجمعة',
+  'Saturday': 'السبت',
+  'Sunday': 'الأحد',
+  "Trainee's reason": 'سبب المتدرب',
+  "TRAINEE'S REASON": 'سبب المتدرب',
+  'Upgrade to Premium': 'الترقية إلى Premium',
+  'Plan Name': 'اسم الخطة',
+  'Difficulty Level': 'مستوى الصعوبة',
+  'Certifications': 'الشهادات',
+  'Championships & Awards': 'البطولات والجوائز',
+  'Help & Support': 'المساعدة والدعم',
+  'Profile Completion': 'اكتمال الملف الشخصي',
+  'Caution': 'تحذير',
+  'Instruction': 'تعليمات',
+  'No food items yet.': 'لا عناصر غذائية بعد.',
+  'Start logging your meals to track your nutrition!': 'ابدأ بتسجيل وجباتك لتتبع تغذيتك!',
+  'Upgrade to Pro': 'الترقية إلى Pro',
+  'My Progress': 'تقدمي',
+  '6/6 exercises · 30 min ago': '6/6 تمارين · منذ 30 دقيقة',
+  'Fatima Z. logged all meals': 'سجّلت Fatima Z. جميع الوجبات',
+  'Breakfast + Lunch + Snack · 1 hr ago': 'الإفطار + الغداء + وجبة خفيفة · منذ ساعة',
+  'Sarah M. hit a new PR': 'حققت Sarah M. رقماً شخصياً جديداً',
+  'Squat 65kg → 70kg · 2 hrs ago': 'قرفصاء 65كجم ← 70كجم · منذ ساعتين',
+  'Ahmed K. skipped nutrition log': 'تخطّى Ahmed K. تسجيل التغذية',
+  'No meals logged today · 4 hrs ago': 'لا وجبات مسجّلة اليوم · منذ 4 ساعات',
+  'Karim S. sent you a message': 'أرسل Karim S. رسالة',
+  '"Coach, about tomorrow\'s plan..." · 5 hrs ago': '"مدرب، بخصوص خطة الغد..." · منذ 5 ساعات',
+  'Dana M. invitation sent': 'تم إرسال دعوة Dana M.',
+  'Pending acceptance · Just now': 'في انتظار القبول · الآن',
+  'Missed 2+ workouts this week': 'فاته أكثر من تمرينين هذا الأسبوع',
+  'Nutrition adherence dropped to': 'انخفض التزام التغذية إلى',
+  'No login for 5+ days': 'لم يسجّل دخول منذ 5+ أيام',
+  'Weight plateau for 3+ weeks': 'ثبات الوزن منذ 3+ أسابيع',
+  'Alerts': 'التنبيهات',
+  'Avg Adherence': 'متوسط الالتزام',
+  'Client limit reached': 'تم الوصول لحد العملاء',
+  '7-day workout streak': '7 أيام تمرين متتالية',
+  'Complete 20 workouts': 'أكمل 20 تمريناً',
+  'Log meals for 14 days': 'سجّل الوجبات لـ 14 يوماً',
+  'Upload 5 progress photos': 'ارفع 5 صور تقدم',
+  'Reach target weight': 'الوصول للوزن المستهدف',
+  '100% adherence for 1 week': 'التزام 100% لأسبوع كامل',
+  'Leg Day at 4:00 PM': 'يوم الأرجل في 4:00 مساءً',
+  'Take creatine with lunch': 'تناول الكرياتين مع الغداء',
+  'Rest day tomorrow — active recovery': 'يوم راحة غداً — تعافٍ نشط',
+  'Lose 3 kg by end of March': 'خسارة 3 كجم بنهاية مارس',
+  'Hit 150g protein daily': 'تحقيق 150 جرام بروتين يومياً',
+  'Complete 5 workouts per week': 'إكمال 5 تمارين أسبوعياً',
+  'Drink 2.5L water daily': 'شرب 2.5 لتر ماء يومياً',
+  'Workout reminder': 'تذكير بالتمرين',
+  'Weekly check-in due': 'موعد التسجيل الأسبوعي',
+  'New achievement unlocked!': 'تم فتح إنجاز جديد!',
+  'Log your weight and measurements for this week': 'سجّل وزنك وقياساتك لهذا الأسبوع',
+  'Coach Mike sent a message': 'أرسل المدرب Mike رسالة',
+  'Fat Burn — Monday starts in 1 hour': 'حرق الدهون — الاثنين يبدأ خلال ساعة',
+  'Set by Coach Mike': 'حدَّده المدرب Mike',
+  'Coach Goals': 'أهداف المدرب',
+  'Monthly Goal': 'الهدف الشهري',
+  'Reach 72 kg': 'الوصول لـ 72 كجم',
+  'Started: 76.2 kg': 'البداية: 76.2 كجم',
+  'Bkfast': 'الإفطار',
+  'Medium': 'متوسط',
+  'None': 'لا شيء',
+  'Snoozed': 'مؤجَّل',
+  'New Reminder': 'تذكير جديد',
+  'Name *': 'الاسم *',
+  'Date *': 'التاريخ *',
+  'Hour *': 'الساعة *',
+  'Icon (optional)': 'أيقونة (اختياري)',
+  'Tap to upload photo': 'اضغط لرفع صورة',
+  'JPG, PNG up to 10 MB': 'JPG، PNG حتى 10 ميجابايت',
+  'Sunday, Feb 15': 'الأحد، 15 فبراير',
+  'session': 'جلسة',
+  'sessions': 'جلسات',
+  'today': 'اليوم',
+  'need attention': 'يحتاجون انتباهاً',
+  'Upgrade': 'ترقية',
+  '{tr("slots used on free plan")}': 'فتحات مستخدمة في الخطة المجانية',
+  '-day streak': ' أيام متتالية',
+  'No streak yet': 'لا تسلسل بعد',
+  'Less': 'أقل',
+  'Invited': 'دُعي',
+  'Adjust Plan': 'تعديل الخطة',
+  'Remind': 'تذكير',
+  'Waist': 'الخصر',
+  'Arms': 'الذراعان',
+  'on fire!': 'نار!',
+  'Invite First Trainee': 'دعوة أول متدرب',
+  'Upgrade to Invite': 'ترقية للدعوة',
+  'Upgrade to Add More Clients': 'ترقية لإضافة المزيد',
+
+  'Reminder added': 'تم إضافة التذكير',
+  'Name, date and hour are required': 'الاسم والتاريخ والساعة مطلوبة',
+  'Badge unlocked': 'تم فتح شارة',
+  'Fat Burn — Monday starts in 1 hour': 'حرق الدهون — الاثنين يبدأ خلال ساعة',
+  "Great progress this week! Let's adjust your...": 'تقدم رائع هذا الأسبوع! دعنا نعدّل...',
+
+  'Weight loss': 'خسارة وزن',
+  'Muscle gain': 'بناء عضلات',
+  'Toning': 'نحت الجسم',
+  'Endurance': 'تحمل',
+  'Flexibility': 'مرونة',
+  'Maintenance': 'صيانة',
+  'Fat burn': 'حرق دهون',
+  'Strength': 'قوة',
+  'Not set': 'غير محدد',
+  'Beginner': 'مبتدئ',
+  'Intermediate': 'متوسط',
+  'Advanced': 'متقدم',
+  'slots used on free plan': 'فتحات مستخدمة في الخطة المجانية',
+  'Overdue': 'متأخر',
+  'Tomorrow': 'غداً',
+  'Paused due to travel': 'متوقف بسبب السفر',
+  'Traveling often': 'يسافر كثيراً',
+  'Knee injury — avoid deep squats': 'إصابة في الركبة — تجنب القرفصاء العميقة',
+
+  '2 hours ago': 'منذ ساعتين',
+  '1 day ago': 'منذ يوم',
+  '3 days ago': 'منذ 3 أيام',
+  '5 days ago': 'منذ 5 أيام',
+  '30 days ago': 'منذ 30 يوماً',
+  '30 min ago': 'منذ 30 دقيقة',
+  '4 hours ago': 'منذ 4 ساعات',
+  'Just now': 'الآن',
+  'Today, 4:00 PM': 'اليوم، 4:00 مساءً',
+  'Today, 6:00 PM': 'اليوم، 6:00 مساءً',
+  'Today, 9:00 AM': 'اليوم، 9:00 صباحاً',
+  'Tomorrow, 10:00 AM': 'غداً، 10:00 صباحاً',
+  'Tomorrow, 7:00 AM': 'غداً، 7:00 صباحاً',
+  'Wed, 5:00 PM': 'الأربعاء، 5:00 مساءً',
+  '4:00 PM': '4:00 مساءً',
+  '6:00 PM': '6:00 مساءً',
+  '9:00 AM': '9:00 صباحاً',
+
+  '"Coach, about tomorrow\'s plan..." · 5 hrs ago': '"مدرب، بخصوص خطة الغد..." · منذ 5 ساعات',
+  "Lina R. completed today's workout": 'أنهت Lina R. تمرين اليوم',
+
+  'Feb 1, 2026': '1 فبراير 2026',
+  'Jan 15, 2026': '15 يناير 2026',
+  'Jan 20, 2026': '20 يناير 2026',
+  'Feb 12, 2026': '12 فبراير 2026',
+  'Dec 10, 2025': '10 ديسمبر 2025',
+  'Jan 5, 2026': '5 يناير 2026',
+  'Nov 1, 2025': '1 نوفمبر 2025',
+  'Oct 15, 2025': '15 أكتوبر 2025',
+  'Feb 14, 2026': '14 فبراير 2026',
+  'Dec 20, 2025': '20 ديسمبر 2025',
+  'Yesterday': 'الأمس',
+  'Feb 8': '8 فبراير',
+  'Feb 10': '10 فبراير',
+  'Feb 5': '5 فبراير',
+
+  "You've earned the 'Consistency King' badge": "حصلت على شارة 'ملك الثبات'",
+  'W1': 'أ1',
+  'W2': 'أ2',
+  'W3': 'أ3',
+  'W4': 'أ4',
+  'W5': 'أ5',
+  'W6': 'أ6',
+  'Now': 'الآن',
+  '6-day streak!': '6 أيام متتالية!',
+  '1 more day to earn the Streak Master badge': 'يوم آخر فقط للحصول على شارة سيد التتالي',
+  'Fat Burn — Monday': 'حرق الدهون — الاثنين',
+  '4 of 6 exercises done': '4 من 6 تمارين مكتملة',
+  'View All →': 'عرض الكل ←',
+  'Reminder snoozed': 'تم تأجيل التذكير',
+  '74.5 kg → 72 kg': '74.5 كجم ← 72 كجم',
+  'Upload Progress Photo': 'رفع صورة تقدم',
+  'Progress photo saved!': 'تم حفظ صورة التقدم!',
+  '1h': 'منذ ساعة',
+  '2h': 'منذ ساعتين',
+  '3h': 'منذ 3 ساعات',
+
+  '12:30 PM': '12:30 ظهراً',
+  '30m': 'منذ 30 دقيقة',
+  'Earned': 'مكتسبة',
+  'Locked': 'مقفلة',
+  'gold': 'ذهبي',
+  'silver': 'فضي',
+
+  '6 exercises': '6 تمارين',
+  '~45 min': '~45 دقيقة',
+  '~320 cal': '~320 سعرة',
+  'protein': 'بروتين',
+  'carbs': 'كربوهيدرات',
+  'fat': 'دهون',
+  'Snooze': 'تأجيل',
+  'Take Photo': 'التقاط صورة',
+  'Gallery': 'المعرض',
+  'Upload & Save': 'رفع وحفظ',
+  'logged': 'مسجّل',
+  '10 min ago': 'منذ 10 دقائق',
+
+
+
+  'Streak Master': 'سيد التتالي',
+  'Iron Will': 'إرادة حديدية',
+  'Clean Eater': 'أكل صحي',
+  'Progress Tracker': 'متتبع التقدم',
+  'Goal Crusher': 'محقق الأهداف',
+  'Perfect Week': 'أسبوع مثالي',
+  'Badges Unlocked': 'شارات مفتوحة',
+
+  'Light': 'فاتح',
+  'Dark': 'داكن',
+  'Metric': 'متري',
+  'Imperial': 'إمبراطوري',
+  'kg / km / °C': 'كجم / كم / °م',
+  'lbs / mi / °F': 'رطل / ميل / °ف',
+  'Language changed to English': 'تم التغيير إلى الإنجليزية',
+  'Language changed to Arabic': 'تم التغيير إلى العربية',
+
+  'Certified PT with 8+ years experience in strength & conditioning. Specialized in body transformations and competition prep.': 'مدرب معتمد بخبرة 8+ سنوات في القوة والتكييف البدني. متخصص في تحولات الجسم والتحضير للبطولات.',
+  'NASM Certified Personal Trainer': 'مدرب شخصي معتمد NASM',
+  'CrossFit Level 2 Trainer': 'مدرب CrossFit المستوى الثاني',
+  'Precision Nutrition Level 1': 'تغذية دقيقة المستوى الأول',
+  'Regional Bodybuilding 1st Place': 'المركز الأول في كمال الأجسام الإقليمي',
+  'National Fitness Challenge Winner': 'الفائز ببطولة اللياقة الوطنية',
+  'Client lost 30kg in 6 months': 'عميل خسر 30 كجم في 6 أشهر',
+  'Client gained 12kg muscle in 8 months': 'عميل اكتسب 12 كجم عضلات في 8 أشهر',
+  'Post-pregnancy body transformation': 'تحول جسدي ما بعد الحمل',
+  'Proven Transformations': 'تحولات مثبتة',
+  'Before:': 'قبل:',
+  'After:': 'بعد:',
+  'Before/After Photo': 'صورة قبل/بعد',
+
+  'Gender': 'الجنس',
+  'Male': 'ذكر',
+  'Female': 'أنثى',
+  'Prefer not to say': 'أفضل عدم الإفصاح',
+
+  'optional': 'اختياري',
+
+  'Gender *': 'الجنس *',
+
+  'Other': 'آخر',
+
+};
+const tr = (text) => _lang === "Arabic" ? (AR_DICT[text] || text) : text;
 
 // ─── Theme System ───
 const lightTheme = {
@@ -54,7 +556,7 @@ function Toast({ message, type = "success", onDismiss }) {
   useEffect(() => { const t = setTimeout(onDismiss, 3000); return () => clearTimeout(t); }, [onDismiss]);
   const bg = type === "success" ? colors.success : type === "error" ? colors.error : colors.warning;
   return (
-    <div style={{ position: "fixed", bottom: 90, left: "50%", transform: "translateX(-50%)", background: bg, color: "#fff", padding: "12px 24px", borderRadius: 12, display: "flex", alignItems: "center", gap: 8, zIndex: 999, boxShadow: "0 8px 32px rgba(0,0,0,0.18)", animation: "slideUp 0.3s ease", fontSize: 14, fontWeight: 600 }}>
+    <div style={{ position: "absolute", bottom: 90, left: "50%", transform: "translateX(-50%)", background: bg, color: "#fff", padding: "12px 24px", borderRadius: 12, display: "flex", alignItems: "center", gap: 8, zIndex: 999, boxShadow: "0 8px 32px rgba(0,0,0,0.18)", animation: "slideUp 0.3s ease", fontSize: 14, fontWeight: 600 }}>
       {type === "success" ? <CheckCircle2 size={18} /> : <AlertTriangle size={18} />}
       {message}
     </div>
@@ -64,13 +566,13 @@ function Toast({ message, type = "success", onDismiss }) {
 // ─── Confirmation Dialog ───
 function ConfirmDialog({ title, message, onConfirm, onCancel }) {
   return (
-    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 998, padding: 20 }}>
-      <div style={{ background: "#fff", borderRadius: 16, padding: 24, width: "100%", maxWidth: 320, animation: "fadeScale 0.25s ease" }}>
+    <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 998, padding: 20 }}>
+      <div style={{ background: "#fff", borderRadius: 16, padding: 24, width: "100%", maxWidth: 390, animation: "fadeScale 0.25s ease" }}>
         <h3 style={{ fontSize: 18, fontWeight: 700, color: colors.textPrimary, marginBottom: 8 }}>{title}</h3>
         <p style={{ fontSize: 14, color: colors.textSecondary, lineHeight: 1.5, marginBottom: 24 }}>{message}</p>
         <div style={{ display: "flex", gap: 12 }}>
-          <button onClick={onCancel} style={{ flex: 1, padding: "12px 0", borderRadius: 12, border: `1.5px solid ${colors.border}`, background: "#fff", fontSize: 14, fontWeight: 600, color: colors.textSecondary, cursor: "pointer" }}>Cancel</button>
-          <button onClick={onConfirm} style={{ flex: 1, padding: "12px 0", borderRadius: 12, border: "none", background: colors.primary, color: "#fff", fontSize: 14, fontWeight: 600, cursor: "pointer", boxShadow: "0 4px 14px rgba(52,211,153,0.25)" }}>Confirm</button>
+          <button onClick={onCancel} style={{ flex: 1, padding: "12px 0", borderRadius: 12, border: `1.5px solid ${colors.border}`, background: "#fff", fontSize: 14, fontWeight: 600, color: colors.textSecondary, cursor: "pointer" }}>{tr("Cancel")}</button>
+          <button onClick={onConfirm} style={{ flex: 1, padding: "12px 0", borderRadius: 12, border: "none", background: colors.primary, color: "#fff", fontSize: 14, fontWeight: 600, cursor: "pointer", boxShadow: "0 4px 14px rgba(52,211,153,0.25)" }}>{tr("Confirm")}</button>
         </div>
       </div>
     </div>
@@ -80,7 +582,7 @@ function ConfirmDialog({ title, message, onConfirm, onCancel }) {
 // ─── Bottom Sheet ───
 function BottomSheet({ title, children, onClose }) {
   return (
-    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)", display: "flex", alignItems: "flex-end", zIndex: 997 }}>
+    <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.4)", display: "flex", alignItems: "flex-end", zIndex: 997 }}>
       <div style={{ background: "#fff", borderRadius: "24px 24px 0 0", width: "100%", maxHeight: "85vh", overflow: "auto", padding: "12px 20px 32px", animation: "slideUp 0.3s ease" }}>
         <div style={{ width: 40, height: 4, background: colors.border, borderRadius: 2, margin: "0 auto 16px" }} />
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
@@ -124,7 +626,7 @@ function SplashScreen({ onComplete }) {
   }, [onComplete]);
 
   return (
-    <div style={{ position: "fixed", inset: 0, background: "linear-gradient(135deg, #0A0A0F, #1A1A25)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999 }}>
+    <div style={{ position: "absolute", inset: 0, background: "linear-gradient(135deg, #0A0A0F, #1A1A25)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 9999 }}>
       <div style={{ textAlign: "center" }}>
         <div style={{ fontSize: 64, fontWeight: 900, letterSpacing: -2, transition: "all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1)", transform: expanded ? "scale(1)" : "scale(0.5)", opacity: expanded ? 1 : 0 }}>
           {expanded ? <span style={{ color: "#fff" }}>guider<span style={{ color: "#34D399" }}>.</span></span> : <span style={{ color: "#fff" }}>g<span style={{ color: "#34D399" }}>.</span></span>}
@@ -142,17 +644,17 @@ function OnboardingOverlay({ role, onComplete }) {
   const [step, setStep] = useState(0);
 
   const coachSteps = [
-    { title: "Welcome to guider.", subtitle: "Manage your coaching practice", icon: Users },
-    { title: "Create Plans", subtitle: "Build personalized workout & nutrition plans", icon: Plus },
-    { title: "Track Progress", subtitle: "Monitor your clients' adherence & results", icon: TrendingUp },
-    { title: "All Set!", subtitle: "You're ready to start coaching", icon: Check },
+    { title: tr("Welcome to guider."), subtitle: tr("Manage your coaching practice"), icon: Users },
+    { title: tr("Create Plans"), subtitle: tr("Build personalized workout & nutrition plans"), icon: Plus },
+    { title: tr("Track Progress"), subtitle: tr("Monitor your clients' adherence & results"), icon: TrendingUp },
+    { title: tr("All Set!"), subtitle: tr("You're ready to start coaching"), icon: Check },
   ];
 
   const traineeSteps = [
-    { title: "Welcome to guider.", subtitle: "Your fitness journey starts here", icon: Home },
-    { title: "Get a Plan", subtitle: "Receive personalized workouts & meals", icon: Dumbbell },
-    { title: "Track Progress", subtitle: "Log workouts, meals & weight", icon: TrendingUp },
-    { title: "All Set!", subtitle: "Let's transform your fitness", icon: Check },
+    { title: tr("Welcome to guider."), subtitle: tr("Your fitness journey starts here"), icon: Home },
+    { title: tr("Get a Plan"), subtitle: tr("Receive personalized workouts & meals"), icon: Dumbbell },
+    { title: tr("Track Progress"), subtitle: tr("Log workouts, meals & weight"), icon: TrendingUp },
+    { title: tr("All Set!"), subtitle: tr("Let's transform your fitness"), icon: Check },
   ];
 
   const steps = role === "coach" ? coachSteps : traineeSteps;
@@ -168,7 +670,7 @@ function OnboardingOverlay({ role, onComplete }) {
   };
 
   return (
-    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 998, padding: 20 }}>
+    <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.7)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 998, padding: 20 }}>
       <div style={{ background: colors.card, borderRadius: 24, padding: 32, maxWidth: 400, textAlign: "center", animation: "fadeScale 0.4s ease" }}>
         <div style={{ width: 64, height: 64, borderRadius: 16, background: `${colors.primary}15`, display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 20px" }}>
           <IconComponent size={32} color={colors.primary} />
@@ -259,7 +761,7 @@ const allTraineesData = [
 // COACH TRAINEES TAB (Decision-Support Dashboard)
 // ═══════════════════════════════════════════════════════
 
-function CoachTraineesTab({ onNavigate, onShowToast, freemium = {} }) {
+function CoachTraineesTab({ onNavigate, onShowToast, freemium = {}, initialTraineeId = null }) {
   const { isPremium: isPro, CLIENT_FREE_LIMIT: freeLimit = 3, canAddClient: canInvite, onUpgrade, onClientCountChange } = freemium;
   const [trainees, setTrainees] = useState(allTraineesData);
   const [searchQuery, setSearchQuery] = useState("");
@@ -271,13 +773,14 @@ function CoachTraineesTab({ onNavigate, onShowToast, freemium = {} }) {
   const [selectedIds, setSelectedIds] = useState([]);
   const [bulkMode, setBulkMode] = useState(false);
   const [showBulkActions, setShowBulkActions] = useState(false);
-  const [showTraineeProfile, setShowTraineeProfile] = useState(null);
+  const [showTraineeProfile, setShowTraineeProfile] = useState(initialTraineeId);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(null);
   const [swipedId, setSwipedId] = useState(null);
 
   // Invite form state
   const [inviteEmail, setInviteEmail] = useState("");
   const [inviteFirstName, setInviteFirstName] = useState("");
+  const [inviteGender, setInviteGender] = useState("");
   const [inviteGoal, setInviteGoal] = useState("");
   const [inviteMessage, setInviteMessage] = useState("");
   const [inviteLoading, setInviteLoading] = useState(false);
@@ -285,11 +788,11 @@ function CoachTraineesTab({ onNavigate, onShowToast, freemium = {} }) {
 
   // Filter logic
   const filters = [
-    { key: "all", label: "All", count: trainees.length },
-    { key: "active", label: "Active", count: trainees.filter(t => t.status === "active").length },
-    { key: "attention", label: "Attention", count: trainees.filter(t => t.alerts.length > 0).length },
-    { key: "pending", label: "Pending", count: trainees.filter(t => t.status === "pending").length },
-    { key: "inactive", label: "Inactive", count: trainees.filter(t => t.status === "inactive").length },
+    { key: "all", label: tr("All"), count: trainees.length },
+    { key: "active", label: tr("Active"), count: trainees.filter(t => t.status === "active").length },
+    { key: "attention", label: tr("Attention"), count: trainees.filter(t => t.alerts.length > 0).length },
+    { key: "pending", label: tr("Pending"), count: trainees.filter(t => t.status === "pending").length },
+    { key: "inactive", label: tr("Inactive"), count: trainees.filter(t => t.status === "inactive").length },
   ];
 
   // Sort logic
@@ -335,10 +838,10 @@ function CoachTraineesTab({ onNavigate, onShowToast, freemium = {} }) {
 
   // Alert label helper
   const alertLabel = (type) => ({
-    missed: "Missed workouts",
+    missed:    "Missed workouts",
     nutrition: "Low nutrition",
-    noLogin: "No login",
-    plateau: "Weight plateau",
+    noLogin:   "No login",
+    plateau:   "Weight plateau",
   }[type] || type);
 
   const alertColor = (type) => ({
@@ -369,7 +872,7 @@ function CoachTraineesTab({ onNavigate, onShowToast, freemium = {} }) {
     setTimeout(() => {
       const newTrainee = {
         id: Date.now(), name: inviteFirstName || inviteEmail.split("@")[0], email: inviteEmail,
-        avatar: (inviteFirstName || inviteEmail)[0].toUpperCase(), goal: inviteGoal || "Not set",
+        avatar: (inviteFirstName || inviteEmail)[0].toUpperCase(), goal: inviteGoal || "Not set", gender: inviteGender || "—",
         level: "—", adherence: 0, workoutAdherence: 0, nutritionAdherence: 0, status: "pending",
         weight: "—", lastActivity: "Never", nextSession: "—", joined: "Just now",
         alerts: [], note: "", streak: 0,
@@ -383,7 +886,7 @@ function CoachTraineesTab({ onNavigate, onShowToast, freemium = {} }) {
       });
       setInviteLoading(false);
       setShowInviteModal(false);
-      setInviteEmail(""); setInviteFirstName(""); setInviteGoal(""); setInviteMessage("");
+      setInviteEmail(""); setInviteFirstName(""); setInviteGender(""); setInviteGoal(""); setInviteMessage("");
       onShowToast(`Invite sent to ${inviteEmail}`);
     }, 1200);
   };
@@ -400,13 +903,13 @@ function CoachTraineesTab({ onNavigate, onShowToast, freemium = {} }) {
   // Archive trainee
   const archiveTrainee = (id) => {
     setTrainees(prev => prev.map(t => t.id === id ? { ...t, status: "inactive" } : t));
-    onShowToast("Trainee archived");
+    onShowToastr("Trainee archived");
   };
 
   // Reactivate trainee
   const reactivateTrainee = (id) => {
     setTrainees(prev => prev.map(t => t.id === id ? { ...t, status: "active" } : t));
-    onShowToast("Trainee reactivated");
+    onShowToastr("Trainee reactivated");
   };
 
   // Delete trainee
@@ -420,7 +923,7 @@ function CoachTraineesTab({ onNavigate, onShowToast, freemium = {} }) {
   const markReviewed = (id) => {
     setTrainees(prev => prev.map(t => t.id === id ? { ...t, alerts: [] } : t));
     setSwipedId(null);
-    onShowToast("Marked as reviewed");
+    onShowToastr("Marked as reviewed");
   };
 
   // Bulk actions
@@ -435,7 +938,7 @@ function CoachTraineesTab({ onNavigate, onShowToast, freemium = {} }) {
   const bulkMarkReviewed = () => {
     setTrainees(prev => prev.map(t => selectedIds.includes(t.id) ? { ...t, alerts: [] } : t));
     setBulkMode(false); setSelectedIds([]);
-    onShowToast("Marked as reviewed");
+    onShowToastr("Marked as reviewed");
   };
 
   // ─── TRAINEE PROFILE VIEW ───
@@ -461,7 +964,7 @@ function CoachTraineesTab({ onNavigate, onShowToast, freemium = {} }) {
       {/* Header */}
       <div style={{ padding: "0 20px", marginBottom: 16 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
-          <h1 style={{ fontSize: 24, fontWeight: 800, color: colors.textPrimary }}>Trainees</h1>
+          <h1 style={{ fontSize: 24, fontWeight: 800, color: colors.textPrimary }}>{tr("Trainees")}</h1>
           <div style={{ display: "flex", gap: 8 }}>
             {bulkMode ? (
               <button onClick={() => { setBulkMode(false); setSelectedIds([]); }}
@@ -579,7 +1082,7 @@ function CoachTraineesTab({ onNavigate, onShowToast, freemium = {} }) {
             {!searchQuery && activeFilter === "all" && (
               <button onClick={() => canInvite ? setShowInviteModal(true) : onUpgrade && onUpgrade()}
                 style={{ background: canInvite ? colors.primary : colors.surface, border: "none", borderRadius: 14, padding: "12px 24px", color: canInvite ? "#fff" : colors.textMuted, fontSize: 14, fontWeight: 600, cursor: "pointer", display: "inline-flex", alignItems: "center", gap: 6, boxShadow: canInvite ? "0 4px 14px rgba(52,211,153,0.25)" : "none" }}>
-                {canInvite ? <UserPlus size={16} /> : <Lock size={14} />} {canInvite ? "Invite First Trainee" : "Upgrade to Invite"}
+                {canInvite ? <UserPlus size={16} /> : <Lock size={14} />} {canInvite ? tr("Invite First Trainee") : tr("Upgrade to Invite")}
               </button>
             )}
           </div>
@@ -658,12 +1161,16 @@ function CoachTraineesTab({ onNavigate, onShowToast, freemium = {} }) {
                 {/* Alert badges */}
                 {hasAlerts && (
                   <div style={{ display: "flex", gap: 4, flexWrap: "wrap", marginTop: 4 }}>
-                    {t.alerts.map((a, i) => (
-                      <span key={i} style={{ fontSize: 10, fontWeight: 600, padding: "2px 8px", borderRadius: 6,
-                        background: alertColor(a) + "18", color: alertColor(a) }}>
-                        {alertLabel(a)}
-                      </span>
-                    ))}
+                    {t.alerts.map((a, i) => {
+                      const alertIcon = { missed: Dumbbell, nutrition: Leaf, noLogin: Activity, plateau: TrendingUp }[a] || AlertTriangle;
+                      const AlertIcon = alertIcon;
+                      return (
+                        <span key={i} style={{ fontSize: 10, fontWeight: 600, padding: "2px 8px 2px 6px", borderRadius: 6, display: "inline-flex", alignItems: "center", gap: 3,
+                          background: alertColor(a) + "18", color: alertColor(a), border: `1px solid ${alertColor(a)}25` }}>
+                          <AlertIcon size={9} strokeWidth={2.5} />{alertLabel(a)}
+                        </span>
+                      );
+                    })}
                   </div>
                 )}
 
@@ -740,7 +1247,7 @@ function CoachTraineesTab({ onNavigate, onShowToast, freemium = {} }) {
               display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
               boxShadow: canInvite ? "0 6px 24px rgba(52,211,153,0.35)" : "0 2px 8px rgba(0,0,0,0.08)" }}>
             {canInvite ? <UserPlus size={18} /> : <Lock size={16} />}
-            {canInvite ? "Invite Trainee" : "Upgrade to Add More Clients"}
+            {canInvite ? tr("Invite Trainee") : tr("Upgrade to Add More Clients")}
           </button>
         </div>
       )}
@@ -772,11 +1279,11 @@ function CoachTraineesTab({ onNavigate, onShowToast, freemium = {} }) {
 
       {/* ─── INVITE TRAINEE MODAL ─── */}
       {showInviteModal && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)", display: "flex", alignItems: "flex-end", zIndex: 997 }}>
+        <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.4)", display: "flex", alignItems: "flex-end", zIndex: 997 }}>
           <div style={{ background: "#fff", borderRadius: "24px 24px 0 0", width: "100%", maxHeight: "88vh", overflow: "auto", padding: "12px 20px 32px", animation: "slideUp 0.3s ease" }}>
             <div style={{ width: 40, height: 4, background: colors.border, borderRadius: 2, margin: "0 auto 16px" }} />
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 20 }}>
-              <h3 style={{ fontSize: 18, fontWeight: 700, color: colors.textPrimary }}>Invite Trainee</h3>
+              <h3 style={{ fontSize: 18, fontWeight: 700, color: colors.textPrimary }}>{tr("Invite Trainee")}</h3>
               <button onClick={() => { setShowInviteModal(false); setInviteError(""); }}
                 style={{ background: colors.surface, border: "none", borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
                 <X size={18} color={colors.textSecondary} />
@@ -796,11 +1303,35 @@ function CoachTraineesTab({ onNavigate, onShowToast, freemium = {} }) {
 
             {/* First name (optional) */}
             <div style={{ marginBottom: 16 }}>
-              <div style={{ fontSize: 10, fontWeight: 700, color: colors.textMuted, marginBottom: 6, letterSpacing: 1, textTransform: "uppercase" }}>First Name <span style={{ fontWeight: 400 }}>(optional)</span></div>
+              <div style={{ fontSize: 10, fontWeight: 700, color: colors.textMuted, marginBottom: 6, letterSpacing: 1, textTransform: "uppercase" }}>{tr("First Name ")}<span style={{ fontWeight: 400 }}>(optional)</span></div>
               <input value={inviteFirstName} onChange={e => setInviteFirstName(e.target.value)} placeholder="e.g. Sarah"
                 style={{ width: "100%", height: 48, borderRadius: 12, border: `1.5px solid ${colors.border}`, padding: "0 14px", fontSize: 14, outline: "none", boxSizing: "border-box" }} />
             </div>
 
+
+            {/* Gender (optional) */}
+            <div style={{ marginBottom: 16 }}>
+              <div style={{ fontSize: 10, fontWeight: 700, color: colors.textMuted, marginBottom: 6, letterSpacing: 1, textTransform: "uppercase" }}>
+                {tr("Gender")} <span style={{ fontWeight: 400, textTransform: "none" }}>({tr("optional")})</span>
+              </div>
+              <div style={{ display: "flex", gap: 8 }}>
+                {[
+                  { key: "Male",   icon: "♂", label: tr("Male") },
+                  { key: "Female", icon: "♀", label: tr("Female") },
+                ].map(g => (
+                  <button key={g.key} onClick={() => setInviteGender(inviteGender === g.key ? "" : g.key)}
+                    style={{
+                      flex: 1, padding: "10px 6px", borderRadius: 12,
+                      border: `2px solid ${inviteGender === g.key ? colors.primary : colors.border}`,
+                      background: inviteGender === g.key ? colors.primaryLight : colors.surface,
+                      cursor: "pointer", textAlign: "center", transition: "all 0.15s"
+                    }}>
+                    <div style={{ fontSize: 16, marginBottom: 2 }}>{g.icon}</div>
+                    <div style={{ fontSize: 11, fontWeight: 600, color: inviteGender === g.key ? colors.primary : colors.textSecondary }}>{g.label}</div>
+                  </button>
+                ))}
+              </div>
+            </div>
             {/* Goal (optional) */}
             <div style={{ marginBottom: 16 }}>
               <div style={{ fontSize: 10, fontWeight: 700, color: colors.textMuted, marginBottom: 6, letterSpacing: 1, textTransform: "uppercase" }}>Goal <span style={{ fontWeight: 400 }}>(optional)</span></div>
@@ -858,7 +1389,7 @@ function CoachTraineesTab({ onNavigate, onShowToast, freemium = {} }) {
 
       {/* Sort menu overlay click-away */}
       {showSortMenu && (
-        <div onClick={() => setShowSortMenu(false)} style={{ position: "fixed", inset: 0, zIndex: 50 }} />
+        <div onClick={() => setShowSortMenu(false)} style={{ position: "absolute", inset: 0, zIndex: 50 }} />
       )}
     </div>
   );
@@ -885,7 +1416,18 @@ function TraineeProfileScreen({ trainee, onBack, onNavigate, onShowToast, onArch
   ]);
   const [newGoalText, setNewGoalText] = useState("");
 
-  // Progress photos mirrored from trainee side (item 6)
+  // Exercise weight progress chart popup
+  const [showExerciseChart, setShowExerciseChart] = useState(null); // { name, data: [{session, weight}] }
+
+  // Generate mock weight progress data for an exercise
+  const getExerciseProgressData = (exName) => {
+    const base = { "Barbell Squat": 65, "Leg Press": 110, "Lunges": 16, "Leg Curl": 35,
+      "Bench Press": 55, "Incline Dumbbell Press": 20, "Cable Fly": 12,
+      "Deadlift": 85, "Pull-ups": 0, "Barbell Row": 45 }[exName] || 40;
+    return ["W1","W2","W3","W4","W5","W6","W7"].map((w, i) => ({
+      session: w, weight: Math.round(base + (i * (base * 0.04)) + (Math.random() * 4 - 2))
+    }));
+  };
   const traineeProgressPhotos = [
     { date: "Feb 15, 2025", photos: [{ label: "Front", bg: "#E0E7FF" }, { label: "Side", bg: "#DBEAFE" }, { label: "Back", bg: "#EDE9FE" }] },
     { date: "Feb 8, 2025", photos: [{ label: "Front", bg: "#D1FAE5" }, { label: "Side", bg: "#CFFAFE" }, { label: "Back", bg: "#FEF3C7" }] },
@@ -964,26 +1506,27 @@ function TraineeProfileScreen({ trainee, onBack, onNavigate, onShowToast, onArch
 
   // Per-day workout log data (mirrored from trainee)
   const traineeWorkoutLog = [
-    { day: "Mon", completed: true, duration: "42 min", note: "", exercises: [
+    { day: "Mon", completed: true, duration: "42 min", note: "", skipReason: "", exercises: [
       { name: "Barbell Squat", sets: [{ weight: 70, reps: 10, done: true }, { weight: 75, reps: 8, done: true }, { weight: 80, reps: 6, done: true }] },
-      { name: "Leg Press", sets: [{ weight: 120, reps: 12, done: true }, { weight: 130, reps: 10, done: true }, { weight: 130, reps: 8, done: false }] },
+      { name: "Leg Press", sets: [{ weight: 120, reps: 12, done: true }, { weight: 130, reps: 10, done: true }, { weight: 130, reps: 8, done: false }], skippedSets: [{ setIndex: 2, reason: "Hip flexor felt tight on last set" }] },
       { name: "Lunges", sets: [{ weight: 20, reps: 12, done: true }, { weight: 20, reps: 12, done: true }] },
-      { name: "Leg Curl", sets: [{ weight: 40, reps: 12, done: true }, { weight: 45, reps: 10, done: true }] },
+      { name: "Leg Curl", skipped: true, skipReason: "Machine was occupied, ran out of time", sets: [] },
     ]},
-    { day: "Tue", completed: true, duration: "38 min", note: "Felt strong today!", exercises: [
+    { day: "Tue", completed: true, duration: "38 min", note: "Felt strong today!", skipReason: "", exercises: [
       { name: "Bench Press", sets: [{ weight: 60, reps: 10, done: true }, { weight: 65, reps: 8, done: true }, { weight: 70, reps: 6, done: true }] },
       { name: "Incline Dumbbell Press", sets: [{ weight: 22, reps: 10, done: true }, { weight: 24, reps: 8, done: true }] },
-      { name: "Cable Fly", sets: [{ weight: 15, reps: 12, done: true }, { weight: 15, reps: 12, done: true }] },
+      { name: "Cable Fly", skipped: true, skipReason: "Shoulder felt slightly strained, coach note said to skip if discomfort", sets: [] },
     ]},
-    { day: "Wed", completed: false, duration: "—", note: "Rest day", exercises: [] },
-    { day: "Thu", completed: true, duration: "45 min", note: "", exercises: [
+    { day: "Wed", completed: false, duration: "—", note: "Rest day", skipReason: "", exercises: [] },
+    { day: "Thu", completed: true, duration: "45 min", note: "", skipReason: "", exercises: [
       { name: "Deadlift", sets: [{ weight: 90, reps: 8, done: true }, { weight: 100, reps: 6, done: true }, { weight: 100, reps: 5, done: true }] },
-      { name: "Pull-ups", sets: [{ weight: 0, reps: 8, done: true }, { weight: 0, reps: 7, done: true }, { weight: 0, reps: 6, done: false }] },
+      { name: "Pull-ups", sets: [{ weight: 0, reps: 8, done: true }, { weight: 0, reps: 7, done: true }, { weight: 0, reps: 6, done: false }], skippedSets: [{ setIndex: 2, reason: "Grip fatigue after deadlifts" }] },
       { name: "Barbell Row", sets: [{ weight: 50, reps: 10, done: true }, { weight: 55, reps: 8, done: true }] },
+      { name: "Face Pull", skipped: true, skipReason: "Forgot — will add to next session", sets: [] },
     ]},
-    { day: "Fri", completed: false, duration: "—", note: "Skipped — feeling unwell", exercises: [] },
-    { day: "Sat", completed: false, duration: "—", note: "", exercises: [] },
-    { day: "Sun", completed: false, duration: "—", note: "", exercises: [] },
+    { day: "Fri", completed: false, duration: "—", note: "Skipped — feeling unwell", skipReason: "Had a fever and sore throat since the morning, didn't want to push through and make it worse.", exercises: [] },
+    { day: "Sat", completed: false, duration: "—", note: "", skipReason: "Work emergency — had to travel last minute, no access to gym.", exercises: [] },
+    { day: "Sun", completed: false, duration: "—", note: "", skipReason: "", exercises: [] },
   ];
   const traineeWorkoutOverallNote = "Legs felt good this week. Struggling with pull-up volume.";
 
@@ -991,38 +1534,38 @@ function TraineeProfileScreen({ trainee, onBack, onNavigate, onShowToast, onArch
   const traineeNutritionLog = [
     { day: "Mon", mealsLogged: 4, mealsTotal: 4, waterLiters: 2.8, skippedMeals: [], extraMeals: [], note: "",
       meals: [
-        { name: "Breakfast", done: true, foods: ["Oatmeal", "Banana", "Whey Shake"], cal: 367 },
-        { name: "Lunch", done: true, foods: ["Grilled Chicken", "Brown Rice", "Broccoli"], cal: 488 },
-        { name: "Snack", done: true, foods: ["Greek Yogurt", "Almonds"], cal: 187 },
-        { name: "Dinner", done: true, foods: ["Salmon", "Sweet Potato", "Salad"], cal: 657 },
+        { name: "Breakfast", done: true, foods: [{name:"Oatmeal",weight:80},{name:"Banana",weight:120},{name:"Whey Shake",weight:250}], cal: 367 },
+        { name: "Lunch", done: true, foods: [{name:"Grilled Chicken",weight:180},{name:"Brown Rice",weight:150},{name:"Broccoli",weight:100}], cal: 488 },
+        { name: "Snack", done: true, foods: [{name:"Greek Yogurt",weight:200},{name:"Almonds",weight:30}], cal: 187 },
+        { name: "Dinner", done: true, foods: [{name:"Salmon",weight:200},{name:"Sweet Potato",weight:150},{name:"Salad",weight:80}], cal: 657 },
       ]},
     { day: "Tue", mealsLogged: 3, mealsTotal: 4, waterLiters: 2.5, skippedMeals: ["Snack"], extraMeals: [{ name: "Post-workout Shake", cal: 180 }], note: "",
       meals: [
-        { name: "Breakfast", done: true, foods: ["Eggs", "Toast", "Avocado"], cal: 410 },
-        { name: "Lunch", done: true, foods: ["Turkey Wrap", "Fruit"], cal: 380 },
-        { name: "Snack", done: false, foods: [], cal: 0 },
-        { name: "Dinner", done: true, foods: ["Steak", "Rice", "Veggies"], cal: 620 },
+        { name: "Breakfast", done: true, foods: [{name:"Eggs",weight:150},{name:"Toast",weight:60},{name:"Avocado",weight:80}], cal: 410 },
+        { name: "Lunch", done: true, foods: [{name:"Turkey Wrap",weight:220},{name:"Fruit",weight:150}], cal: 380 },
+        { name: "Snack", done: false, foods: [], cal: 0, skipReason: "Was in back-to-back meetings all afternoon" },
+        { name: "Dinner", done: true, foods: [{name:"Steak",weight:200},{name:"Rice",weight:130},{name:"Veggies",weight:100}], cal: 620 },
       ]},
     { day: "Wed", mealsLogged: 4, mealsTotal: 4, waterLiters: 3.0, skippedMeals: [], extraMeals: [], note: "Great eating day",
       meals: [
-        { name: "Breakfast", done: true, foods: ["Smoothie Bowl"], cal: 340 },
-        { name: "Lunch", done: true, foods: ["Chicken Salad", "Bread"], cal: 450 },
-        { name: "Snack", done: true, foods: ["Protein Bar"], cal: 210 },
-        { name: "Dinner", done: true, foods: ["Fish", "Quinoa", "Spinach"], cal: 520 },
+        { name: "Breakfast", done: true, foods: [{name:"Smoothie Bowl",weight:350}], cal: 340 },
+        { name: "Lunch", done: true, foods: [{name:"Chicken Salad",weight:200},{name:"Bread",weight:60}], cal: 450 },
+        { name: "Snack", done: true, foods: [{name:"Protein Bar",weight:65}], cal: 210 },
+        { name: "Dinner", done: true, foods: [{name:"Fish",weight:180},{name:"Quinoa",weight:120},{name:"Spinach",weight:80}], cal: 520 },
       ]},
     { day: "Thu", mealsLogged: 3, mealsTotal: 4, waterLiters: 2.0, skippedMeals: ["Dinner"], extraMeals: [], note: "Late meeting, skipped dinner",
       meals: [
-        { name: "Breakfast", done: true, foods: ["Oatmeal", "Berries"], cal: 290 },
-        { name: "Lunch", done: true, foods: ["Pasta", "Chicken"], cal: 510 },
-        { name: "Snack", done: true, foods: ["Apple", "PB"], cal: 195 },
-        { name: "Dinner", done: false, foods: [], cal: 0 },
+        { name: "Breakfast", done: true, foods: [{name:"Oatmeal",weight:80},{name:"Berries",weight:100}], cal: 290 },
+        { name: "Lunch", done: true, foods: [{name:"Pasta",weight:200},{name:"Chicken",weight:150}], cal: 510 },
+        { name: "Snack", done: true, foods: [{name:"Apple",weight:180},{name:"Peanut Butter",weight:32}], cal: 195 },
+        { name: "Dinner", done: false, foods: [], cal: 0, skipReason: "Had a late work meeting that ran past 11pm — too late to eat" },
       ]},
     { day: "Fri", mealsLogged: 4, mealsTotal: 4, waterLiters: 2.5, skippedMeals: [], extraMeals: [{ name: "Midnight Snack", cal: 150 }], note: "",
       meals: [
-        { name: "Breakfast", done: true, foods: ["Pancakes", "Syrup", "Eggs"], cal: 480 },
-        { name: "Lunch", done: true, foods: ["Burger", "Fries"], cal: 680 },
-        { name: "Snack", done: true, foods: ["Trail Mix"], cal: 220 },
-        { name: "Dinner", done: true, foods: ["Sushi", "Miso Soup"], cal: 540 },
+        { name: "Breakfast", done: true, foods: [{name:"Pancakes",weight:200},{name:"Syrup",weight:30},{name:"Eggs",weight:120}], cal: 480 },
+        { name: "Lunch", done: true, foods: [{name:"Burger",weight:300},{name:"Fries",weight:150}], cal: 680 },
+        { name: "Snack", done: true, foods: [{name:"Trail Mix",weight:50}], cal: 220 },
+        { name: "Dinner", done: true, foods: [{name:"Sushi",weight:250},{name:"Miso Soup",weight:200}], cal: 540 },
       ]},
     { day: "Sat", mealsLogged: 0, mealsTotal: 4, waterLiters: 0, skippedMeals: [], extraMeals: [], note: "", meals: [] },
     { day: "Sun", mealsLogged: 0, mealsTotal: 4, waterLiters: 0, skippedMeals: [], extraMeals: [], note: "", meals: [] },
@@ -1032,13 +1575,14 @@ function TraineeProfileScreen({ trainee, onBack, onNavigate, onShowToast, onArch
   const adherenceColor = (pct) => pct >= 80 ? colors.success : pct >= 60 ? colors.warning : pct < 1 ? colors.textMuted : colors.error;
 
   const alertLabel = (type) => ({
-    missed: "Missed workouts",
+    missed:    "Missed workouts",
     nutrition: "Low nutrition adherence",
-    noLogin: "No login for 5+ days",
-    plateau: "Weight plateau (3+ weeks)",
+    noLogin:   "No login for 5+ days",
+    plateau:   "Weight plateau (3+ weeks)",
   }[type] || type);
 
   return (
+    <>
     <div style={{ paddingBottom: 20 }}>
       {/* Header */}
       <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "0 20px", marginBottom: 16 }}>
@@ -1047,7 +1591,7 @@ function TraineeProfileScreen({ trainee, onBack, onNavigate, onShowToast, onArch
         </button>
         <div style={{ flex: 1 }}>
           <h2 style={{ fontSize: 18, fontWeight: 700, color: colors.textPrimary }}>{t.name}</h2>
-          <span style={{ fontSize: 12, color: colors.textSecondary }}>{t.goal} · {t.level}</span>
+          <span style={{ fontSize: 12, color: colors.textSecondary }}>{tr(t.goal)} · {tr(t.level)}</span>
         </div>
         <button onClick={() => setShowSettings(!showSettings)}
           style={{ background: colors.surface, border: "none", borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
@@ -1058,7 +1602,7 @@ function TraineeProfileScreen({ trainee, onBack, onNavigate, onShowToast, onArch
       {/* Settings dropdown */}
       {showSettings && (
         <>
-          <div onClick={() => setShowSettings(false)} style={{ position: "fixed", inset: 0, zIndex: 90 }} />
+          <div onClick={() => setShowSettings(false)} style={{ position: "absolute", inset: 0, zIndex: 90 }} />
           <div style={{ position: "absolute", top: 90, right: 20, background: colors.card, borderRadius: 14, boxShadow: "0 8px 32px rgba(0,0,0,0.18)", padding: 6, width: 180, zIndex: 100 }}>
             {t.status === "inactive" ? (
               <button onClick={() => { setShowSettings(false); onReactivate(); }}
@@ -1087,11 +1631,11 @@ function TraineeProfileScreen({ trainee, onBack, onNavigate, onShowToast, onArch
           </div>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 20, fontWeight: 800, color: colors.textPrimary }}>{t.name}</div>
-            <div style={{ fontSize: 13, color: colors.textSecondary }}>{t.goal} · {t.level}</div>
+            <div style={{ fontSize: 13, color: colors.textSecondary }}>{tr(t.goal)} · {tr(t.level)}</div>
             <button onClick={() => setShowTraineeHistory(true)}
               style={{ background: "none", border: "none", padding: 0, cursor: "pointer", marginTop: 3, display: "flex", alignItems: "center", gap: 4 }}>
               <FileText size={11} color={colors.primary} />
-              <span style={{ fontSize: 11, fontWeight: 600, color: colors.primary, textDecoration: "underline" }}>View Health & Training History</span>
+              <span style={{ fontSize: 11, fontWeight: 600, color: colors.primary, textDecoration: "underline" }}>{tr("View Health & Training History")}</span>
             </button>
           </div>
         </div>
@@ -1100,15 +1644,16 @@ function TraineeProfileScreen({ trainee, onBack, onNavigate, onShowToast, onArch
         <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
           <div style={{ flex: 1, background: colors.surface, borderRadius: 14, padding: "12px 8px", textAlign: "center" }}>
             <div style={{ fontSize: 24, fontWeight: 900, color: adherenceColor(t.adherence), letterSpacing: -0.5 }}>{t.adherence}%</div>
-            <div style={{ fontSize: 10, fontWeight: 600, color: colors.textMuted, marginTop: 2, textTransform: "uppercase", letterSpacing: 0.5 }}>Adherence</div>
+            <div style={{ fontSize: 10, fontWeight: 600, color: colors.textMuted, marginTop: 2, textTransform: "uppercase", letterSpacing: 0.5 }}>{tr("Adherence")}</div>
           </div>
           <div style={{ flex: 1, background: colors.surface, borderRadius: 14, padding: "12px 8px", textAlign: "center" }}>
-            <div style={{ fontSize: 24, fontWeight: 900, color: t.streak >= 7 ? colors.success : t.streak >= 3 ? colors.primary : colors.textMuted, letterSpacing: -0.5 }}>{t.streak}</div>
-            <div style={{ fontSize: 10, fontWeight: 600, color: colors.textMuted, marginTop: 2, textTransform: "uppercase", letterSpacing: 0.5 }}>Day Streak</div>
+            <div style={{ fontSize: 24, fontWeight: 900, color: t.streak >= 7 ? colors.success : t.streak >= 3 ? colors.primary : colors.textMuted, letterSpacing: -0.5, display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
+              {t.streak > 0 ? <><Flame size={18} color={t.streak >= 7 ? colors.success : colors.primary} strokeWidth={2.5} />{t.streak}</> : "—"}</div>
+            <div style={{ fontSize: 10, fontWeight: 600, color: colors.textMuted, marginTop: 2, textTransform: "uppercase", letterSpacing: 0.5 }}>{tr("Day Streak")}</div>
           </div>
           <div style={{ flex: 1, background: colors.surface, borderRadius: 14, padding: "12px 8px", textAlign: "center" }}>
             <div style={{ fontSize: 24, fontWeight: 900, color: colors.textPrimary, letterSpacing: -0.5 }}>{t.weight}</div>
-            <div style={{ fontSize: 10, fontWeight: 600, color: colors.textMuted, marginTop: 2, textTransform: "uppercase", letterSpacing: 0.5 }}>Weight</div>
+            <div style={{ fontSize: 10, fontWeight: 600, color: colors.textMuted, marginTop: 2, textTransform: "uppercase", letterSpacing: 0.5 }}>{tr("Weight")}</div>
           </div>
         </div>
 
@@ -1136,7 +1681,7 @@ function TraineeProfileScreen({ trainee, onBack, onNavigate, onShowToast, onArch
           </div>
           {showLevelDropdown && (
             <>
-              <div onClick={() => setShowLevelDropdown(false)} style={{ position: "fixed", inset: 0, zIndex: 80 }} />
+              <div onClick={() => setShowLevelDropdown(false)} style={{ position: "absolute", inset: 0, zIndex: 80 }} />
               <div style={{ position: "absolute", right: 0, top: 36, background: colors.card, borderRadius: 12, boxShadow: "0 8px 24px rgba(0,0,0,0.15)", padding: 4, width: 160, zIndex: 90 }}>
                 {levelOptions.map(level => (
                   <button key={level} onClick={() => { setTraineeLevel(level); setShowLevelDropdown(false); onShowToast("Level set to " + level); }}
@@ -1155,14 +1700,20 @@ function TraineeProfileScreen({ trainee, onBack, onNavigate, onShowToast, onArch
       {/* Alerts */}
       {t.alerts.length > 0 && (
         <div style={{ padding: "0 20px", marginBottom: 16 }}>
-          {t.alerts.map((a, i) => (
+          {t.alerts.map((a, i) => {
+            const alertIconMap = { missed: Dumbbell, nutrition: Leaf, noLogin: Activity, plateau: TrendingUp };
+            const AlertBannerIcon = alertIconMap[a] || AlertTriangle;
+            return (
             <div key={i} style={{ background: a === "missed" ? colors.errorLight : a === "plateau" ? "#EDE9FE" : colors.warningLight,
               borderRadius: 12, padding: "10px 14px", marginBottom: 6, display: "flex", alignItems: "center", gap: 10,
               border: `1px solid ${a === "missed" ? "#FECACA" : a === "plateau" ? "#C4B5FD" : "#FDE68A"}` }}>
-              <AlertTriangle size={14} color={a === "missed" ? colors.error : a === "plateau" ? "#8B5CF6" : colors.warning} />
+              <div style={{ width: 26, height: 26, borderRadius: 7, background: a === "missed" ? `${colors.error}20` : a === "plateau" ? "#C4B5FD40" : `${colors.warning}20`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                <AlertBannerIcon size={13} color={a === "missed" ? colors.error : a === "plateau" ? "#8B5CF6" : colors.warning} strokeWidth={2.2} />
+              </div>
               <span style={{ fontSize: 13, fontWeight: 600, color: a === "missed" ? colors.error : a === "plateau" ? "#7C3AED" : colors.warning }}>{alertLabel(a)}</span>
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
@@ -1175,7 +1726,7 @@ function TraineeProfileScreen({ trainee, onBack, onNavigate, onShowToast, onArch
               color: activeTab === tab ? colors.primary : colors.textMuted,
               fontSize: 11, fontWeight: 600, cursor: "pointer", textTransform: "capitalize",
               boxShadow: activeTab === tab ? "0 1px 3px rgba(0,0,0,0.08)" : "none", transition: "all 0.2s" }}>
-            {tab}
+            {tr(tab.charAt(0).toUpperCase() + tab.slice(1))}
           </button>
         ))}
       </div>
@@ -1188,14 +1739,14 @@ function TraineeProfileScreen({ trainee, onBack, onNavigate, onShowToast, onArch
             <div style={{ fontSize: 14, fontWeight: 700, color: colors.textPrimary, marginBottom: 14 }}>Weekly Summary</div>
             <div style={{ marginBottom: 12 }}>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                <span style={{ fontSize: 13, color: colors.textSecondary }}>Workouts</span>
+                <span style={{ fontSize: 13, color: colors.textSecondary }}>{tr("Workouts")}</span>
                 <span style={{ fontSize: 13, fontWeight: 700, color: adherenceColor(t.workoutAdherence) }}>{t.weeklyWorkouts.done}/{t.weeklyWorkouts.total} ({t.workoutAdherence}%)</span>
               </div>
               <ProgressBar value={t.weeklyWorkouts.done} max={Math.max(t.weeklyWorkouts.total, 1)} color={adherenceColor(t.workoutAdherence)} />
             </div>
             <div>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                <span style={{ fontSize: 13, color: colors.textSecondary }}>Nutrition</span>
+                <span style={{ fontSize: 13, color: colors.textSecondary }}>{tr("Nutrition")}</span>
                 <span style={{ fontSize: 13, fontWeight: 700, color: adherenceColor(t.nutritionAdherence) }}>{t.weeklyNutrition.done}/{t.weeklyNutrition.total} ({t.nutritionAdherence}%)</span>
               </div>
               <ProgressBar value={t.weeklyNutrition.done} max={Math.max(t.weeklyNutrition.total, 1)} color={adherenceColor(t.nutritionAdherence)} />
@@ -1204,7 +1755,7 @@ function TraineeProfileScreen({ trainee, onBack, onNavigate, onShowToast, onArch
 
           {/* Info */}
           <div style={{ background: colors.card, borderRadius: 16, padding: 16, border: `1px solid ${colors.border}`, marginBottom: 12 }}>
-            <div style={{ fontSize: 14, fontWeight: 700, color: colors.textPrimary, marginBottom: 12 }}>Details</div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: colors.textPrimary, marginBottom: 12 }}>{tr("Details")}</div>
             {[["Email", t.email], ["Weight", t.weight], ["Last Active", t.lastActivity], ["Next Session", t.nextSession]].map(([label, val], i) => (
               <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "9px 0", borderTop: i > 0 ? `1px solid ${colors.border}` : "none" }}>
                 <span style={{ fontSize: 13, color: colors.textMuted, fontWeight: 600 }}>{label}</span>
@@ -1234,7 +1785,7 @@ function TraineeProfileScreen({ trainee, onBack, onNavigate, onShowToast, onArch
                   <Dumbbell size={16} color={colors.primary} />
                 </div>
                 <div>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: colors.textPrimary }}>Workout Progress</div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: colors.textPrimary }}>{tr("Workout Progress")}</div>
                   <div style={{ fontSize: 10, color: colors.textMuted }}>{t.weeklyWorkouts.done}/{t.weeklyWorkouts.total} this week · {t.workoutAdherence}% adherence</div>
                 </div>
               </div>
@@ -1248,12 +1799,27 @@ function TraineeProfileScreen({ trainee, onBack, onNavigate, onShowToast, onArch
             <div style={{ padding: "10px 14px", display: "flex", gap: 6 }}>
               {traineeWorkoutLog.map((d, di) => {
                 const isDone = d.completed;
-                const isSkipped = !d.completed && d.exercises.length === 0 && d.note;
+                const isSkipped = !d.completed && !!d.skipReason;
+                const isSkippedNote = !d.completed && d.exercises.length === 0 && d.note && !d.skipReason;
                 return (
-                  <div key={di} style={{ flex: 1, textAlign: "center", padding: "6px 0", borderRadius: 8, background: isDone ? `${colors.success}10` : isSkipped ? `${colors.warning}10` : colors.surface }}>
-                    <div style={{ fontSize: 9, fontWeight: 700, color: colors.textMuted }}>{d.day}</div>
+                  <div key={di} onClick={() => {
+                    if (isSkipped) {
+                      setWorkoutProgressExpanded(true);
+                    } else {
+                      setWorkoutProgressExpanded(true);
+                      setExpandedWorkoutDays({ [d.day]: true });
+                      setTimeout(() => {
+                        const el = document.getElementById(`workout-day-${d.day}`);
+                        if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                      }, 100);
+                    }
+                  }}
+                    style={{ flex: 1, textAlign: "center", padding: "6px 0", borderRadius: 8,
+                      background: isDone ? `${colors.success}10` : isSkipped ? `${colors.error}10` : isSkippedNote ? `${colors.warning}10` : colors.surface,
+                      cursor: "pointer" }}>
+                    <div style={{ fontSize: 9, fontWeight: 700, color: isSkipped ? colors.error : colors.textMuted }}>{d.day}</div>
                     <div style={{ fontSize: 12, marginTop: 2 }}>
-                      {isDone ? <Check size={12} color={colors.success} /> : isSkipped ? <X size={12} color={colors.warning} /> : <Circle size={10} color={colors.textMuted} style={{ opacity: 0.3 }} />}
+                      {isDone ? <Check size={12} color={colors.success} /> : isSkipped ? <X size={12} color={colors.error} /> : isSkippedNote ? <X size={12} color={colors.warning} /> : <Circle size={10} color={colors.textMuted} style={{ opacity: 0.3 }} />}
                     </div>
                   </div>
                 );
@@ -1284,63 +1850,117 @@ function TraineeProfileScreen({ trainee, onBack, onNavigate, onShowToast, onArch
                   </div>
                 )}
 
-                {traineeWorkoutLog.filter(d => d.completed || d.note).map((d, di) => (
-                  <div key={di} style={{ background: colors.surface, borderRadius: 12, marginBottom: 8, border: `1px solid ${colors.border}`, overflow: "hidden" }}>
+                {traineeWorkoutLog.filter(d => d.completed || d.note || d.skipReason).map((d, di) => {
+                  const isDaySkipped = !d.completed && !!d.skipReason;
+                  return (
+                  <div key={di} id={`workout-day-${d.day}`} style={{ background: isDaySkipped ? `${colors.error}05` : colors.surface, borderRadius: 12, marginBottom: 8, border: `1px solid ${isDaySkipped ? colors.error + "25" : colors.border}`, overflow: "hidden" }}>
                     {/* Day header — clickable to expand */}
                     <div onClick={() => toggleWorkoutDay(d.day)}
                       style={{ padding: "10px 12px", display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer" }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                        <span style={{ fontSize: 12, fontWeight: 800, color: colors.textPrimary }}>{d.day}</span>
-                        <span style={{ fontSize: 10, fontWeight: 600, padding: "2px 6px", borderRadius: 4, background: d.completed ? colors.successLight : colors.warningLight, color: d.completed ? colors.success : colors.warning }}>
-                          {d.completed ? "Completed" : "Skipped"}
+                        <span style={{ fontSize: 12, fontWeight: 800, color: isDaySkipped ? colors.textMuted : colors.textPrimary }}>{d.day}</span>
+                        <span style={{ fontSize: 10, fontWeight: 700, padding: "2px 7px", borderRadius: 4,
+                          background: d.completed ? colors.successLight : isDaySkipped ? `${colors.error}15` : colors.warningLight,
+                          color: d.completed ? colors.success : isDaySkipped ? colors.error : colors.warning }}>
+                          {d.completed ? "Completed" : isDaySkipped ? "Skipped" : "Not logged"}
                         </span>
                         {d.completed && <span style={{ fontSize: 10, color: colors.textMuted }}>{d.duration}</span>}
                       </div>
                       <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
-                        {d.exercises.length > 0 && <span style={{ fontSize: 10, color: colors.textMuted }}>{d.exercises.length} ex</span>}
-                        {expandedWorkoutDays[d.day] ? <ChevronUp size={14} color={colors.textMuted} /> : <ChevronDown size={14} color={colors.textMuted} />}
+                        {d.exercises.length > 0 && <span style={{ fontSize: 10, color: colors.textMuted }}>{d.exercises.filter(e => !e.skipped).length}/{d.exercises.length} ex</span>}
+                        {expandedWorkoutDays[d.day] ? <ChevronUp size={14} color={isDaySkipped ? colors.error : colors.textMuted} /> : <ChevronDown size={14} color={isDaySkipped ? colors.error : colors.textMuted} />}
                       </div>
                     </div>
-                    {d.note && !expandedWorkoutDays[d.day] ? <div style={{ padding: "0 12px 8px", fontSize: 10, color: colors.textSecondary, fontStyle: "italic" }}>{d.note}</div> : null}
+
+                    {/* Skipped day reason — COLLAPSIBLE, click header to expand */}
+                    {isDaySkipped && d.skipReason && expandedWorkoutDays[d.day] && (
+                      <div style={{ margin: "0 12px 12px", padding: "9px 12px", background: `${colors.error}08`, borderRadius: 9, border: `1px solid ${colors.error}20`, display: "flex", alignItems: "flex-start", gap: 8, animation: "slideUp 0.2s ease" }}>
+                        <AlertTriangle size={13} color={colors.error} style={{ flexShrink: 0, marginTop: 1 }} />
+                        <div>
+                          <div style={{ fontSize: 9, fontWeight: 700, color: colors.error, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 3 }}>{tr("Trainee's reason")}</div>
+                          <div style={{ fontSize: 11, color: colors.textSecondary, lineHeight: 1.5 }}>{d.skipReason}</div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Non-skipped day: collapsible note + exercises */}
+                    {!isDaySkipped && d.note && !expandedWorkoutDays[d.day] && (
+                      <div style={{ padding: "0 12px 8px", fontSize: 10, color: colors.textSecondary, fontStyle: "italic" }}>{d.note}</div>
+                    )}
 
                     {/* Expanded day: exercises */}
-                    {expandedWorkoutDays[d.day] && (
+                    {!isDaySkipped && expandedWorkoutDays[d.day] && (
                       <div style={{ padding: "0 12px 12px" }}>
                         {d.note ? <div style={{ fontSize: 11, color: colors.textSecondary, fontStyle: "italic", marginBottom: 8, padding: "4px 8px", background: `${colors.warning}06`, borderRadius: 6 }}>{d.note}</div> : null}
 
                         {d.exercises.map((ex, ei) => {
                           const exKey = `${d.day}-${ei}`;
+                          const isExSkipped = !!ex.skipped;
                           const completedSets = ex.sets.filter(s => s.done).length;
-                          const allDone = completedSets === ex.sets.length;
+                          const allDone = !isExSkipped && completedSets === ex.sets.length && ex.sets.length > 0;
                           return (
-                            <div key={ei} style={{ background: colors.card, borderRadius: 10, marginBottom: 6, border: `1px solid ${colors.border}`, overflow: "hidden" }}>
-                              {/* Exercise header — clickable */}
-                              <div onClick={() => toggleExercise(exKey)}
-                                style={{ padding: "8px 10px", display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer" }}>
+                            <div key={ei} style={{ background: isExSkipped ? `${colors.error}05` : colors.card, borderRadius: 10, marginBottom: 6, border: `1px solid ${isExSkipped ? colors.error + "25" : colors.border}`, overflow: "hidden" }}>
+                              {/* Exercise header — clickable (only if not fully skipped) */}
+                              <div onClick={() => !isExSkipped && toggleExercise(exKey)}
+                                style={{ padding: "8px 10px", display: "flex", alignItems: "center", justifyContent: "space-between", cursor: isExSkipped ? "default" : "pointer" }}>
                                 <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                                  <div style={{ width: 6, height: 6, borderRadius: "50%", background: allDone ? colors.success : colors.warning }} />
-                                  <span style={{ fontSize: 12, fontWeight: 700, color: colors.textPrimary }}>{ex.name}</span>
+                                  <div style={{ width: 7, height: 7, borderRadius: "50%", background: isExSkipped ? colors.error : allDone ? colors.success : colors.warning, flexShrink: 0 }} />
+                                  <span style={{ fontSize: 12, fontWeight: 700, color: isExSkipped ? colors.textMuted : colors.textPrimary, textDecoration: isExSkipped ? "line-through" : "none" }}>{ex.name}</span>
+                                  {isExSkipped && (
+                                    <span style={{ fontSize: 9, fontWeight: 700, padding: "1px 6px", borderRadius: 4, background: `${colors.error}15`, color: colors.error, letterSpacing: 0.3 }}>{tr("SKIPPED")}</span>
+                                  )}
                                 </div>
                                 <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                                  <span style={{ fontSize: 10, fontWeight: 600, color: allDone ? colors.success : colors.warning }}>{completedSets}/{ex.sets.length}</span>
-                                  {expandedExercises[exKey] ? <ChevronUp size={12} color={colors.textMuted} /> : <ChevronDown size={12} color={colors.textMuted} />}
+                                  {!isExSkipped && (
+                                    <>
+                                      <button onClick={(e) => { e.stopPropagation(); setShowExerciseChart({ name: ex.name, data: getExerciseProgressData(ex.name) }); }}
+                                        style={{ width: 28, height: 28, borderRadius: 8, background: `linear-gradient(135deg, ${colors.primary}, #10B981)`, border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: `0 3px 8px ${colors.primary}40`, flexShrink: 0 }}>
+                                        <TrendingUp size={13} color="#fff" />
+                                      </button>
+                                      <span style={{ fontSize: 10, fontWeight: 600, color: allDone ? colors.success : colors.warning }}>{completedSets}/{ex.sets.length}</span>
+                                      {expandedExercises[exKey] ? <ChevronUp size={12} color={colors.textMuted} /> : <ChevronDown size={12} color={colors.textMuted} />}
+                                    </>
+                                  )}
                                 </div>
                               </div>
 
-                              {/* Expanded exercise: set details */}
-                              {expandedExercises[exKey] && (
+                              {/* Skipped exercise reason pill */}
+                              {isExSkipped && ex.skipReason && (
+                                <div style={{ margin: "0 10px 10px", padding: "7px 10px", background: `${colors.error}08`, borderRadius: 8, border: `1px solid ${colors.error}20`, display: "flex", alignItems: "flex-start", gap: 7 }}>
+                                  <AlertTriangle size={12} color={colors.error} style={{ flexShrink: 0, marginTop: 1 }} />
+                                  <div>
+                                    <div style={{ fontSize: 9, fontWeight: 700, color: colors.error, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 2 }}>{tr("Trainee's reason")}</div>
+                                    <div style={{ fontSize: 11, color: colors.textSecondary, lineHeight: 1.4 }}>{ex.skipReason}</div>
+                                  </div>
+                                </div>
+                              )}
+
+                              {/* Expanded exercise: set details with per-set skip reasons */}
+                              {!isExSkipped && expandedExercises[exKey] && (
                                 <div style={{ padding: "0 10px 10px" }}>
-                                  {ex.sets.map((set, si) => (
-                                    <div key={si} style={{ display: "flex", alignItems: "center", gap: 8, padding: "5px 0", borderTop: si > 0 ? `1px solid ${colors.border}` : "none" }}>
-                                      <div style={{ width: 20, height: 20, borderRadius: 6, background: set.done ? `${colors.success}15` : `${colors.error}15`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                                        {set.done ? <Check size={10} color={colors.success} /> : <X size={10} color={colors.error} />}
+                                  {ex.sets.map((set, si) => {
+                                    const setSkipReason = ex.skippedSets?.find(s => s.setIndex === si)?.reason;
+                                    return (
+                                      <div key={si} style={{ borderTop: si > 0 ? `1px solid ${colors.border}` : "none" }}>
+                                        <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "5px 0" }}>
+                                          <div style={{ width: 20, height: 20, borderRadius: 6, background: set.done ? `${colors.success}15` : `${colors.error}15`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                                            {set.done ? <Check size={10} color={colors.success} /> : <X size={10} color={colors.error} />}
+                                          </div>
+                                          <span style={{ fontSize: 11, fontWeight: 600, color: colors.textMuted, minWidth: 40 }}>Set {si + 1}</span>
+                                          <span style={{ fontSize: 11, fontWeight: 700, color: colors.textPrimary }}>{set.weight > 0 ? `${set.weight} kg` : "Bodyweight"}</span>
+                                          <span style={{ fontSize: 11, color: colors.textSecondary }}>× {set.reps} reps</span>
+                                          {!set.done && <span style={{ fontSize: 9, fontWeight: 600, padding: "1px 6px", borderRadius: 4, background: colors.errorLight, color: colors.error, marginLeft: "auto" }}>{tr("Skipped")}</span>}
+                                        </div>
+                                        {/* Per-set skip reason */}
+                                        {!set.done && setSkipReason && (
+                                          <div style={{ marginBottom: 4, marginLeft: 28, padding: "5px 8px", background: `${colors.warning}08`, borderRadius: 6, border: `1px solid ${colors.warning}20`, display: "flex", alignItems: "flex-start", gap: 6 }}>
+                                            <MessageSquare size={10} color={colors.warning} style={{ flexShrink: 0, marginTop: 1 }} />
+                                            <span style={{ fontSize: 10, color: colors.textSecondary, lineHeight: 1.4, fontStyle: "italic" }}>{setSkipReason}</span>
+                                          </div>
+                                        )}
                                       </div>
-                                      <span style={{ fontSize: 11, fontWeight: 600, color: colors.textMuted, minWidth: 40 }}>Set {si + 1}</span>
-                                      <span style={{ fontSize: 11, fontWeight: 700, color: colors.textPrimary }}>{set.weight > 0 ? `${set.weight} kg` : "Bodyweight"}</span>
-                                      <span style={{ fontSize: 11, color: colors.textSecondary }}>× {set.reps} reps</span>
-                                      {!set.done && <span style={{ fontSize: 9, fontWeight: 600, padding: "1px 6px", borderRadius: 4, background: colors.errorLight, color: colors.error, marginLeft: "auto" }}>Skipped</span>}
-                                    </div>
-                                  ))}
+                                    );
+                                  })}
                                 </div>
                               )}
                             </div>
@@ -1349,12 +1969,13 @@ function TraineeProfileScreen({ trainee, onBack, onNavigate, onShowToast, onArch
                       </div>
                     )}
                   </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
 
-          <div style={{ fontSize: 12, fontWeight: 700, color: colors.textMuted, marginBottom: 10, letterSpacing: 1, textTransform: "uppercase" }}>Workout Plans</div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: colors.textMuted, marginBottom: 10, letterSpacing: 1, textTransform: "uppercase" }}>{tr("Workout Plans")}</div>
           {["Week 1 — Fat Burn", "Week 2 — Strength"].map((plan, i) => (
             <div key={i} style={{ background: colors.card, borderRadius: 16, padding: 16, border: `1px solid ${colors.border}`, marginBottom: 10, cursor: "pointer" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -1381,7 +2002,7 @@ function TraineeProfileScreen({ trainee, onBack, onNavigate, onShowToast, onArch
                   <Apple size={16} color={colors.success} />
                 </div>
                 <div>
-                  <div style={{ fontSize: 13, fontWeight: 700, color: colors.textPrimary }}>Nutrition Progress</div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: colors.textPrimary }}>{tr("Nutrition Progress")}</div>
                   <div style={{ fontSize: 10, color: colors.textMuted }}>{t.weeklyNutrition.done}/{t.weeklyNutrition.total} meals · {t.nutritionAdherence}% adherence</div>
                 </div>
               </div>
@@ -1396,7 +2017,15 @@ function TraineeProfileScreen({ trainee, onBack, onNavigate, onShowToast, onArch
               {traineeNutritionLog.map((d, di) => {
                 const pct = d.mealsTotal > 0 ? Math.round((d.mealsLogged / d.mealsTotal) * 100) : 0;
                 return (
-                  <div key={di} style={{ flex: 1, textAlign: "center", padding: "6px 0", borderRadius: 8, background: pct === 100 ? `${colors.success}10` : pct > 0 ? `${colors.warning}10` : colors.surface }}>
+                  <div key={di} onClick={() => {
+                    setNutritionProgressExpanded(true);
+                    setExpandedNutritionDays({ [d.day]: true });
+                    setTimeout(() => {
+                      const el = document.getElementById(`nutrition-day-${d.day}`);
+                      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                    }, 100);
+                  }}
+                    style={{ flex: 1, textAlign: "center", padding: "6px 0", borderRadius: 8, background: pct === 100 ? `${colors.success}10` : pct > 0 ? `${colors.warning}10` : colors.surface, cursor: "pointer" }}>
                     <div style={{ fontSize: 9, fontWeight: 700, color: colors.textMuted }}>{d.day}</div>
                     <div style={{ fontSize: 10, fontWeight: 800, color: pct === 100 ? colors.success : pct > 0 ? colors.warning : colors.textMuted, marginTop: 2 }}>
                       {pct > 0 ? `${d.mealsLogged}/${d.mealsTotal}` : "—"}
@@ -1440,7 +2069,7 @@ function TraineeProfileScreen({ trainee, onBack, onNavigate, onShowToast, onArch
                 )}
 
                 {traineeNutritionLog.filter(d => d.mealsLogged > 0 || d.note).map((d, di) => (
-                  <div key={di} style={{ background: colors.surface, borderRadius: 12, marginBottom: 8, border: `1px solid ${colors.border}`, overflow: "hidden" }}>
+                  <div key={di} id={`nutrition-day-${d.day}`} style={{ background: colors.surface, borderRadius: 12, marginBottom: 8, border: `1px solid ${colors.border}`, overflow: "hidden" }}>
                     {/* Day header — clickable */}
                     <div onClick={() => toggleNutritionDay(d.day)}
                       style={{ padding: "10px 12px", display: "flex", alignItems: "center", justifyContent: "space-between", cursor: "pointer" }}>
@@ -1476,17 +2105,30 @@ function TraineeProfileScreen({ trainee, onBack, onNavigate, onShowToast, onArch
                                 </div>
                                 <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                                   {m.done && <span style={{ fontSize: 10, fontWeight: 700, color: colors.textSecondary }}>{m.cal} cal</span>}
-                                  {!m.done && d.skippedMeals.includes(m.name) && <span style={{ fontSize: 9, fontWeight: 600, padding: "1px 5px", borderRadius: 4, background: colors.warningLight, color: colors.warning }}>Skipped</span>}
-                                  {expandedMeals[mealKey] ? <ChevronUp size={12} color={colors.textMuted} /> : <ChevronDown size={12} color={colors.textMuted} />}
+                                  {!m.done && (d.skippedMeals || []).includes(m.name) && <span style={{ fontSize: 9, fontWeight: 600, padding: "1px 5px", borderRadius: 4, background: colors.warningLight, color: colors.warning }}>{tr("Skipped")}</span>}
+                                  {(m.done || m.skipReason) && (expandedMeals[mealKey] ? <ChevronUp size={12} color={colors.textMuted} /> : <ChevronDown size={12} color={colors.textMuted} />)}
                                 </div>
                               </div>
 
+                              {/* Skipped meal reason */}
+                              {expandedMeals[mealKey] && !m.done && m.skipReason && (
+                                <div style={{ padding: "8px 10px 10px", display: "flex", alignItems: "flex-start", gap: 7 }}>
+                                  <AlertTriangle size={12} color={colors.warning} style={{ flexShrink: 0, marginTop: 1 }} />
+                                  <div>
+                                    <div style={{ fontSize: 9, fontWeight: 700, color: colors.warning, textTransform: "uppercase", letterSpacing: 0.5, marginBottom: 2 }}>Reason</div>
+                                    <div style={{ fontSize: 11, color: colors.textSecondary, lineHeight: 1.4 }}>{m.skipReason}</div>
+                                  </div>
+                                </div>
+                              )}
                               {/* Expanded meal: food details */}
                               {expandedMeals[mealKey] && m.done && m.foods.length > 0 && (
                                 <div style={{ padding: "0 10px 10px" }}>
                                   {m.foods.map((food, fi) => (
-                                    <div key={fi} style={{ display: "flex", alignItems: "center", gap: 8, padding: "4px 0", borderTop: fi > 0 ? `1px solid ${colors.border}` : "none" }}>
-                                      <span style={{ fontSize: 11, color: colors.textPrimary }}>• {food}</span>
+                                    <div key={fi} style={{ display: "flex", alignItems: "center", gap: 8, padding: "5px 0", borderTop: fi > 0 ? `1px solid ${colors.border}` : "none" }}>
+                                      <span style={{ fontSize: 11, color: colors.textPrimary, flex: 1 }}>• {typeof food === "string" ? food : food.name}</span>
+                                      {typeof food !== "string" && food.weight && (
+                                        <span style={{ fontSize: 10, fontWeight: 700, color: colors.primary, background: `${colors.primary}12`, padding: "1px 7px", borderRadius: 6, border: `1px solid ${colors.primary}20`, flexShrink: 0 }}>{food.weight}g</span>
+                                      )}
                                     </div>
                                   ))}
                                 </div>
@@ -1515,14 +2157,14 @@ function TraineeProfileScreen({ trainee, onBack, onNavigate, onShowToast, onArch
             )}
           </div>
 
-          <div style={{ fontSize: 12, fontWeight: 700, color: colors.textMuted, marginBottom: 10, letterSpacing: 1, textTransform: "uppercase" }}>Nutrition Plans</div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: colors.textMuted, marginBottom: 10, letterSpacing: 1, textTransform: "uppercase" }}>{tr("Nutrition Plans")}</div>
           <div style={{ background: colors.card, borderRadius: 16, padding: 16, border: `1px solid ${colors.border}`, marginBottom: 10 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <div>
                 <div style={{ fontSize: 15, fontWeight: 600, color: colors.textPrimary }}>Lean Cut — 2,100 cal</div>
                 <div style={{ fontSize: 12, color: colors.textSecondary, marginTop: 2 }}>Active · P:150g C:230g F:70g</div>
               </div>
-              <span style={{ fontSize: 10, fontWeight: 600, padding: "3px 10px", borderRadius: 6, background: colors.successLight, color: colors.success }}>Active</span>
+              <span style={{ fontSize: 10, fontWeight: 600, padding: "3px 10px", borderRadius: 6, background: colors.successLight, color: colors.success }}>{tr("Active")}</span>
             </div>
           </div>
           <button onClick={() => onNavigate("nutrition-builder")}
@@ -1539,7 +2181,7 @@ function TraineeProfileScreen({ trainee, onBack, onNavigate, onShowToast, onArch
           {t.weightTrend.length > 0 && (
             <div style={{ background: colors.card, borderRadius: 16, padding: 16, border: `1px solid ${colors.border}`, marginBottom: 12 }}>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-                <div style={{ fontSize: 14, fontWeight: 700, color: colors.textPrimary }}>Weight Trend</div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: colors.textPrimary }}>{tr("Weight Trend")}</div>
                 <span style={{ fontSize: 10, fontWeight: 600, padding: "2px 8px", borderRadius: 6, background: colors.primaryLight, color: colors.primary }}>From Trainee</span>
               </div>
               <svg viewBox="0 0 300 100" style={{ width: "100%", height: 100 }}>
@@ -1573,17 +2215,17 @@ function TraineeProfileScreen({ trainee, onBack, onNavigate, onShowToast, onArch
 
           {/* Adherence bars */}
           <div style={{ background: colors.card, borderRadius: 16, padding: 16, border: `1px solid ${colors.border}`, marginBottom: 12 }}>
-            <div style={{ fontSize: 14, fontWeight: 700, color: colors.textPrimary, marginBottom: 14 }}>This Week</div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: colors.textPrimary, marginBottom: 14 }}>{tr("This Week")}</div>
             <div style={{ marginBottom: 12 }}>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                <span style={{ fontSize: 13, color: colors.textSecondary }}>Workouts</span>
+                <span style={{ fontSize: 13, color: colors.textSecondary }}>{tr("Workouts")}</span>
                 <span style={{ fontSize: 13, fontWeight: 700, color: adherenceColor(t.workoutAdherence) }}>{t.weeklyWorkouts.done}/{t.weeklyWorkouts.total}</span>
               </div>
               <ProgressBar value={t.weeklyWorkouts.done} max={Math.max(t.weeklyWorkouts.total, 1)} color={adherenceColor(t.workoutAdherence)} />
             </div>
             <div>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                <span style={{ fontSize: 13, color: colors.textSecondary }}>Nutrition</span>
+                <span style={{ fontSize: 13, color: colors.textSecondary }}>{tr("Nutrition")}</span>
                 <span style={{ fontSize: 13, fontWeight: 700, color: adherenceColor(t.nutritionAdherence) }}>{t.weeklyNutrition.done}/{t.weeklyNutrition.total}</span>
               </div>
               <ProgressBar value={t.weeklyNutrition.done} max={Math.max(t.weeklyNutrition.total, 1)} color={adherenceColor(t.nutritionAdherence)} />
@@ -1593,7 +2235,7 @@ function TraineeProfileScreen({ trainee, onBack, onNavigate, onShowToast, onArch
           {/* Body Measurements (mirrored from trainee) */}
           <div style={{ background: colors.card, borderRadius: 16, padding: 16, border: `1px solid ${colors.border}`, marginBottom: 12 }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-              <div style={{ fontSize: 14, fontWeight: 700, color: colors.textPrimary }}>Body Measurements</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: colors.textPrimary }}>{tr("Body Measurements")}</div>
               <span style={{ fontSize: 10, fontWeight: 600, padding: "2px 8px", borderRadius: 6, background: colors.primaryLight, color: colors.primary }}>From Trainee</span>
             </div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
@@ -1611,7 +2253,7 @@ function TraineeProfileScreen({ trainee, onBack, onNavigate, onShowToast, onArch
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                 <Camera size={15} color={colors.primary} />
-                <span style={{ fontSize: 14, fontWeight: 700, color: colors.textPrimary }}>Progress Photos</span>
+                <span style={{ fontSize: 14, fontWeight: 700, color: colors.textPrimary }}>{tr("Progress Photos")}</span>
                 <span style={{ fontSize: 10, fontWeight: 600, padding: "2px 6px", borderRadius: 5, background: colors.surface, color: colors.textMuted }}>{traineeProgressPhotos.length} sets</span>
               </div>
               <span style={{ fontSize: 10, fontWeight: 600, padding: "2px 8px", borderRadius: 6, background: colors.primaryLight, color: colors.primary }}>From Trainee</span>
@@ -1654,7 +2296,7 @@ function TraineeProfileScreen({ trainee, onBack, onNavigate, onShowToast, onArch
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                 <Activity size={15} color="#8B5CF6" />
-                <span style={{ fontSize: 14, fontWeight: 700, color: colors.textPrimary }}>InBody Reports</span>
+                <span style={{ fontSize: 14, fontWeight: 700, color: colors.textPrimary }}>{tr("InBody Reports")}</span>
                 <span style={{ fontSize: 10, fontWeight: 600, padding: "2px 6px", borderRadius: 5, background: colors.surface, color: colors.textMuted }}>{traineeInbodyReports.length}</span>
               </div>
               <span style={{ fontSize: 10, fontWeight: 600, padding: "2px 8px", borderRadius: 6, background: "#8B5CF610", color: "#8B5CF6" }}>From Trainee</span>
@@ -1690,7 +2332,7 @@ function TraineeProfileScreen({ trainee, onBack, onNavigate, onShowToast, onArch
           <div style={{ background: colors.card, borderRadius: 16, padding: 16, border: `1px solid ${colors.border}`, marginBottom: 12 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 12 }}>
               <MessageSquare size={15} color="#8B5CF6" />
-              <span style={{ fontSize: 14, fontWeight: 700, color: colors.textPrimary }}>Trainee Feedback</span>
+              <span style={{ fontSize: 14, fontWeight: 700, color: colors.textPrimary }}>{tr("Trainee Feedback")}</span>
             </div>
             {traineeFeedbackEntries.map((entry, i) => (
               <div key={i} style={{ padding: "10px 12px", background: i === 0 ? "#8B5CF608" : colors.surface, borderRadius: 10, marginBottom: i < traineeFeedbackEntries.length - 1 ? 8 : 0, border: i === 0 ? "1px solid #8B5CF620" : `1px solid ${colors.border}` }}>
@@ -1707,7 +2349,7 @@ function TraineeProfileScreen({ trainee, onBack, onNavigate, onShowToast, onArch
           <div style={{ background: colors.card, borderRadius: 16, padding: 16, border: `1px solid ${colors.border}`, marginBottom: 12 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 12 }}>
               <Edit3 size={15} color={colors.primary} />
-              <span style={{ fontSize: 14, fontWeight: 700, color: colors.textPrimary }}>Coach Notes</span>
+              <span style={{ fontSize: 14, fontWeight: 700, color: colors.textPrimary }}>{tr("Coach Notes")}</span>
             </div>
             <div style={{ marginBottom: 10 }}>
               <div style={{ fontSize: 11, fontWeight: 600, color: colors.textSecondary, marginBottom: 4, display: "flex", alignItems: "center", gap: 4 }}>
@@ -1728,7 +2370,7 @@ function TraineeProfileScreen({ trainee, onBack, onNavigate, onShowToast, onArch
                 style={{ width: "100%", borderRadius: 10, border: `1.5px solid ${colors.warning}30`, padding: "10px 12px", fontSize: 12, color: colors.textPrimary, outline: "none", resize: "vertical", boxSizing: "border-box", fontFamily: "inherit", background: colors.warningLight }} />
             </div>
             {(coachFeedback || coachCaution) && (
-              <button onClick={() => onShowToast("Notes saved")}
+              <button onClick={() => onShowToastr("Notes saved")}
                 style={{ marginTop: 10, width: "100%", padding: "10px 0", borderRadius: 10, border: "none", background: colors.primary, color: "#fff", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
                 Save Notes
               </button>
@@ -1740,7 +2382,7 @@ function TraineeProfileScreen({ trainee, onBack, onNavigate, onShowToast, onArch
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                 <Target size={15} color={colors.success} />
-                <span style={{ fontSize: 14, fontWeight: 700, color: colors.textPrimary }}>Goals</span>
+                <span style={{ fontSize: 14, fontWeight: 700, color: colors.textPrimary }}>{tr("Goals")}</span>
               </div>
               <span style={{ fontSize: 11, fontWeight: 600, color: colors.textMuted }}>{traineeGoals.filter(g => g.completed).length}/{traineeGoals.length} done</span>
             </div>
@@ -1781,15 +2423,22 @@ function TraineeProfileScreen({ trainee, onBack, onNavigate, onShowToast, onArch
 
           {/* Milestones */}
           <div style={{ background: colors.card, borderRadius: 16, padding: 16, border: `1px solid ${colors.border}` }}>
-            <div style={{ fontSize: 14, fontWeight: 700, color: colors.textPrimary, marginBottom: 12 }}>Milestones</div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: colors.textPrimary, marginBottom: 12, display: "flex", alignItems: "center", gap: 6 }}>
+              <div style={{ width: 22, height: 22, borderRadius: 6, background: "linear-gradient(135deg, #FBBF24, #F97316)", display: "flex", alignItems: "center", justifyContent: "center" }}><Trophy size={11} color="#fff" strokeWidth={2.5} /></div>
+              Milestones
+            </div>
             {t.streak >= 7 && (
               <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 0" }}>
-                <Award size={18} color={colors.warning} />
-                <span style={{ fontSize: 13, color: colors.textPrimary, fontWeight: 500 }}>{t.streak}-day streak!</span>
+                <div style={{ width: 30, height: 30, borderRadius: 8, background: "linear-gradient(135deg, #F97316, #EF4444)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 3px 8px rgba(239,68,68,0.3)" }}>
+                  <Flame size={14} color="#fff" strokeWidth={2.2} />
+                </div>
+                <span style={{ fontSize: 13, color: colors.textPrimary, fontWeight: 600 }}>{t.streak}-day streak — {tr("on fire!")}</span>
               </div>
             )}
             <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 0" }}>
-              <Star size={18} color={colors.primary} />
+              <div style={{ width: 30, height: 30, borderRadius: 8, background: "linear-gradient(135deg, #A78BFA, #7C3AED)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 3px 8px rgba(139,92,246,0.3)" }}>
+                <Star size={14} color="#fff" strokeWidth={2.2} fill="#fff" />
+              </div>
               <span style={{ fontSize: 13, color: colors.textPrimary, fontWeight: 500 }}>Joined {t.joined}</span>
             </div>
           </div>
@@ -1800,7 +2449,7 @@ function TraineeProfileScreen({ trainee, onBack, onNavigate, onShowToast, onArch
       {activeTab === "settings" && (
         <div style={{ padding: "0 20px" }}>
           <div style={{ background: colors.card, borderRadius: 16, padding: 16, border: `1px solid ${colors.border}`, marginBottom: 12 }}>
-            <div style={{ fontSize: 14, fontWeight: 700, color: colors.textPrimary, marginBottom: 14 }}>Trainee Info</div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: colors.textPrimary, marginBottom: 14 }}>{tr("Trainee Info")}</div>
             {[["Name", t.name], ["Email", t.email], ["Goal", t.goal], ["Level", t.level], ["Notes", t.note || "—"]].map(([label, val], i) => (
               <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "10px 0", borderTop: i > 0 ? `1px solid ${colors.border}` : "none" }}>
                 <span style={{ fontSize: 13, color: colors.textMuted, fontWeight: 600 }}>{label}</span>
@@ -1831,8 +2480,8 @@ function TraineeProfileScreen({ trainee, onBack, onNavigate, onShowToast, onArch
 
       {/* Trainee History Popup */}
       {showTraineeHistory && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 300, padding: 20 }}>
-          <div style={{ background: colors.card, borderRadius: 22, width: "100%", maxWidth: 360, maxHeight: "80vh", overflow: "hidden", boxShadow: "0 20px 60px rgba(0,0,0,0.3)", display: "flex", flexDirection: "column" }}>
+        <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 300, padding: 20 }}>
+          <div style={{ background: colors.card, borderRadius: 22, width: "100%", maxWidth: 400, maxHeight: "80vh", overflow: "hidden", boxShadow: "0 20px 60px rgba(0,0,0,0.3)", display: "flex", flexDirection: "column" }}>
             <div style={{ padding: "18px 20px 12px", borderBottom: `1px solid ${colors.border}`, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <div>
                 <div style={{ fontSize: 16, fontWeight: 800, color: colors.textPrimary }}>Health & Training History</div>
@@ -1872,6 +2521,77 @@ function TraineeProfileScreen({ trainee, onBack, onNavigate, onShowToast, onArch
         </div>
       )}
     </div>
+
+      {/* ── Exercise Weight Progress Chart Popup ── */}
+      {showExerciseChart && (
+        <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.55)", zIndex: 600, display: "flex", alignItems: "center", justifyContent: "center", padding: 20 }}
+          onClick={() => setShowExerciseChart(null)}>
+          <div onClick={e => e.stopPropagation()} style={{ width: "100%", maxWidth: 400, background: colors.card, borderRadius: 20, padding: 20, boxShadow: "0 20px 60px rgba(0,0,0,0.3)", animation: "fadeScale 0.2s ease" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 16 }}>
+              <div>
+                <div style={{ fontSize: 15, fontWeight: 800, color: colors.textPrimary }}>{showExerciseChart.name}</div>
+                <div style={{ fontSize: 11, color: colors.textMuted, marginTop: 1 }}>Weight Progress Over Sessions</div>
+              </div>
+              <button onClick={() => setShowExerciseChart(null)} style={{ width: 28, height: 28, borderRadius: "50%", background: colors.surface, border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+                <X size={14} color={colors.textMuted} />
+              </button>
+            </div>
+            {(() => {
+              const data = showExerciseChart.data;
+              const weights = data.map(d => d.weight);
+              const minW = Math.min(...weights) - 5;
+              const maxW = Math.max(...weights) + 5;
+              const range = maxW - minW || 1;
+              const pts = data.map((d, i) => ({
+                x: 20 + (i / (data.length - 1)) * 270,
+                y: 10 + ((maxW - d.weight) / range) * 80,
+                d
+              }));
+              const line = pts.map((p, i) => `${i === 0 ? "M" : "L"}${p.x},${p.y}`).join(" ");
+              const area = line + ` L${pts[pts.length-1].x},100 L${pts[0].x},100 Z`;
+              const last = pts[pts.length - 1];
+              const first = pts[0];
+              const isUp = last.d.weight >= first.d.weight;
+              const diff = last.d.weight - first.d.weight;
+              return (
+                <>
+                  <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+                    <div style={{ flex: 1, background: isUp ? `${colors.success}10` : `${colors.error}10`, borderRadius: 10, padding: "8px 10px", textAlign: "center" }}>
+                      <div style={{ fontSize: 11, color: colors.textMuted, fontWeight: 600 }}>Current</div>
+                      <div style={{ fontSize: 18, fontWeight: 800, color: colors.textPrimary }}>{last.d.weight} kg</div>
+                    </div>
+                    <div style={{ flex: 1, background: isUp ? `${colors.success}10` : `${colors.error}10`, borderRadius: 10, padding: "8px 10px", textAlign: "center" }}>
+                      <div style={{ fontSize: 11, color: colors.textMuted, fontWeight: 600 }}>{tr("Change")}</div>
+                      <div style={{ fontSize: 18, fontWeight: 800, color: isUp ? colors.success : colors.error }}>{isUp ? "+" : ""}{diff} kg</div>
+                    </div>
+                  </div>
+                  <svg viewBox="0 0 310 110" style={{ width: "100%", height: 110 }}>
+                    <defs>
+                      <linearGradient id="exChartGrad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor={isUp ? colors.success : colors.error} stopOpacity="0.18"/>
+                        <stop offset="100%" stopColor={isUp ? colors.success : colors.error} stopOpacity="0"/>
+                      </linearGradient>
+                    </defs>
+                    <path d={area} fill="url(#exChartGrad)" />
+                    <path d={line} fill="none" stroke={isUp ? colors.success : colors.error} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                    {pts.map((p, i) => (
+                      <g key={i}>
+                        <circle cx={p.x} cy={p.y} r="4" fill={isUp ? colors.success : colors.error} stroke="#fff" strokeWidth="2" />
+                        <text x={p.x} y="108" fontSize="8" fill={colors.textMuted} textAnchor="middle">{p.d.session}</text>
+                      </g>
+                    ))}
+                    <text x={last.x + 6} y={last.y - 6} fontSize="9" fill={isUp ? colors.success : colors.error} fontWeight="700">{last.d.weight}kg</text>
+                  </svg>
+                  <div style={{ marginTop: 8, fontSize: 11, color: colors.textSecondary, textAlign: "center" }}>
+                    {isUp ? `Weight increased by ${diff} kg over ${data.length} sessions` : `Weight decreased by ${Math.abs(diff)} kg over ${data.length} sessions`}
+                  </div>
+                </>
+              );
+            })()}
+          </div>
+        </div>
+      )}
+    </>
   );
 }
 
@@ -1879,7 +2599,7 @@ function TraineeProfileScreen({ trainee, onBack, onNavigate, onShowToast, onArch
 // COACH SCREENS
 // ═══════════════════════════════════════════════════════
 
-function CoachDashboard({ onNavigate, onShowToast, freemium = {} }) {
+function CoachDashboard({ onNavigate, onShowToast, freemium = {}, onOpenTrainee }) {
   const { isPremium, clientCount = 0, CLIENT_FREE_LIMIT = 3, canAddClient, workoutSets = [], nutritionSets = [], onUpgrade } = freemium;
   // Use shared trainee data
   const active = allTraineesData.filter(t => t.status === "active");
@@ -1898,17 +2618,23 @@ function CoachDashboard({ onNavigate, onShowToast, freemium = {} }) {
 
   // Recent activity feed
   const activityFeed = [
-    { icon: CheckCircle2, color: colors.success, text: "Lina R. completed today's workout", subtext: "6/6 exercises · 30 min ago", trainee: "Lina R." },
-    { icon: Apple, color: colors.success, text: "Fatima Z. logged all meals", subtext: "Breakfast + Lunch + Snack · 1 hr ago", trainee: "Fatima Z." },
-    { icon: TrendingUp, color: colors.primary, text: "Sarah M. hit a new PR", subtext: "Squat 65kg → 70kg · 2 hrs ago", trainee: "Sarah M." },
-    { icon: AlertTriangle, color: colors.warning, text: "Ahmed K. skipped nutrition log", subtext: "No meals logged today · 4 hrs ago", trainee: "Ahmed K." },
-    { icon: MessageSquare, color: colors.primary, text: "Karim S. sent you a message", subtext: "\"Coach, about tomorrow's plan...\" · 5 hrs ago", trainee: "Karim S." },
-    { icon: UserPlus, color: colors.textMuted, text: "Dana M. invitation sent", subtext: "Pending acceptance · Just now", trainee: "Dana M." },
+    { icon: CheckCircle2, color: colors.success, text: tr("Lina R. completed today's workout"), subtext: tr("6/6 exercises · 30 min ago"), trainee: "Lina R." },
+    { icon: Apple, color: colors.success, text: tr("Fatima Z. logged all meals"), subtext: tr("Breakfast + Lunch + Snack · 1 hr ago"), trainee: "Fatima Z." },
+    { icon: TrendingUp, color: colors.primary, text: tr("Sarah M. hit a new PR"), subtext: tr("Squat 65kg → 70kg · 2 hrs ago"), trainee: "Sarah M." },
+    { icon: AlertTriangle, color: colors.warning, text: tr("Ahmed K. skipped nutrition log"), subtext: tr("No meals logged today · 4 hrs ago"), trainee: "Ahmed K." },
+    { icon: MessageSquare, color: colors.primary, text: tr("Karim S. sent you a message"), subtext: tr("\"Coach, about tomorrow's plan...\" · 5 hrs ago"), trainee: "Karim S." },
+    { icon: UserPlus, color: colors.textMuted, text: tr("Dana M. invitation sent"), subtext: tr("Pending acceptance · Just now"), trainee: "Dana M." },
   ];
 
   // Greeting based on time
   const hour = new Date().getHours();
-  const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
+  const greeting = hour < 12 ? tr("Good morning") : hour < 17 ? tr("Good afternoon") : tr("Good evening");
+
+  // Dynamic date in Arabic or English
+  const now = new Date();
+  const dateStr = _lang === "Arabic"
+    ? now.toLocaleDateString("ar-EG", { weekday: "long", month: "long", day: "numeric" })
+    : now.toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" });
 
   // Adherence color helper
   const adherenceColor = (pct) => pct >= 80 ? colors.success : pct >= 60 ? colors.warning : colors.error;
@@ -1923,58 +2649,41 @@ function CoachDashboard({ onNavigate, onShowToast, freemium = {} }) {
       <div style={{ padding: "0 20px", marginBottom: 20 }}>
         <h1 style={{ fontSize: 24, fontWeight: 800, color: colors.textPrimary, lineHeight: 1.2, marginBottom: 2 }}>{greeting}, Mahmoud</h1>
         <p style={{ fontSize: 13, color: colors.textSecondary }}>
-          Sunday, Feb 15 · {todaySessions.length} session{todaySessions.length !== 1 ? "s" : ""} today
-          {needsAttention.length > 0 && <span style={{ color: colors.error, fontWeight: 600 }}> · {needsAttention.length} need attention</span>}
+          {dateStr} · {todaySessions.length} {todaySessions.length !== 1 ? tr("sessions") : tr("session")} {tr("today")}
+          {needsAttention.length > 0 && <span style={{ color: colors.error, fontWeight: 600 }}> · {needsAttention.length} {tr("need attention")}</span>}
         </p>
       </div>
 
-      {/* ─── FREEMIUM CLIENT LIMIT ALERT ─── */}
-      {!isPremium && (
-        <div style={{ padding: "0 20px", marginBottom: 16, animation: "slideUp 0.3s ease" }}>
-          <div style={{
-            borderRadius: 16, overflow: "hidden", border: `1px solid ${canAddClient ? colors.border : colors.warning + "30"}`,
-            background: colors.card, boxShadow: "0 2px 8px rgba(0,0,0,0.04)"
-          }}>
-            {/* Usage Header */}
-            <div style={{
-              padding: "12px 16px", background: `linear-gradient(135deg, ${colors.primary}08, ${colors.primary}04)`,
-              display: "flex", alignItems: "center", justifyContent: "space-between"
-            }}>
+      {/* ─── ADD TRAINEE CTA / UPGRADE PROMPT ─── */}
+      <div style={{ padding: "0 20px", marginBottom: 16 }}>
+        {canAddClient ? (
+          <button onClick={() => onNavigate("coach-trainees")}
+            style={{ width: "100%", padding: "15px 20px", borderRadius: 16, border: "none", background: `linear-gradient(135deg, ${colors.primary} 0%, #10B981 100%)`, color: "#fff", fontSize: 15, fontWeight: 800, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 10, boxShadow: "0 8px 24px rgba(52,211,153,0.35)", letterSpacing: -0.2 }}>
+            <div style={{ width: 32, height: 32, borderRadius: 10, background: "rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <UserPlus size={18} color="#fff" />
+            </div>
+            {tr("Add New Trainee")}
+            <ChevronRight size={18} color="rgba(255,255,255,0.8)" style={{ marginLeft: "auto" }} />
+          </button>
+        ) : (
+          <div style={{ borderRadius: 16, border: `1.5px solid ${colors.warning}40`, background: colors.card, overflow: "hidden", boxShadow: "0 2px 12px rgba(0,0,0,0.06)" }}>
+            <div style={{ padding: "12px 16px", background: `linear-gradient(135deg, ${colors.warning}12, ${colors.warning}06)`, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <div style={{ width: 28, height: 28, borderRadius: 8, background: `${colors.primary}12`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <Zap size={14} color={colors.primary} />
+                <div style={{ width: 32, height: 32, borderRadius: 10, background: `${colors.warning}20`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <Lock size={15} color={colors.warning} />
                 </div>
-                <span style={{ fontSize: 12, fontWeight: 700, color: colors.textPrimary }}>Free Plan</span>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: colors.textPrimary }}>{tr("Client limit reached")}</div>
+                  <div style={{ fontSize: 10, color: colors.textMuted, marginTop: 1 }}>{CLIENT_FREE_LIMIT}/{CLIENT_FREE_LIMIT} {tr("slots used on free plan")}</div>
+                </div>
               </div>
-              <button onClick={onUpgrade} style={{
-                padding: "4px 10px", borderRadius: 6, border: "none",
-                background: "linear-gradient(135deg, #7C3AED, #34D399)", color: "#fff",
-                fontSize: 10, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 3
-              }}>
-                <Star size={10} fill="#fff" /> Upgrade
+              <button onClick={onUpgrade} style={{ padding: "7px 14px", borderRadius: 10, border: "none", background: "linear-gradient(135deg, #7C3AED, #34D399)", color: "#fff", fontSize: 12, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 4, boxShadow: "0 4px 12px rgba(124,58,237,0.3)" }}>
+                <Zap size={12} fill="#fff" color="#fff" /> {tr("Upgrade")}
               </button>
             </div>
-            {/* Client Usage */}
-            <div style={{ padding: "12px 16px" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
-                  <Users size={13} color={colors.textSecondary} />
-                  <span style={{ fontSize: 11, fontWeight: 600, color: colors.textSecondary }}>Clients</span>
-                </div>
-                <span style={{ fontSize: 11, fontWeight: 700, color: canAddClient ? colors.primary : colors.warning }}>{clientCount}/{CLIENT_FREE_LIMIT}</span>
-              </div>
-              <div style={{ background: colors.surface, borderRadius: 4, height: 6, overflow: "hidden" }}>
-                <div style={{ width: `${Math.min((clientCount / CLIENT_FREE_LIMIT) * 100, 100)}%`, height: "100%", background: canAddClient ? colors.primary : colors.warning, borderRadius: 4, transition: "width 0.5s" }} />
-              </div>
-              {!canAddClient && (
-                <div style={{ fontSize: 10, color: colors.warning, fontWeight: 600, marginTop: 6, display: "flex", alignItems: "center", gap: 4 }}>
-                  <Lock size={10} /> Client limit reached — upgrade to add more
-                </div>
-              )}
-            </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Quick Actions removed */}
 
@@ -1982,19 +2691,19 @@ function CoachDashboard({ onNavigate, onShowToast, freemium = {} }) {
       <div style={{ display: "flex", gap: 8, padding: "0 20px", marginBottom: 20 }}>
         <div onClick={() => onNavigate("coach-trainees")} style={{ flex: 1, background: colors.card, borderRadius: 14, padding: "14px 10px", textAlign: "center", border: `1px solid ${colors.border}`, boxShadow: "0 1px 3px rgba(0,0,0,0.05)", cursor: "pointer" }}>
           <div style={{ fontSize: 24, fontWeight: 900, color: colors.primary, letterSpacing: -0.5 }}>{active.length}</div>
-          <div style={{ fontSize: 10, fontWeight: 600, color: colors.textMuted, marginTop: 2, letterSpacing: 0.2, textTransform: "uppercase" }}>Active</div>
+          <div style={{ fontSize: 10, fontWeight: 600, color: colors.textMuted, marginTop: 2, letterSpacing: 0.2, textTransform: "uppercase" }}>{tr("Active")}</div>
         </div>
         <div onClick={() => onNavigate("coach-trainees")} style={{ flex: 1, background: colors.card, borderRadius: 14, padding: "14px 10px", textAlign: "center", border: `1px solid ${colors.border}`, boxShadow: "0 1px 3px rgba(0,0,0,0.05)", cursor: "pointer" }}>
           <div style={{ fontSize: 24, fontWeight: 900, color: avgAdherence >= 75 ? colors.success : colors.warning, letterSpacing: -0.5 }}>{avgAdherence}%</div>
-          <div style={{ fontSize: 10, fontWeight: 600, color: colors.textMuted, marginTop: 2, letterSpacing: 0.2, textTransform: "uppercase" }}>Avg Adherence</div>
+          <div style={{ fontSize: 10, fontWeight: 600, color: colors.textMuted, marginTop: 2, letterSpacing: 0.2, textTransform: "uppercase" }}>{tr("Avg Adherence")}</div>
         </div>
         <div style={{ flex: 1, background: colors.card, borderRadius: 14, padding: "14px 10px", textAlign: "center", border: `1px solid ${colors.border}`, boxShadow: "0 1px 3px rgba(0,0,0,0.05)" }}>
           <div style={{ fontSize: 24, fontWeight: 900, color: colors.textPrimary, letterSpacing: -0.5 }}>{todaySessions.length}</div>
-          <div style={{ fontSize: 10, fontWeight: 600, color: colors.textMuted, marginTop: 2, letterSpacing: 0.2, textTransform: "uppercase" }}>Sessions Today</div>
+          <div style={{ fontSize: 10, fontWeight: 600, color: colors.textMuted, marginTop: 2, letterSpacing: 0.2, textTransform: "uppercase" }}>{tr("Sessions Today")}</div>
         </div>
         <div style={{ flex: 1, background: needsAttention.length > 0 ? colors.errorLight : colors.card, borderRadius: 14, padding: "14px 10px", textAlign: "center", border: `1px solid ${needsAttention.length > 0 ? colors.error + "25" : colors.border}`, boxShadow: "0 1px 3px rgba(0,0,0,0.05)", cursor: "pointer" }} onClick={() => onNavigate("coach-trainees")}>
           <div style={{ fontSize: 24, fontWeight: 900, color: needsAttention.length > 0 ? colors.error : colors.textMuted, letterSpacing: -0.5 }}>{needsAttention.length}</div>
-          <div style={{ fontSize: 10, fontWeight: 600, color: needsAttention.length > 0 ? colors.error : colors.textMuted, marginTop: 2, letterSpacing: 0.2, textTransform: "uppercase" }}>Alerts</div>
+          <div style={{ fontSize: 10, fontWeight: 600, color: needsAttention.length > 0 ? colors.error : colors.textMuted, marginTop: 2, letterSpacing: 0.2, textTransform: "uppercase" }}>{tr("Alerts")}</div>
         </div>
       </div>
 
@@ -2004,21 +2713,21 @@ function CoachDashboard({ onNavigate, onShowToast, freemium = {} }) {
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <div style={{ width: 8, height: 8, borderRadius: "50%", background: colors.error, animation: "typingDot 2s infinite" }} />
-              <span style={{ fontSize: 14, fontWeight: 700, color: colors.textPrimary }}>Needs Attention</span>
+              <span style={{ fontSize: 14, fontWeight: 700, color: colors.textPrimary }}>{tr("Needs Attention")}</span>
             </div>
-            <button onClick={() => onNavigate("coach-trainees")} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 12, fontWeight: 600, color: colors.primary }}>View all</button>
+            <button onClick={() => onNavigate("coach-trainees")} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 12, fontWeight: 600, color: colors.primary }}>{tr("View all")}</button>
           </div>
           {needsAttention.slice(0, 3).map((t, i) => {
             const alertMessages = {
-              missed: { text: "Missed 2+ workouts this week", bg: colors.errorLight, border: "#FECACA", dotColor: colors.error },
-              nutrition: { text: "Nutrition adherence dropped to " + t.nutritionAdherence + "%", bg: colors.warningLight, border: "#FDE68A", dotColor: colors.warning },
-              noLogin: { text: "No login for 5+ days", bg: colors.surface, border: colors.border, dotColor: colors.textMuted },
-              plateau: { text: "Weight plateau for 3+ weeks", bg: "#EDE9FE", border: "#C4B5FD", dotColor: "#8B5CF6" },
+              missed: { text: tr("Missed 2+ workouts this week"), bg: colors.errorLight, border: "#FECACA", dotColor: colors.error },
+              nutrition: { text: tr("Nutrition adherence dropped to") + " " + t.nutritionAdherence + "%", bg: colors.warningLight, border: "#FDE68A", dotColor: colors.warning },
+              noLogin: { text: tr("No login for 5+ days"), bg: colors.surface, border: colors.border, dotColor: colors.textMuted },
+              plateau: { text: tr("Weight plateau for 3+ weeks"), bg: "#EDE9FE", border: "#C4B5FD", dotColor: "#8B5CF6" },
             };
             const primaryAlert = t.alerts[0];
             const alertInfo = alertMessages[primaryAlert] || alertMessages.missed;
             return (
-              <div key={t.id} onClick={() => onNavigate("coach-trainees")}
+              <div key={t.id} onClick={() => onOpenTrainee && onOpenTrainee(t.id)}
                 style={{ background: alertInfo.bg, borderRadius: 14, padding: "12px 14px", marginBottom: 8, display: "flex", alignItems: "center", gap: 12, cursor: "pointer", border: `1px solid ${alertInfo.border}`, transition: "transform 0.15s" }}>
                 <div style={{ width: 40, height: 40, borderRadius: "50%", background: "rgba(255,255,255,0.7)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, position: "relative" }}>
                   <span style={{ fontSize: 16, fontWeight: 700, color: alertInfo.dotColor }}>{t.avatar}</span>
@@ -2046,12 +2755,12 @@ function CoachDashboard({ onNavigate, onShowToast, freemium = {} }) {
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <Calendar size={15} color={colors.primary} />
-              <span style={{ fontSize: 14, fontWeight: 700, color: colors.textPrimary }}>Today's Sessions</span>
+              <span style={{ fontSize: 14, fontWeight: 700, color: colors.textPrimary }}>{tr("Today's Sessions")}</span>
             </div>
           </div>
           <div style={{ display: "flex", gap: 10, overflowX: "auto", paddingBottom: 4 }}>
             {todaySessions.map((t, i) => (
-              <div key={t.id} onClick={() => onNavigate("coach-trainees")}
+              <div key={t.id} onClick={() => onOpenTrainee && onOpenTrainee(t.id)}
                 style={{ minWidth: 150, background: colors.card, borderRadius: 16, padding: 14, border: `1px solid ${colors.border}`, boxShadow: "0 2px 8px rgba(0,0,0,0.04)", cursor: "pointer", flexShrink: 0 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
                   <div style={{ width: 36, height: 36, borderRadius: "50%", background: colors.primaryLight, display: "flex", alignItems: "center", justifyContent: "center" }}>
@@ -2059,12 +2768,12 @@ function CoachDashboard({ onNavigate, onShowToast, freemium = {} }) {
                   </div>
                   <div>
                     <div style={{ fontSize: 13, fontWeight: 700, color: colors.textPrimary }}>{t.name}</div>
-                    <div style={{ fontSize: 11, color: colors.textSecondary }}>{t.goal}</div>
+                    <div style={{ fontSize: 11, color: colors.textSecondary }}>{tr(t.goal)}</div>
                   </div>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 8 }}>
                   <Clock size={13} color={colors.primary} />
-                  <span style={{ fontSize: 13, fontWeight: 700, color: colors.primary }}>{t.sessionTime}</span>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: colors.primary }}>{tr(t.sessionTime)}</span>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: 4 }}>
                   <div style={{ flex: 1, height: 4, background: colors.surface, borderRadius: 2, overflow: "hidden" }}>
@@ -2085,13 +2794,13 @@ function CoachDashboard({ onNavigate, onShowToast, freemium = {} }) {
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <Award size={15} color={colors.warning} />
-            <span style={{ fontSize: 14, fontWeight: 700, color: colors.textPrimary }}>Top Performers</span>
+            <span style={{ fontSize: 14, fontWeight: 700, color: colors.textPrimary }}>{tr("Top Performers")}</span>
           </div>
-          <button onClick={() => onNavigate("coach-trainees")} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 12, fontWeight: 600, color: colors.primary }}>View all</button>
+          <button onClick={() => onNavigate("coach-trainees")} style={{ background: "none", border: "none", cursor: "pointer", fontSize: 12, fontWeight: 600, color: colors.primary }}>{tr("View all")}</button>
         </div>
         <div style={{ background: colors.card, borderRadius: 16, border: `1px solid ${colors.border}`, overflow: "hidden" }}>
           {topPerformers.map((t, i) => (
-            <div key={t.id} onClick={() => onNavigate("coach-trainees")}
+            <div key={t.id} onClick={() => onOpenTrainee && onOpenTrainee(t.id)}
               style={{ padding: "12px 16px", display: "flex", alignItems: "center", gap: 12, cursor: "pointer",
                 borderBottom: i < topPerformers.length - 1 ? `1px solid ${colors.border}` : "none" }}>
               <div style={{ width: 24, height: 24, borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
@@ -2103,7 +2812,7 @@ function CoachDashboard({ onNavigate, onShowToast, freemium = {} }) {
               </div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: 14, fontWeight: 600, color: colors.textPrimary }}>{t.name}</div>
-                <div style={{ fontSize: 11, color: colors.textSecondary }}>{t.goal} · {t.streak}-day streak</div>
+                <div style={{ fontSize: 11, color: colors.textSecondary }}>{tr(t.goal)} · {t.streak > 0 ? <span style={{ display: "inline-flex", alignItems: "center", gap: 2 }}><Flame size={10} color="#F97316" strokeWidth={2.5} /> {t.streak}{tr("-day streak")}</span> : tr("No streak yet")}</div>
               </div>
               <div style={{ textAlign: "right" }}>
                 <div style={{ fontSize: 16, fontWeight: 800, color: colors.success }}>{t.adherence}%</div>
@@ -2118,12 +2827,12 @@ function CoachDashboard({ onNavigate, onShowToast, freemium = {} }) {
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
             <Activity size={15} color={colors.textSecondary} />
-            <span style={{ fontSize: 14, fontWeight: 700, color: colors.textPrimary }}>Recent Activity</span>
+            <span style={{ fontSize: 14, fontWeight: 700, color: colors.textPrimary }}>{tr("Recent Activity")}</span>
           </div>
           {activityFeed.length > 2 && (
             <button onClick={() => setActivityExpanded(!activityExpanded)}
               style={{ background: "none", border: "none", cursor: "pointer", fontSize: 12, fontWeight: 600, color: colors.primary, display: "flex", alignItems: "center", gap: 4 }}>
-              {activityExpanded ? <><ChevronUp size={14} /> Less</> : <>All ({activityFeed.length}) <ChevronDown size={14} /></>}
+              {activityExpanded ? <><ChevronUp size={14} /> {tr("Less")}</> : <>{tr("All")} ({activityFeed.length}) <ChevronDown size={14} /></>}
             </button>
           )}
         </div>
@@ -2149,13 +2858,13 @@ function CoachDashboard({ onNavigate, onShowToast, freemium = {} }) {
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <Mail size={15} color={colors.textMuted} />
-              <span style={{ fontSize: 14, fontWeight: 700, color: colors.textPrimary }}>Pending Invitations</span>
+              <span style={{ fontSize: 14, fontWeight: 700, color: colors.textPrimary }}>{tr("Pending Invitations")}</span>
               <span style={{ fontSize: 10, fontWeight: 600, padding: "2px 8px", borderRadius: 6, background: colors.warningLight, color: colors.warning }}>{pending.length}</span>
             </div>
             {pending.length > 2 && (
               <button onClick={() => setInvitationsExpanded(!invitationsExpanded)}
                 style={{ background: "none", border: "none", cursor: "pointer", fontSize: 12, fontWeight: 600, color: colors.primary, display: "flex", alignItems: "center", gap: 4 }}>
-                {invitationsExpanded ? <><ChevronUp size={14} /> Less</> : <>All ({pending.length}) <ChevronDown size={14} /></>}
+                {invitationsExpanded ? <><ChevronUp size={14} /> {tr("Less")}</> : <>{tr("All")} ({pending.length}) <ChevronDown size={14} /></>}
               </button>
             )}
           </div>
@@ -2166,9 +2875,9 @@ function CoachDashboard({ onNavigate, onShowToast, freemium = {} }) {
               </div>
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: 13, fontWeight: 600, color: colors.textPrimary }}>{t.email}</div>
-                <div style={{ fontSize: 11, color: colors.textMuted }}>Invited {t.joined} · Pending</div>
+                <div style={{ fontSize: 11, color: colors.textMuted }}>{tr("Invited")} {tr(t.joined)} · {tr("Pending")}</div>
               </div>
-              <span style={{ fontSize: 10, fontWeight: 600, padding: "3px 10px", borderRadius: 8, background: colors.warningLight, color: colors.warning }}>Pending</span>
+              <span style={{ fontSize: 10, fontWeight: 600, padding: "3px 10px", borderRadius: 8, background: colors.warningLight, color: colors.warning }}>{tr("Pending")}</span>
             </div>
           ))}
         </div>
@@ -2179,7 +2888,7 @@ function CoachDashboard({ onNavigate, onShowToast, freemium = {} }) {
 
 function TraineeDetail({ onBack, onNavigate, onShowToast }) {
   const [activeTab, setActiveTab] = useState("progress");
-  const tabs = ["profile", "plans", "progress", "messages"];
+  const tabs = ["profile", "plans", "progress"];
 
   return (
     <div>
@@ -2201,7 +2910,7 @@ function TraineeDetail({ onBack, onNavigate, onShowToast }) {
           </div>
 
           <div style={{ background: colors.card, borderRadius: 16, padding: 16, border: `1px solid ${colors.border}`, marginBottom: 16 }}>
-            <div style={{ fontSize: 14, fontWeight: 700, color: colors.textPrimary, marginBottom: 12 }}>Weight Trend</div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: colors.textPrimary, marginBottom: 12 }}>{tr("Weight Trend")}</div>
             <svg viewBox="0 0 300 120" style={{ width: "100%", height: 120 }}>
               <defs><linearGradient id="wg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={colors.primary} stopOpacity="0.15"/><stop offset="100%" stopColor={colors.primary} stopOpacity="0"/></linearGradient></defs>
               <path d="M20,20 L80,35 L140,25 L200,50 L260,65 L280,60" fill="none" stroke={colors.primary} strokeWidth="2.5" strokeLinecap="round"/>
@@ -2216,14 +2925,14 @@ function TraineeDetail({ onBack, onNavigate, onShowToast }) {
             <div style={{ fontSize: 14, fontWeight: 700, color: colors.textPrimary, marginBottom: 14 }}>Adherence This Week</div>
             <div style={{ marginBottom: 12 }}>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                <span style={{ fontSize: 13, color: colors.textSecondary }}>Workouts</span>
+                <span style={{ fontSize: 13, color: colors.textSecondary }}>{tr("Workouts")}</span>
                 <span style={{ fontSize: 13, fontWeight: 700, color: colors.success }}>4/5 (80%)</span>
               </div>
               <ProgressBar value={4} max={5} color={colors.success} />
             </div>
             <div>
               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 6 }}>
-                <span style={{ fontSize: 13, color: colors.textSecondary }}>Nutrition</span>
+                <span style={{ fontSize: 13, color: colors.textSecondary }}>{tr("Nutrition")}</span>
                 <span style={{ fontSize: 13, fontWeight: 700, color: colors.warning }}>3/5 (60%)</span>
               </div>
               <ProgressBar value={3} max={5} color={colors.warning} />
@@ -2231,7 +2940,7 @@ function TraineeDetail({ onBack, onNavigate, onShowToast }) {
           </div>
 
           <div style={{ background: colors.card, borderRadius: 16, padding: 16, border: `1px solid ${colors.border}`, marginBottom: 16 }}>
-            <div style={{ fontSize: 14, fontWeight: 700, color: colors.textPrimary, marginBottom: 12 }}>Measurements</div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: colors.textPrimary, marginBottom: 12 }}>{tr("Measurements")}</div>
             {[["Waist", "82cm", "79cm", "-3cm"], ["Arms", "32cm", "33cm", "+1cm"]].map(([part, from, to, diff], i) => (
               <div key={i} style={{ display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: i === 0 ? `1px solid ${colors.border}` : "none" }}>
                 <span style={{ fontSize: 13, color: colors.textSecondary }}>{part}</span>
@@ -2241,8 +2950,8 @@ function TraineeDetail({ onBack, onNavigate, onShowToast }) {
           </div>
 
           <div style={{ display: "flex", gap: 10 }}>
-            <button onClick={() => onNavigate("workout-builder")} style={{ flex: 1, padding: "14px 0", borderRadius: 14, border: "none", background: colors.primary, color: "#fff", fontSize: 14, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}><Edit3 size={16} /> Adjust Plan</button>
-            <button onClick={() => onShowToast("Reminder sent to Sarah M.")} style={{ flex: 1, padding: "14px 0", borderRadius: 14, border: `1.5px solid ${colors.border}`, background: "#fff", color: colors.textPrimary, fontSize: 14, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}><Bell size={16} /> Remind</button>
+            <button onClick={() => onNavigate("workout-builder")} style={{ flex: 1, padding: "14px 0", borderRadius: 14, border: "none", background: colors.primary, color: "#fff", fontSize: 14, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}><Edit3 size={16} /> {tr("Adjust Plan")}</button>
+            <button onClick={() => onShowToastr("Reminder sent to Sarah M.")} style={{ flex: 1, padding: "14px 0", borderRadius: 14, border: `1.5px solid ${colors.border}`, background: "#fff", color: colors.textPrimary, fontSize: 14, fontWeight: 600, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}><Bell size={16} /> {tr("Remind")}</button>
           </div>
         </div>
       )}
@@ -2284,7 +2993,6 @@ function TraineeDetail({ onBack, onNavigate, onShowToast }) {
         </div>
       )}
 
-      {activeTab === "messages" && <CoachChat onShowToast={onShowToast} />}
     </div>
   );
 }
@@ -2294,15 +3002,15 @@ function TraineeDetail({ onBack, onNavigate, onShowToast }) {
 // ═══════════════════════════════════════════════════════
 
 const chatConversations = [
-  { id: 1, name: "Sarah M.", goal: "Weight loss", avatar: "S", online: true, unread: 2, pinned: true,
+  { id: 1, traineeId: 1, name: "Sarah M.", goal: "Weight loss", avatar: "S", online: true, unread: 2, pinned: true,
     lastMsg: "Should I increase weight next week?", lastTime: "3:01 PM", lastFrom: "trainee" },
-  { id: 2, name: "Ahmed K.", goal: "Muscle gain", avatar: "A", online: false, unread: 0, pinned: false,
+  { id: 2, traineeId: 2, name: "Ahmed K.", goal: "Muscle gain", avatar: "A", online: false, unread: 0, pinned: false,
     lastMsg: "Got it, thanks coach!", lastTime: "Yesterday", lastFrom: "trainee" },
-  { id: 3, name: "Lina R.", goal: "Toning", avatar: "L", online: true, unread: 1, pinned: false,
+  { id: 3, traineeId: 3, name: "Lina R.", goal: "Toning", avatar: "L", online: true, unread: 1, pinned: false,
     lastMsg: "New workout plan assigned", lastTime: "Yesterday", lastFrom: "system" },
-  { id: 4, name: "Omar T.", goal: "Endurance", avatar: "O", online: false, unread: 0, pinned: false,
+  { id: 4, traineeId: 4, name: "Omar T.", goal: "Endurance", avatar: "O", online: false, unread: 0, pinned: false,
     lastMsg: "Welcome to guider.!", lastTime: "Feb 12", lastFrom: "system" },
-  { id: 5, name: "Nadia H.", goal: "Flexibility", avatar: "N", online: false, unread: 0, pinned: false,
+  { id: 5, traineeId: 5, name: "Nadia H.", goal: "Flexibility", avatar: "N", online: false, unread: 0, pinned: false,
     lastMsg: "I'll try the new stretching routine", lastTime: "Feb 10", lastFrom: "trainee" },
 ];
 
@@ -2348,6 +3056,7 @@ function CoachChatSystem({ onShowToast, onNavigate }) {
   const [showQuickReplies, setShowQuickReplies] = useState(false);
   const [isTyping, setIsTyping] = useState(false);
   const [showJumpToLatest, setShowJumpToLatest] = useState(false);
+  const [profileOverlayTrainee, setProfileOverlayTrainee] = useState(null);
   const messagesEndRef = useRef(null);
   const scrollContainerRef = useRef(null);
 
@@ -2424,7 +3133,7 @@ function CoachChatSystem({ onShowToast, onNavigate }) {
   // Mark as unread
   const markUnread = (id) => {
     setConversations(prev => prev.map(c => c.id === id ? { ...c, unread: 1 } : c));
-    onShowToast("Marked as unread");
+    onShowToastr("Marked as unread");
   };
 
   // Pin/unpin
@@ -2456,21 +3165,52 @@ function CoachChatSystem({ onShowToast, onNavigate }) {
             style={{ background: colors.surface, border: "none", borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", flexShrink: 0 }}>
             <ChevronLeft size={20} color={colors.textPrimary} />
           </button>
-          <div onClick={() => { setActiveConvo(null); onNavigate && onNavigate("trainee-detail"); }} style={{ display: "flex", alignItems: "center", gap: 12, flex: 1, cursor: "pointer" }}>
-            <div style={{ width: 40, height: 40, borderRadius: "50%", background: colors.primaryLight, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, position: "relative" }}>
-              <span style={{ fontSize: 16, fontWeight: 700, color: colors.primary }}>{convo.avatar}</span>
-              {convo.online && (
-                <div style={{ position: "absolute", bottom: 0, right: 0, width: 12, height: 12, borderRadius: "50%", background: colors.success, border: "2px solid #fff" }} />
-              )}
-            </div>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 15, fontWeight: 700, color: colors.textPrimary }}>{convo.name}</div>
-              <div style={{ fontSize: 11, color: convo.online ? colors.success : colors.textMuted, fontWeight: 500 }}>
-                {convo.online ? "Online" : "Last seen recently"}
-              </div>
+          {/* Avatar (non-clickable display only) */}
+          <div style={{ width: 40, height: 40, borderRadius: "50%", background: colors.primaryLight, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0, position: "relative" }}>
+            <span style={{ fontSize: 16, fontWeight: 700, color: colors.primary }}>{convo.avatar}</span>
+            {convo.online && (
+              <div style={{ position: "absolute", bottom: 0, right: 0, width: 12, height: 12, borderRadius: "50%", background: colors.success, border: "2px solid #fff" }} />
+            )}
+          </div>
+          {/* Name (clickable) → opens full TraineeProfileScreen */}
+          <div style={{ flex: 1 }}>
+            <button
+              onClick={() => {
+                const trainee = allTraineesData.find(t => t.id === convo.traineeId);
+                if (trainee) setProfileOverlayTrainee(trainee);
+              }}
+              style={{ background: "none", border: "none", padding: 0, cursor: "pointer", textAlign: "left" }}>
+              <div style={{ fontSize: 15, fontWeight: 700, color: colors.primary, textDecoration: "underline", textDecorationColor: `${colors.primary}40`, textUnderlineOffset: 3 }}>{convo.name}</div>
+            </button>
+            <div style={{ fontSize: 11, color: convo.online ? colors.success : colors.textMuted, fontWeight: 500 }}>
+              {convo.online ? "🟢 Online" : "⚫ Last seen recently"}
             </div>
           </div>
         </div>
+
+        {/* Trainee Profile Overlay */}
+        {profileOverlayTrainee && (
+          <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.55)", zIndex: 600, display: "flex", alignItems: "flex-end" }}
+            onClick={e => { if (e.target === e.currentTarget) setProfileOverlayTrainee(null); }}>
+            <div style={{ width: "100%", maxHeight: "92%", background: colors.background, borderRadius: "24px 24px 0 0", overflow: "auto", animation: "slideUp 0.3s ease" }}>
+              <div style={{ display: "flex", justifyContent: "flex-end", padding: "12px 16px 0" }}>
+                <button onClick={() => setProfileOverlayTrainee(null)}
+                  style={{ background: colors.surface, border: "none", borderRadius: 10, width: 32, height: 32, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+                  <X size={16} color={colors.textMuted} />
+                </button>
+              </div>
+              <TraineeProfileScreen
+                trainee={profileOverlayTrainee}
+                onBack={() => setProfileOverlayTrainee(null)}
+                onNavigate={onNavigate}
+                onShowToast={onShowToast}
+                onArchive={() => { setProfileOverlayTrainee(null); onShowToast("Trainee archived", "warning"); }}
+                onReactivate={() => { setProfileOverlayTrainee(null); onShowToastr("Trainee reactivated"); }}
+                onDelete={() => { setProfileOverlayTrainee(null); onShowToast("Trainee removed", "warning"); }}
+              />
+            </div>
+          </div>
+        )}
 
         {/* Messages Area */}
         <div ref={scrollContainerRef}
@@ -2574,7 +3314,7 @@ function CoachChatSystem({ onShowToast, onNavigate }) {
         {/* Quick Replies Panel */}
         {showQuickReplies && (
           <div style={{ padding: "8px 16px", background: colors.surface, borderTop: `1px solid ${colors.border}`, maxHeight: 140, overflow: "auto", flexShrink: 0 }}>
-            <div style={{ fontSize: 10, fontWeight: 700, color: colors.textMuted, marginBottom: 6, letterSpacing: 1, textTransform: "uppercase" }}>Quick Replies</div>
+            <div style={{ fontSize: 10, fontWeight: 700, color: colors.textMuted, marginBottom: 6, letterSpacing: 1, textTransform: "uppercase" }}>{tr("Quick Replies")}</div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
               {quickReplies.map((qr, i) => (
                 <button key={i} onClick={() => sendMessage(qr)}
@@ -2624,7 +3364,7 @@ function CoachChatSystem({ onShowToast, onNavigate }) {
       {/* Header */}
       <div style={{ padding: "0 20px", marginBottom: 16 }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-          <h1 style={{ fontSize: 24, fontWeight: 800, color: colors.textPrimary }}>Messages</h1>
+          <h1 style={{ fontSize: 24, fontWeight: 800, color: colors.textPrimary }}>{tr("Messages")}</h1>
           <div style={{ display: "flex", gap: 8 }}>
             <button onClick={() => setShowSearch(!showSearch)}
               style={{ background: showSearch ? colors.primaryLight : colors.surface, border: "none", borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
@@ -2711,7 +3451,7 @@ function CoachChatSystem({ onShowToast, onNavigate }) {
                   fontWeight: convo.unread > 0 ? 600 : 400,
                   overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", paddingRight: 8 }}>
                   {convo.lastFrom === "coach" && <span style={{ color: colors.textMuted }}>You: </span>}
-                  {convo.lastFrom === "system" && <span style={{ color: colors.textMuted }}>📋 </span>}
+                  {convo.lastFrom === "system" && <FileText size={10} color={colors.textMuted} style={{ marginRight: 2 }} />}
                   {convo.lastMsg}
                 </div>
                 {convo.unread > 0 && (
@@ -2741,7 +3481,7 @@ function CoachChat({ onShowToast }) {
     if (!msg.trim()) return;
     setMessages([...messages, { from: "coach", text: msg, time: "Now", status: "sent" }]);
     setMsg("");
-    onShowToast("Message sent");
+    onShowToastr("Message sent");
   };
 
   return (
@@ -2992,7 +3732,7 @@ function WorkoutBuilder({ onBack, onShowToast }) {
       const updated = [...exercises];
       updated.splice(idx + 1, 0, copy);
       setExercises(updated);
-      onShowToast("Exercise duplicated");
+      onShowToastr("Exercise duplicated");
     }
   };
   const moveExercise = (fromIdx, direction) => {
@@ -3073,7 +3813,7 @@ function WorkoutBuilder({ onBack, onShowToast }) {
         <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "0 20px", marginBottom: 12 }}>
           <button onClick={onBack} style={{ background: colors.surface, border: "none", borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}><ChevronLeft size={20} color={colors.textPrimary} /></button>
           <div style={{ flex: 1 }}>
-            <h2 style={{ fontSize: 18, fontWeight: 700, color: colors.textPrimary }}>Workout Builder</h2>
+            <h2 style={{ fontSize: 18, fontWeight: 700, color: colors.textPrimary }}>{tr("Workout Builder")}</h2>
             <span style={{ fontSize: 12, color: colors.textSecondary }}>Step 1: Select trainees</span>
           </div>
         </div>
@@ -3169,7 +3909,7 @@ function WorkoutBuilder({ onBack, onShowToast }) {
             style={{ width: "100%", background: gradients.workout, borderRadius: 18, padding: 20, border: "none", cursor: "pointer", textAlign: "left", boxShadow: "0 6px 20px rgba(52,211,153,0.25)" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
               <Plus size={20} color="rgba(255,255,255,0.9)" />
-              <span style={{ fontSize: 16, fontWeight: 700, color: "#fff" }}>Start from Scratch</span>
+              <span style={{ fontSize: 16, fontWeight: 700, color: "#fff" }}>{tr("Start from Scratch")}</span>
             </div>
             <span style={{ fontSize: 13, color: "rgba(255,255,255,0.75)" }}>Build a completely custom workout</span>
           </button>
@@ -3183,7 +3923,7 @@ function WorkoutBuilder({ onBack, onShowToast }) {
               <FileText size={20} color={colors.warning} />
             </div>
             <div>
-              <div style={{ fontSize: 14, fontWeight: 700, color: colors.textPrimary }}>My Drafts</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: colors.textPrimary }}>{tr("My Drafts")}</div>
               <div style={{ fontSize: 12, color: colors.textSecondary }}>Continue editing saved plans</div>
             </div>
             <ChevronRight size={16} color={colors.textMuted} style={{ marginLeft: "auto" }} />
@@ -3237,14 +3977,14 @@ function WorkoutBuilder({ onBack, onShowToast }) {
         <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "0 20px", marginBottom: 12 }}>
           <button onClick={() => setStep("template")} style={{ background: colors.surface, border: "none", borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}><ChevronLeft size={20} color={colors.textPrimary} /></button>
           <div style={{ flex: 1 }}>
-            <h2 style={{ fontSize: 18, fontWeight: 700, color: colors.textPrimary }}>My Drafts</h2>
+            <h2 style={{ fontSize: 18, fontWeight: 700, color: colors.textPrimary }}>{tr("My Drafts")}</h2>
             <span style={{ fontSize: 12, color: colors.textSecondary }}>Continue editing your saved drafts</span>
           </div>
         </div>
 
         {draftWorkouts.length === 0 ? (
           <div style={{ padding: "40px 20px", textAlign: "center" }}>
-            <div style={{ fontSize: 14, color: colors.textSecondary, marginBottom: 10 }}>No draft workouts yet</div>
+            <div style={{ fontSize: 14, color: colors.textSecondary, marginBottom: 10 }}>{tr("No draft workouts yet")}</div>
             <div style={{ fontSize: 12, color: colors.textMuted }}>Start by creating a new workout</div>
           </div>
         ) : (
@@ -3257,7 +3997,7 @@ function WorkoutBuilder({ onBack, onShowToast }) {
                     <div style={{ fontSize: 15, fontWeight: 700, color: colors.textPrimary }}>{draft.name}</div>
                     <div style={{ fontSize: 12, color: colors.textSecondary, marginTop: 2 }}>{draft.exercises} exercises · Last edited: {draft.created}</div>
                   </div>
-                  <span style={{ fontSize: 10, fontWeight: 600, padding: "4px 10px", borderRadius: 6, background: colors.warningLight, color: colors.warning }}>Draft</span>
+                  <span style={{ fontSize: 10, fontWeight: 600, padding: "4px 10px", borderRadius: 6, background: colors.warningLight, color: colors.warning }}>{tr("Draft")}</span>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 10 }}>
                   <span style={{ fontSize: 11, color: colors.textMuted }}>Tap to continue editing</span>
@@ -3339,7 +4079,7 @@ function WorkoutBuilder({ onBack, onShowToast }) {
             </button>
             {showMuscleDropdown === ex.id && (
               <>
-                <div onClick={() => setShowMuscleDropdown(null)} style={{ position: "fixed", top: 0, left: 0, right: 0, bottom: 0, zIndex: 50 }} />
+                <div onClick={() => setShowMuscleDropdown(null)} style={{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0, zIndex: 50 }} />
                 <div style={{ position: "absolute", top: 40, left: 0, right: 0, background: colors.card, borderRadius: 10, border: `1px solid ${colors.border}`,
                   boxShadow: "0 8px 24px rgba(0,0,0,0.12)", zIndex: 51, maxHeight: 180, overflowY: "auto" }}>
                   {muscleOptions.map(m => (
@@ -3358,13 +4098,13 @@ function WorkoutBuilder({ onBack, onShowToast }) {
           {/* Instruction & Caution fields */}
           <div style={{ marginTop: 8, display: "flex", gap: 6 }}>
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 9, fontWeight: 700, color: colors.primary, marginBottom: 3, letterSpacing: 0.5, textTransform: "uppercase" }}>Instruction</div>
+              <div style={{ fontSize: 9, fontWeight: 700, color: colors.primary, marginBottom: 3, letterSpacing: 0.5, textTransform: "uppercase" }}>{tr("Instruction")}</div>
               <textarea value={ex.instruction || ""} onChange={e => updateExercise(ex.id, "instruction", e.target.value)}
                 placeholder="How to perform..." rows={2}
                 style={{ width: "100%", borderRadius: 8, border: `1px solid ${colors.border}`, padding: "6px 8px", fontSize: 11, outline: "none", resize: "none", fontFamily: "inherit", boxSizing: "border-box" }} />
             </div>
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 9, fontWeight: 700, color: colors.warning, marginBottom: 3, letterSpacing: 0.5, textTransform: "uppercase" }}>Caution</div>
+              <div style={{ fontSize: 9, fontWeight: 700, color: colors.warning, marginBottom: 3, letterSpacing: 0.5, textTransform: "uppercase" }}>{tr("Caution")}</div>
               <textarea value={ex.caution || ""} onChange={e => updateExercise(ex.id, "caution", e.target.value)}
                 placeholder="Safety notes..." rows={2}
                 style={{ width: "100%", borderRadius: 8, border: `1px solid ${colors.warning}30`, padding: "6px 8px", fontSize: 11, outline: "none", resize: "none", fontFamily: "inherit", boxSizing: "border-box", background: `${colors.warning}04` }} />
@@ -3410,7 +4150,7 @@ function WorkoutBuilder({ onBack, onShowToast }) {
                 placeholder="Additional notes..." rows={2} autoFocus
                 style={{ width: "100%", borderRadius: 8, border: `1px solid ${colors.border}`, padding: "8px 10px", fontSize: 12, outline: "none", resize: "none", fontFamily: "inherit", boxSizing: "border-box" }} />
               <button onClick={() => setEditingNote(null)}
-                style={{ marginTop: 4, background: "none", border: "none", fontSize: 11, fontWeight: 600, color: colors.primary, cursor: "pointer" }}>Done</button>
+                style={{ marginTop: 4, background: "none", border: "none", fontSize: 11, fontWeight: 600, color: colors.primary, cursor: "pointer" }}>{tr("Done")}</button>
             </div>
           ) : (
             <div style={{ marginTop: 6, display: "flex", alignItems: "center", gap: 6 }}>
@@ -3470,10 +4210,10 @@ function WorkoutBuilder({ onBack, onShowToast }) {
         <div style={{ display: "flex", alignItems: "center", gap: 10, padding: "0 20px", marginBottom: 12 }}>
           <button onClick={() => setStep("template")} style={{ background: colors.surface, border: "none", borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}><ChevronLeft size={20} color={colors.textPrimary} /></button>
           <div style={{ flex: 1 }}>
-            <h2 style={{ fontSize: 17, fontWeight: 700, color: colors.textPrimary }}>Build Workout</h2>
+            <h2 style={{ fontSize: 17, fontWeight: 700, color: colors.textPrimary }}>{tr("Build Workout")}</h2>
             <span style={{ fontSize: 11, color: colors.textSecondary }}>Step 3: Add & customize exercises</span>
           </div>
-          <button onClick={() => onShowToast("Draft saved ✓")} title="Save draft"
+          <button onClick={() => onShowToastr("Draft saved ✓")} title="Save draft"
             style={{ background: colors.surface, border: "none", borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
             <Save size={16} color={colors.textSecondary} />
           </button>
@@ -3495,7 +4235,7 @@ function WorkoutBuilder({ onBack, onShowToast }) {
 
         {/* Difficulty Level */}
         <div style={{ padding: "0 20px", marginBottom: 10 }}>
-          <div style={{ fontSize: 10, fontWeight: 700, color: colors.textMuted, marginBottom: 4, letterSpacing: 0.5, textTransform: "uppercase" }}>Difficulty Level</div>
+          <div style={{ fontSize: 10, fontWeight: 700, color: colors.textMuted, marginBottom: 4, letterSpacing: 0.5, textTransform: "uppercase" }}>{tr("Difficulty Level")}</div>
           <div style={{ display: "flex", gap: 6 }}>
             {["Easy", "Medium", "Hard"].map(lvl => {
               const lvlColor = lvl === "Easy" ? colors.success : lvl === "Medium" ? colors.warning : colors.error;
@@ -3534,11 +4274,11 @@ function WorkoutBuilder({ onBack, onShowToast }) {
         <div style={{ display: "flex", gap: 8, padding: "0 20px", marginBottom: 14 }}>
           <div style={{ flex: 1, padding: "8px 0", background: colors.surface, borderRadius: 10, textAlign: "center" }}>
             <div style={{ fontSize: 14, fontWeight: 800, color: colors.textPrimary }}>{exercises.length}</div>
-            <div style={{ fontSize: 9, color: colors.textMuted, fontWeight: 600, textTransform: "uppercase" }}>Exercises</div>
+            <div style={{ fontSize: 9, color: colors.textMuted, fontWeight: 600, textTransform: "uppercase" }}>{tr("Exercises")}</div>
           </div>
           <div style={{ flex: 1, padding: "8px 0", background: colors.surface, borderRadius: 10, textAlign: "center" }}>
             <div style={{ fontSize: 14, fontWeight: 800, color: colors.textPrimary }}>~{Math.round(estDuration)}</div>
-            <div style={{ fontSize: 9, color: colors.textMuted, fontWeight: 600, textTransform: "uppercase" }}>Minutes</div>
+            <div style={{ fontSize: 9, color: colors.textMuted, fontWeight: 600, textTransform: "uppercase" }}>{tr("Minutes")}</div>
           </div>
           <div style={{ flex: 1, padding: "8px 0", background: colors.surface, borderRadius: 10, textAlign: "center" }}>
             <div style={{ fontSize: 14, fontWeight: 800, color: colors.textPrimary }}>{muscleGroups.length}</div>
@@ -3622,7 +4362,7 @@ function WorkoutBuilder({ onBack, onShowToast }) {
                 </div>
               ))}
               {filteredLib.length === 0 && (
-                <div style={{ textAlign: "center", padding: "24px 0", color: colors.textMuted, fontSize: 13 }}>No exercises found</div>
+                <div style={{ textAlign: "center", padding: "24px 0", color: colors.textMuted, fontSize: 13 }}>{tr("No exercises found")}</div>
               )}
             </div>
           </BottomSheet>
@@ -3648,7 +4388,7 @@ function WorkoutBuilder({ onBack, onShowToast }) {
             {selectedVideos.length > 0 && (
               <div style={{ padding: "6px 10px", borderRadius: 8, background: colors.primaryLight, marginBottom: 10, display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <span style={{ fontSize: 12, fontWeight: 600, color: colors.primary }}>{selectedVideos.length} video{selectedVideos.length > 1 ? "s" : ""} selected (max 3)</span>
-                <button onClick={() => setSelectedVideos([])} style={{ background: "none", border: "none", fontSize: 11, fontWeight: 600, color: colors.error, cursor: "pointer" }}>Clear</button>
+                <button onClick={() => setSelectedVideos([])} style={{ background: "none", border: "none", fontSize: 11, fontWeight: 600, color: colors.error, cursor: "pointer" }}>{tr("Clear")}</button>
               </div>
             )}
             <div style={{ maxHeight: 240, overflow: "auto" }}>
@@ -3751,7 +4491,7 @@ function WorkoutBuilder({ onBack, onShowToast }) {
 
           {/* Notifications */}
           <div style={{ background: colors.card, borderRadius: 16, border: `1px solid ${colors.border}`, padding: 16, marginBottom: 16 }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: colors.textPrimary, marginBottom: 14 }}>Notifications</div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: colors.textPrimary, marginBottom: 14 }}>{tr("Notifications")}</div>
             {[
               { label: "Remind trainee before session", value: notifyTrainee, toggle: () => setNotifyTrainee(!notifyTrainee) },
               { label: "Alert me if workout missed", value: alertIfMissed, toggle: () => setAlertIfMissed(!alertIfMissed) },
@@ -3768,7 +4508,7 @@ function WorkoutBuilder({ onBack, onShowToast }) {
 
           {/* Visual calendar preview */}
           <div style={{ background: colors.card, borderRadius: 16, border: `1px solid ${colors.border}`, padding: 16, marginBottom: 16 }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: colors.textPrimary, marginBottom: 12 }}>Preview</div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: colors.textPrimary, marginBottom: 12 }}>{tr("Preview")}</div>
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
               <div style={{ width: 48, height: 48, borderRadius: 14, background: colors.primaryLight, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
                 <span style={{ fontSize: 8, fontWeight: 700, color: colors.primary, textTransform: "uppercase" }}>
@@ -3836,7 +4576,7 @@ function WorkoutBuilder({ onBack, onShowToast }) {
           <div style={{ background: colors.card, borderRadius: 16, padding: 16, border: `1px solid ${colors.border}`, marginBottom: 12 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
               <div style={{ fontSize: 13, fontWeight: 700, color: colors.textPrimary }}>Assigned to</div>
-              <button onClick={() => setStep("trainees")} style={{ background: "none", border: "none", fontSize: 12, fontWeight: 600, color: colors.primary, cursor: "pointer" }}>Edit</button>
+              <button onClick={() => setStep("trainees")} style={{ background: "none", border: "none", fontSize: 12, fontWeight: 600, color: colors.primary, cursor: "pointer" }}>{tr("Edit")}</button>
             </div>
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
               {selectedTraineeObjs.map(t => (
@@ -3854,7 +4594,7 @@ function WorkoutBuilder({ onBack, onShowToast }) {
           <div style={{ background: colors.card, borderRadius: 16, padding: 16, border: `1px solid ${colors.border}`, marginBottom: 12 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
               <div style={{ fontSize: 13, fontWeight: 700, color: colors.textPrimary }}>Schedule</div>
-              <button onClick={() => setStep("schedule")} style={{ background: "none", border: "none", fontSize: 12, fontWeight: 600, color: colors.primary, cursor: "pointer" }}>Edit</button>
+              <button onClick={() => setStep("schedule")} style={{ background: "none", border: "none", fontSize: 12, fontWeight: 600, color: colors.primary, cursor: "pointer" }}>{tr("Edit")}</button>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
               <Calendar size={18} color={colors.primary} />
@@ -3872,8 +4612,8 @@ function WorkoutBuilder({ onBack, onShowToast }) {
           {/* Exercise list */}
           <div style={{ background: colors.card, borderRadius: 16, padding: 16, border: `1px solid ${colors.border}`, marginBottom: 12 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: colors.textPrimary }}>Exercises</div>
-              <button onClick={() => setStep("builder")} style={{ background: "none", border: "none", fontSize: 12, fontWeight: 600, color: colors.primary, cursor: "pointer" }}>Edit</button>
+              <div style={{ fontSize: 13, fontWeight: 700, color: colors.textPrimary }}>{tr("Exercises")}</div>
+              <button onClick={() => setStep("builder")} style={{ background: "none", border: "none", fontSize: 12, fontWeight: 600, color: colors.primary, cursor: "pointer" }}>{tr("Edit")}</button>
             </div>
             {exercises.map((ex, i) => (
               <div key={ex.id} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 0", borderTop: i > 0 ? `1px solid ${colors.border}` : "none" }}>
@@ -3889,7 +4629,7 @@ function WorkoutBuilder({ onBack, onShowToast }) {
 
           {/* Notifications */}
           <div style={{ background: colors.card, borderRadius: 16, padding: 16, border: `1px solid ${colors.border}`, marginBottom: 16 }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: colors.textPrimary, marginBottom: 8 }}>Notifications</div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: colors.textPrimary, marginBottom: 8 }}>{tr("Notifications")}</div>
             <div style={{ fontSize: 12, color: colors.textSecondary }}>
               {notifyTrainee ? "✓ Trainee will be reminded" : "✗ No trainee reminder"}
               {" · "}
@@ -3898,7 +4638,7 @@ function WorkoutBuilder({ onBack, onShowToast }) {
           </div>
 
           {/* Save as template */}
-          <button onClick={() => onShowToast("Saved as template ✓")}
+          <button onClick={() => onShowToastr("Saved as template ✓")}
             style={{ width: "100%", padding: "12px 0", borderRadius: 12, border: `1.5px dashed ${colors.border}`, background: "transparent",
               color: colors.primary, fontSize: 13, fontWeight: 600, cursor: "pointer", marginBottom: 12, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
             <Bookmark size={14} /> Save as Template
@@ -3906,7 +4646,7 @@ function WorkoutBuilder({ onBack, onShowToast }) {
 
           {/* Confirm */}
           <div style={{ display: "flex", gap: 10, marginBottom: 20 }}>
-            <button onClick={() => onShowToast("Draft saved ✓")}
+            <button onClick={() => onShowToastr("Draft saved ✓")}
               style={{ flex: 1, padding: "14px 0", borderRadius: 14, border: `1.5px solid ${colors.border}`, background: "#fff", fontSize: 14, fontWeight: 600, color: colors.textPrimary, cursor: "pointer" }}>
               Save Draft
             </button>
@@ -4080,7 +4820,7 @@ function TraineeSelector({ onSelect, onBack }) {
         <button onClick={onBack} style={{ background: colors.surface, border: "none", borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
           <ChevronLeft size={20} color={colors.textPrimary} />
         </button>
-        <h2 style={{ fontSize: 18, fontWeight: 700, color: colors.textPrimary }}>Select Trainee</h2>
+        <h2 style={{ fontSize: 18, fontWeight: 700, color: colors.textPrimary }}>{tr("Select Trainee")}</h2>
       </div>
 
       <div style={{ padding: "0 20px", marginBottom: 16, position: "relative" }}>
@@ -4326,7 +5066,7 @@ function NutritionPlanBuilder({ onBack, onShowToast }) {
     const updated = [...currentMeals];
     updated.splice(mealIdx + 1, 0, copy);
     setCurrentMeals(updated);
-    onShowToast("Meal duplicated");
+    onShowToastr("Meal duplicated");
   };
 
   // Remove meal
@@ -4477,7 +5217,7 @@ function NutritionPlanBuilder({ onBack, onShowToast }) {
             style={{ width: "100%", background: gradients.nutrition, borderRadius: 18, padding: 20, border: "none", cursor: "pointer", textAlign: "left", boxShadow: "0 6px 20px rgba(16,185,129,0.25)" }}>
             <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 8 }}>
               <Plus size={20} color="rgba(255,255,255,0.9)" />
-              <span style={{ fontSize: 16, fontWeight: 700, color: "#fff" }}>Start from Scratch</span>
+              <span style={{ fontSize: 16, fontWeight: 700, color: "#fff" }}>{tr("Start from Scratch")}</span>
             </div>
             <span style={{ fontSize: 13, color: "rgba(255,255,255,0.75)" }}>Build a completely custom nutrition plan</span>
           </button>
@@ -4491,7 +5231,7 @@ function NutritionPlanBuilder({ onBack, onShowToast }) {
               <FileText size={20} color={colors.warning} />
             </div>
             <div>
-              <div style={{ fontSize: 14, fontWeight: 700, color: colors.textPrimary }}>My Drafts</div>
+              <div style={{ fontSize: 14, fontWeight: 700, color: colors.textPrimary }}>{tr("My Drafts")}</div>
               <div style={{ fontSize: 12, color: colors.textSecondary }}>Continue editing saved plans</div>
             </div>
             <ChevronRight size={16} color={colors.textMuted} style={{ marginLeft: "auto" }} />
@@ -4540,7 +5280,7 @@ function NutritionPlanBuilder({ onBack, onShowToast }) {
 
         {draftNutritionPlans.length === 0 ? (
           <div style={{ padding: "40px 20px", textAlign: "center" }}>
-            <div style={{ fontSize: 14, color: colors.textSecondary, marginBottom: 10 }}>No draft nutrition plans yet</div>
+            <div style={{ fontSize: 14, color: colors.textSecondary, marginBottom: 10 }}>{tr("No draft nutrition plans yet")}</div>
             <div style={{ fontSize: 12, color: colors.textMuted }}>Start by creating a new nutrition plan</div>
           </div>
         ) : (
@@ -4553,7 +5293,7 @@ function NutritionPlanBuilder({ onBack, onShowToast }) {
                     <div style={{ fontSize: 15, fontWeight: 700, color: colors.textPrimary }}>{draft.name}</div>
                     <div style={{ fontSize: 12, color: colors.textSecondary, marginTop: 2 }}>{draft.meals} meals · Last edited: {draft.created}</div>
                   </div>
-                  <span style={{ fontSize: 10, fontWeight: 600, padding: "4px 10px", borderRadius: 6, background: "rgba(245,158,11,0.1)", color: colors.warning }}>Draft</span>
+                  <span style={{ fontSize: 10, fontWeight: 600, padding: "4px 10px", borderRadius: 6, background: "rgba(245,158,11,0.1)", color: colors.warning }}>{tr("Draft")}</span>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 10 }}>
                   <span style={{ fontSize: 11, color: colors.textMuted }}>Tap to continue editing</span>
@@ -4598,7 +5338,7 @@ function NutritionPlanBuilder({ onBack, onShowToast }) {
 
           {/* Notifications */}
           <div style={{ background: colors.card, borderRadius: 16, border: `1px solid ${colors.border}`, padding: 16, marginBottom: 16 }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: colors.textPrimary, marginBottom: 14 }}>Notifications</div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: colors.textPrimary, marginBottom: 14 }}>{tr("Notifications")}</div>
             {[
               { label: "Remind trainee when plan starts", value: notifyTrainee, toggle: () => setNotifyTrainee(!notifyTrainee) },
               { label: "Alert if meals not logged", value: alertIfMissed, toggle: () => setAlertIfMissed(!alertIfMissed) },
@@ -4615,7 +5355,7 @@ function NutritionPlanBuilder({ onBack, onShowToast }) {
 
           {/* Visual calendar preview */}
           <div style={{ background: colors.card, borderRadius: 16, border: `1px solid ${colors.border}`, padding: 16, marginBottom: 16 }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: colors.textPrimary, marginBottom: 12 }}>Preview</div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: colors.textPrimary, marginBottom: 12 }}>{tr("Preview")}</div>
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
               <div style={{ width: 48, height: 48, borderRadius: 14, background: colors.primaryLight, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
                 <span style={{ fontSize: 8, fontWeight: 700, color: colors.primary, textTransform: "uppercase" }}>
@@ -4683,7 +5423,7 @@ function NutritionPlanBuilder({ onBack, onShowToast }) {
           <div style={{ background: colors.card, borderRadius: 16, padding: 16, border: `1px solid ${colors.border}`, marginBottom: 12 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
               <div style={{ fontSize: 13, fontWeight: 700, color: colors.textPrimary }}>Assigned to</div>
-              <button onClick={() => setStep("trainees")} style={{ background: "none", border: "none", fontSize: 12, fontWeight: 600, color: colors.primary, cursor: "pointer" }}>Edit</button>
+              <button onClick={() => setStep("trainees")} style={{ background: "none", border: "none", fontSize: 12, fontWeight: 600, color: colors.primary, cursor: "pointer" }}>{tr("Edit")}</button>
             </div>
             <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
               {selectedTraineeObjs.map(t => (
@@ -4701,7 +5441,7 @@ function NutritionPlanBuilder({ onBack, onShowToast }) {
           <div style={{ background: colors.card, borderRadius: 16, padding: 16, border: `1px solid ${colors.border}`, marginBottom: 12 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
               <div style={{ fontSize: 13, fontWeight: 700, color: colors.textPrimary }}>Schedule</div>
-              <button onClick={() => setStep("schedule")} style={{ background: "none", border: "none", fontSize: 12, fontWeight: 600, color: colors.primary, cursor: "pointer" }}>Edit</button>
+              <button onClick={() => setStep("schedule")} style={{ background: "none", border: "none", fontSize: 12, fontWeight: 600, color: colors.primary, cursor: "pointer" }}>{tr("Edit")}</button>
             </div>
             <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
               <Calendar size={18} color={colors.primary} />
@@ -4719,8 +5459,8 @@ function NutritionPlanBuilder({ onBack, onShowToast }) {
           {/* Meals */}
           <div style={{ background: colors.card, borderRadius: 16, padding: 16, border: `1px solid ${colors.border}`, marginBottom: 12 }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 12 }}>
-              <div style={{ fontSize: 13, fontWeight: 700, color: colors.textPrimary }}>Meals</div>
-              <button onClick={() => setStep("builder")} style={{ background: "none", border: "none", fontSize: 12, fontWeight: 600, color: colors.primary, cursor: "pointer" }}>Edit</button>
+              <div style={{ fontSize: 13, fontWeight: 700, color: colors.textPrimary }}>{tr("Meals")}</div>
+              <button onClick={() => setStep("builder")} style={{ background: "none", border: "none", fontSize: 12, fontWeight: 600, color: colors.primary, cursor: "pointer" }}>{tr("Edit")}</button>
             </div>
             {currentMeals.map((meal, i) => (
               <div key={meal.name} style={{ display: "flex", alignItems: "center", gap: 10, padding: "8px 0", borderTop: i > 0 ? `1px solid ${colors.border}` : "none" }}>
@@ -4739,21 +5479,21 @@ function NutritionPlanBuilder({ onBack, onShowToast }) {
             <div style={{ display: "flex", gap: 12 }}>
               <div style={{ flex: 1, textAlign: "center" }}>
                 <div style={{ fontSize: 18, fontWeight: 800, color: macroColors.protein }}>{proteinG}g</div>
-                <div style={{ fontSize: 10, color: colors.textMuted, marginTop: 2 }}>Protein</div>
+                <div style={{ fontSize: 10, color: colors.textMuted, marginTop: 2 }}>{tr("Protein")}</div>
               </div>
               <div style={{ flex: 1, textAlign: "center" }}>
                 <div style={{ fontSize: 18, fontWeight: 800, color: macroColors.carbs }}>{carbsG}g</div>
-                <div style={{ fontSize: 10, color: colors.textMuted, marginTop: 2 }}>Carbs</div>
+                <div style={{ fontSize: 10, color: colors.textMuted, marginTop: 2 }}>{tr("Carbs")}</div>
               </div>
               <div style={{ flex: 1, textAlign: "center" }}>
                 <div style={{ fontSize: 18, fontWeight: 800, color: macroColors.fat }}>{fatG}g</div>
-                <div style={{ fontSize: 10, color: colors.textMuted, marginTop: 2 }}>Fat</div>
+                <div style={{ fontSize: 10, color: colors.textMuted, marginTop: 2 }}>{tr("Fat")}</div>
               </div>
             </div>
           </div>
 
           {/* Save as template */}
-          <button onClick={() => onShowToast("Saved as template ✓")}
+          <button onClick={() => onShowToastr("Saved as template ✓")}
             style={{ width: "100%", padding: "12px 0", borderRadius: 12, border: `1.5px dashed ${colors.border}`, background: "transparent",
               color: colors.primary, fontSize: 13, fontWeight: 600, cursor: "pointer", marginBottom: 12, display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
             <Bookmark size={14} /> Save as Template
@@ -4761,7 +5501,7 @@ function NutritionPlanBuilder({ onBack, onShowToast }) {
 
           {/* Confirm */}
           <div style={{ display: "flex", gap: 10, marginBottom: 20 }}>
-            <button onClick={() => onShowToast("Draft saved ✓")}
+            <button onClick={() => onShowToastr("Draft saved ✓")}
               style={{ flex: 1, padding: "14px 0", borderRadius: 14, border: `1.5px solid ${colors.border}`, background: "#fff", fontSize: 14, fontWeight: 600, color: colors.textPrimary, cursor: "pointer" }}>
               Save Draft
             </button>
@@ -4822,8 +5562,10 @@ function NutritionPlanBuilder({ onBack, onShowToast }) {
                 </span>
               </div>
               {meal.foods.map((food, fi) => (
-                <div key={fi} style={{ fontSize: 13, color: colors.textSecondary, padding: "4px 0" }}>
-                  • {food.name} ({food.qty} × {food.unit})
+                <div key={fi} style={{ display: "flex", alignItems: "center", gap: 7, padding: "4px 0" }}>
+                  <span style={{ fontSize: 12, color: colors.textMuted }}>•</span>
+                  <span style={{ fontSize: 13, color: colors.textSecondary, flex: 1 }}>{food.name}</span>
+                  <span style={{ fontSize: 10, fontWeight: 700, color: colors.primary, background: `${colors.primary}12`, padding: "1px 7px", borderRadius: 6, border: `1px solid ${colors.primary}20`, flexShrink: 0 }}>{Math.round(food.qty * 100)}g</span>
                 </div>
               ))}
             </div>
@@ -4849,7 +5591,7 @@ function NutritionPlanBuilder({ onBack, onShowToast }) {
           <ChevronLeft size={20} color={colors.textPrimary} />
         </button>
         <div style={{ flex: 1 }}>
-          <h2 style={{ fontSize: 17, fontWeight: 700, color: colors.textPrimary }}>Nutrition Plan Builder</h2>
+          <h2 style={{ fontSize: 17, fontWeight: 700, color: colors.textPrimary }}>{tr("Nutrition Plan Builder")}</h2>
         </div>
         <button onClick={() => setPreviewMode(true)} title="Preview as Trainee"
           style={{ background: colors.surface, border: "none", borderRadius: 10, width: 36, height: 36, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
@@ -4870,12 +5612,12 @@ function NutritionPlanBuilder({ onBack, onShowToast }) {
           <div style={{ fontSize: 14, fontWeight: 700, color: "#fff" }}>{selectedTrainees.length} Trainee{selectedTrainees.length !== 1 ? "s" : ""} Selected</div>
           <div style={{ fontSize: 11, color: "rgba(255,255,255,0.8)" }}>Assigned to: {selectedTrainees.length > 0 ? selectedTrainees.map(id => `Trainee ${id}`).join(", ") : "None"}</div>
         </div>
-        <button onClick={() => setStep("trainees")} style={{ background: "rgba(255,255,255,0.2)", border: "none", borderRadius: 8, padding: "4px 10px", color: "#fff", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>Change</button>
+        <button onClick={() => setStep("trainees")} style={{ background: "rgba(255,255,255,0.2)", border: "none", borderRadius: 8, padding: "4px 10px", color: "#fff", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>{tr("Change")}</button>
       </div>
 
       {/* Plan Name */}
       <div style={{ padding: "0 20px", marginBottom: 12 }}>
-        <div style={{ fontSize: 10, fontWeight: 700, color: colors.textMuted, marginBottom: 4, letterSpacing: 1, textTransform: "uppercase" }}>Plan Name</div>
+        <div style={{ fontSize: 10, fontWeight: 700, color: colors.textMuted, marginBottom: 4, letterSpacing: 1, textTransform: "uppercase" }}>{tr("Plan Name")}</div>
         <input value={planName} onChange={e => setPlanName(e.target.value)}
           style={{ width: "100%", height: 42, borderRadius: 12, border: `1.5px solid ${colors.border}`, padding: "0 14px", fontSize: 14, fontWeight: 600, color: colors.textPrimary, outline: "none", boxSizing: "border-box" }} />
       </div>
@@ -4888,7 +5630,7 @@ function NutritionPlanBuilder({ onBack, onShowToast }) {
               <Droplets size={16} color="#3B82F6" />
             </div>
             <div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: colors.textPrimary }}>Water Intake</div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: colors.textPrimary }}>{tr("Water Intake")}</div>
               <div style={{ fontSize: 10, color: colors.textMuted }}>{waterLitersPerWeek} L / week</div>
             </div>
           </div>
@@ -4975,7 +5717,7 @@ function NutritionPlanBuilder({ onBack, onShowToast }) {
           <div style={{ padding: "8px 14px 14px" }}>
             <div style={{ marginBottom: 10 }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-                <span style={{ fontSize: 12, fontWeight: 600, color: colors.textPrimary }}>Daily Calorie Target</span>
+                <span style={{ fontSize: 12, fontWeight: 600, color: colors.textPrimary }}>{tr("Daily Calorie Target")}</span>
               </div>
               <input type="number" value={targetCal} onChange={e => setTargetCal(Number(e.target.value) || 0)}
                 style={{ width: "100%", height: 40, borderRadius: 10, border: `1.5px solid ${colors.border}`, textAlign: "center", fontSize: 16, fontWeight: 700, color: colors.textPrimary, outline: "none", boxSizing: "border-box" }} />
@@ -5075,7 +5817,7 @@ function NutritionPlanBuilder({ onBack, onShowToast }) {
                 <div style={{ borderTop: `1px solid ${colors.border}`, padding: "10px 14px" }}>
                   {meal.foods.length === 0 && (
                     <div style={{ padding: "16px 0", textAlign: "center" }}>
-                      <div style={{ fontSize: 13, color: colors.textMuted, marginBottom: 8 }}>No food items yet.</div>
+                      <div style={{ fontSize: 13, color: colors.textMuted, marginBottom: 8 }}>{tr("No food items yet.")}</div>
                     </div>
                   )}
 
@@ -5083,7 +5825,10 @@ function NutritionPlanBuilder({ onBack, onShowToast }) {
                     <div key={fi} style={{ display: "flex", alignItems: "center", gap: 8, padding: "8px 0", borderBottom: fi < meal.foods.length - 1 ? `1px solid ${colors.border}` : "none" }}>
                       <GripVertical size={14} color={colors.textMuted} style={{ cursor: "grab", flexShrink: 0 }} />
                       <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: 13, fontWeight: 600, color: colors.textPrimary }}>{food.name}</div>
+                        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+                          <span style={{ fontSize: 13, fontWeight: 600, color: colors.textPrimary }}>{food.name}</span>
+                          <span style={{ fontSize: 10, fontWeight: 700, color: colors.primary, background: `${colors.primary}12`, padding: "1px 7px", borderRadius: 6, border: `1px solid ${colors.primary}20`, flexShrink: 0 }}>{Math.round(food.qty * 100)}g</span>
+                        </div>
                         <div style={{ fontSize: 10, color: colors.textSecondary, marginTop: 1 }}>
                           {food.cal} cal · P: {food.p}g · C: {food.c}g · F: {food.f}g
                         </div>
@@ -5164,7 +5909,7 @@ function NutritionPlanBuilder({ onBack, onShowToast }) {
 
         {/* Action Buttons */}
         <div style={{ display: "flex", gap: 10, marginBottom: 24 }}>
-          <button onClick={() => onShowToast("Draft saved ✓")}
+          <button onClick={() => onShowToastr("Draft saved ✓")}
             style={{ flex: 1, padding: "14px 0", borderRadius: 14, border: `1.5px solid ${colors.border}`, background: "#fff", color: colors.textPrimary, fontSize: 14, fontWeight: 600, cursor: "pointer" }}>
             Save Draft
           </button>
@@ -5219,7 +5964,7 @@ function NutritionPlanBuilder({ onBack, onShowToast }) {
               <ChevronRight size={16} color={colors.textMuted} />
             </div>
           ))}
-          <button onClick={() => onShowToast("Saved as template")}
+          <button onClick={() => onShowToastr("Saved as template")}
             style={{ width: "100%", padding: "12px 0", borderRadius: 12, border: `2px dashed ${colors.border}`, background: "transparent", color: colors.primary, fontSize: 13, fontWeight: 600, cursor: "pointer", marginTop: 14 }}>
             + Save Current Plan as Template
           </button>
@@ -5245,8 +5990,10 @@ function TraineeToday({ onNavigate, onShowToast, onShowCoachProfile }) {
   const [newReminder, setNewReminder] = useState({ name: "", date: "", hour: "", icon: "" });
 
   const hour = new Date().getHours();
-  const greeting = hour < 12 ? "Good morning" : hour < 17 ? "Good afternoon" : "Good evening";
-  const today = new Date().toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" });
+  const greeting = hour < 12 ? tr("Good morning") : hour < 17 ? tr("Good afternoon") : tr("Good evening");
+  const today = _lang === "Arabic"
+    ? new Date().toLocaleDateString("ar-EG", { weekday: "long", month: "long", day: "numeric" })
+    : new Date().toLocaleDateString("en-US", { weekday: "long", month: "short", day: "numeric" });
 
   const mealCalories = { breakfast: 480, lunch: 620, dinner: 700, snack: 200 };
   const eatenCal = Object.keys(mealsDone).filter(k => mealsDone[k]).reduce((a, k) => a + mealCalories[k], 0);
@@ -5256,43 +6003,43 @@ function TraineeToday({ onNavigate, onShowToast, onShowCoachProfile }) {
 
   const toggleMeal = (meal) => {
     setMealsDone(p => ({ ...p, [meal]: !p[meal] }));
-    if (!mealsDone[meal]) onShowToast(`${meal.charAt(0).toUpperCase() + meal.slice(1)} logged`, "success");
+    if (!mealsDone[meal]) onShowToast(`${tr(meal.charAt(0).toUpperCase() + meal.slice(1))} ${tr("logged")}`, "success");
   };
 
   const notifications = [
-    { id: 1, type: "coach", icon: MessageSquare, color: "#8B5CF6", title: "Coach Mike sent a message", desc: "Great progress this week! Let's adjust your...", time: "10 min ago", unread: true },
-    { id: 2, type: "workout", icon: Dumbbell, color: colors.primary, title: "Workout reminder", desc: "Fat Burn — Monday starts in 1 hour", time: "1h", unread: true },
-    { id: 3, type: "system", icon: Bell, color: colors.warning, title: "Weekly check-in due", desc: "Log your weight and measurements for this week", time: "Today", unread: false },
-    { id: 4, type: "coach", icon: Star, color: "#F97316", title: "New achievement unlocked!", desc: "You've earned the 'Consistency King' badge", time: "Yesterday", unread: false },
+    { id: 1, type: "coach",   iconType: "message",   color: "#8B5CF6", title: tr("Coach Mike sent a message"),  desc: tr("Great progress this week! Let's adjust your..."), time: "10 min ago", unread: true },
+    { id: 2, type: "workout", iconType: "workout",   color: "#34D399", title: tr("Workout reminder"),            desc: tr("Fat Burn — Monday starts in 1 hour"),            time: "1h",         unread: true },
+    { id: 3, type: "system",  iconType: "checkin",   color: "#F59E0B", title: tr("Weekly check-in due"),         desc: tr("Log your weight and measurements for this week"), time: "Today",     unread: false },
+    { id: 4, type: "coach",   iconType: "trophy",    color: "#F97316", title: tr("New achievement unlocked!"),   desc: tr("You've earned the 'Consistency King' badge"),    time: "Yesterday",  unread: false },
   ];
 
   const badges = [
-    { id: 1, icon: Flame, iconColor: "#F97316", name: "Streak Master", desc: "7-day workout streak", earned: true, date: "Feb 10" },
-    { id: 2, icon: Dumbbell, iconColor: "#34D399", name: "Iron Will", desc: "Complete 20 workouts", earned: true, date: "Feb 8" },
-    { id: 3, icon: Apple, iconColor: "#10B981", name: "Clean Eater", desc: "Log meals for 14 days", earned: true, date: "Feb 5" },
-    { id: 4, icon: Camera, iconColor: "#3B82F6", name: "Progress Tracker", desc: "Upload 5 progress photos", earned: false, progress: 3, total: 5 },
-    { id: 5, icon: Target, iconColor: "#F59E0B", name: "Goal Crusher", desc: "Reach target weight", earned: false, progress: 74.5, total: 72 },
-    { id: 6, icon: Star, iconColor: "#34D399", name: "Perfect Week", desc: "100% adherence for 1 week", earned: false, progress: 80, total: 100 },
+    { id: 1, icon: "fire",    iconColor: "#F97316", name: tr("Streak Master"),   desc: tr("7-day workout streak"),        earned: true,  date: tr("Feb 10"), tier: "gold"   },
+    { id: 2, icon: "bicep",   iconColor: "#34D399", name: tr("Iron Will"),        desc: tr("Complete 20 workouts"),        earned: true,  date: tr("Feb 8"),  tier: "gold"   },
+    { id: 3, icon: "salad",   iconColor: "#10B981", name: tr("Clean Eater"),      desc: tr("Log meals for 14 days"),       earned: true,  date: tr("Feb 5"),  tier: "silver" },
+    { id: 4, icon: "camera",  iconColor: "#3B82F6", name: tr("Progress Tracker"), desc: tr("Upload 5 progress photos"),    earned: false, progress: 3, total: 5 },
+    { id: 5, icon: "target",  iconColor: "#F59E0B", name: tr("Goal Crusher"),     desc: tr("Reach target weight"),         earned: false, progress: 74.5, total: 72 },
+    { id: 6, icon: "zap",     iconColor: "#34D399", name: tr("Perfect Week"),     desc: tr("100% adherence for 1 week"),   earned: false, progress: 80, total: 100 },
   ];
 
   const weeklyGoals = [
-    { label: "Workouts", done: 4, total: 5, color: colors.primary },
-    { label: "Meals Logged", done: 18, total: 21, color: colors.success },
-    { label: "Water (L)", done: 12, total: 14, color: "#3B82F6" },
+    { label: tr("Workouts"), done: 4, total: 5, color: colors.primary },
+    { label: tr("Meals Logged"), done: 18, total: 21, color: colors.success },
+    { label: tr("Water (L)"), done: 12, total: 14, color: "#3B82F6" },
   ];
 
   const weightData = [76.2, 75.8, 75.5, 75.2, 75.0, 74.8, 74.5];
-  const weightLabels = ["W1", "W2", "W3", "W4", "W5", "W6", "Now"];
+  const weightLabels = [tr("W1"), tr("W2"), tr("W3"), tr("W4"), tr("W5"), tr("W6"), tr("Now")];
 
   const reminders = [
-    { id: "r1", text: "Leg Day at 4:00 PM", type: "session", time: "4:00 PM" },
-    { id: "r2", text: "Take creatine with lunch", type: "supplement", time: "12:30 PM" },
-    { id: "r3", text: "Rest day tomorrow — active recovery", type: "rest", time: "Tomorrow" },
+    { id: "r1", text: tr("Leg Day at 4:00 PM"), type: "session", time: "4:00 PM" },
+    { id: "r2", text: tr("Take creatine with lunch"), type: "supplement", time: "12:30 PM" },
+    { id: "r3", text: tr("Rest day tomorrow — active recovery"), type: "rest", time: "Tomorrow" },
   ];
 
   const unlockBadge = (badge) => {
     setShowConfetti(true);
-    onShowToast(`Badge unlocked: ${badge.name}!`, "success");
+    onShowToast(`${tr("Badge unlocked")}: ${badge.name}!`, "success");
     setTimeout(() => setShowConfetti(false), 3000);
   };
 
@@ -5300,7 +6047,7 @@ function TraineeToday({ onNavigate, onShowToast, onShowCoachProfile }) {
     <div style={{ paddingBottom: 20 }}>
       {/* ── Confetti Animation ── */}
       {showConfetti && (
-        <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 999, overflow: "hidden" }}>
+        <div style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 999, overflow: "hidden" }}>
           {Array.from({ length: 30 }).map((_, i) => (
             <div key={i} style={{
               position: "absolute", top: -10, left: `${Math.random() * 100}%`,
@@ -5327,7 +6074,7 @@ function TraineeToday({ onNavigate, onShowToast, onShowCoachProfile }) {
           <div style={{ width: 44, height: 44, borderRadius: "50%", background: `linear-gradient(135deg, ${colors.primary}, #8B5CF6)`, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 3px 12px rgba(52,211,153,0.3)", border: "2px solid #fff" }}>
             <User size={20} color="#fff" />
           </div>
-          <span style={{ fontSize: 9, fontWeight: 700, color: colors.primary }}>My Coach</span>
+          <span style={{ fontSize: 9, fontWeight: 700, color: colors.primary }}>{tr("My Coach")}</span>
         </button>
       </div>
 
@@ -5337,8 +6084,8 @@ function TraineeToday({ onNavigate, onShowToast, onShowCoachProfile }) {
           <Flame size={20} color="#fff" />
         </div>
         <div style={{ flex: 1 }}>
-          <div style={{ fontSize: 16, fontWeight: 800, color: "#fff" }}>6-day streak!</div>
-          <div style={{ fontSize: 11, color: "rgba(255,255,255,0.8)" }}>1 more day to earn the Streak Master badge</div>
+          <div style={{ fontSize: 16, fontWeight: 800, color: "#fff" }}>{tr("6-day streak!")}</div>
+          <div style={{ fontSize: 11, color: "rgba(255,255,255,0.8)" }}>{tr("1 more day to earn the Streak Master badge")}</div>
         </div>
         <div style={{ width: 36, height: 36, borderRadius: "50%", border: "3px solid rgba(255,255,255,0.3)", display: "flex", alignItems: "center", justifyContent: "center" }}>
           <span style={{ fontSize: 12, fontWeight: 800, color: "#fff" }}>6</span>
@@ -5352,19 +6099,19 @@ function TraineeToday({ onNavigate, onShowToast, onShowCoachProfile }) {
             <Target size={16} color={colors.primary} />
           </div>
           <div style={{ flex: 1 }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: colors.textPrimary }}>Coach Goals</div>
-            <div style={{ fontSize: 10, color: colors.textMuted }}>Set by Coach Mike</div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: colors.textPrimary }}>{tr("Coach Goals")}</div>
+            <div style={{ fontSize: 10, color: colors.textMuted }}>{tr("Set by Coach Mike")}</div>
           </div>
           <div style={{ padding: "3px 8px", borderRadius: 6, background: colors.primaryLight }}>
-            <span style={{ fontSize: 10, fontWeight: 700, color: colors.primary }}>Weight Loss</span>
+            <span style={{ fontSize: 10, fontWeight: 700, color: colors.primary }}>{tr("Weight Loss")}</span>
           </div>
         </div>
         <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
           {[
-            { text: "Lose 3 kg by end of March", done: false },
-            { text: "Hit 150g protein daily", done: true },
-            { text: "Complete 5 workouts per week", done: false },
-            { text: "Drink 2.5L water daily", done: true },
+            { text: tr("Lose 3 kg by end of March"), done: false },
+            { text: tr("Hit 150g protein daily"), done: true },
+            { text: tr("Complete 5 workouts per week"), done: false },
+            { text: tr("Drink 2.5L water daily"), done: true },
           ].map((g, i) => (
             <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, padding: "6px 10px", borderRadius: 8, background: g.done ? `${colors.success}06` : colors.surface }}>
               <div style={{ width: 18, height: 18, borderRadius: 5, border: g.done ? "none" : `1.5px solid ${colors.border}`, background: g.done ? colors.success : "transparent", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
@@ -5383,32 +6130,32 @@ function TraineeToday({ onNavigate, onShowToast, onShowCoachProfile }) {
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <Dumbbell size={18} color="rgba(255,255,255,0.9)" />
-            <span style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.8)", textTransform: "uppercase", letterSpacing: 1 }}>Today's Workout</span>
+            <span style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.8)", textTransform: "uppercase", letterSpacing: 1 }}>{tr("Today's Workout")}</span>
           </div>
           <div style={{ background: "rgba(255,255,255,0.15)", padding: "3px 10px", borderRadius: 8 }}>
-            <span style={{ fontSize: 11, fontWeight: 700, color: "#fff" }}>Medium</span>
+            <span style={{ fontSize: 11, fontWeight: 700, color: "#fff" }}>{tr("Medium")}</span>
           </div>
         </div>
-        <div style={{ fontSize: 20, fontWeight: 800, color: "#fff", marginBottom: 4 }}>Fat Burn — Monday</div>
+        <div style={{ fontSize: 20, fontWeight: 800, color: "#fff", marginBottom: 4 }}>{tr("Fat Burn — Monday")}</div>
         <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 14 }}>
           <span style={{ fontSize: 12, color: "rgba(255,255,255,0.8)", display: "flex", alignItems: "center", gap: 4 }}>
-            <Layers size={12} /> 6 exercises
+            <Layers size={12} /> {tr("6 exercises")}
           </span>
           <span style={{ fontSize: 12, color: "rgba(255,255,255,0.8)", display: "flex", alignItems: "center", gap: 4 }}>
-            <Clock size={12} /> ~45 min
+            <Clock size={12} /> {tr("~45 min")}
           </span>
           <span style={{ fontSize: 12, color: "rgba(255,255,255,0.8)", display: "flex", alignItems: "center", gap: 4 }}>
-            <Flame size={12} /> ~320 cal
+            <Flame size={12} /> {tr("~320 cal")}
           </span>
         </div>
         <div style={{ marginBottom: 8 }}>
           <ProgressBar value={4} max={6} color="rgba(255,255,255,0.9)" height={6} />
         </div>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <span style={{ fontSize: 12, color: "rgba(255,255,255,0.75)" }}>4 of 6 exercises done</span>
+          <span style={{ fontSize: 12, color: "rgba(255,255,255,0.75)" }}>{tr("4 of 6 exercises done")}</span>
           <div style={{ background: "rgba(255,255,255,0.2)", padding: "6px 16px", borderRadius: 10, display: "flex", alignItems: "center", gap: 6 }}>
             <Play size={12} color="#fff" fill="#fff" />
-            <span style={{ fontSize: 12, fontWeight: 700, color: "#fff" }}>Resume</span>
+            <span style={{ fontSize: 12, fontWeight: 700, color: "#fff" }}>{tr("Resume")}</span>
           </div>
         </div>
       </div>
@@ -5418,9 +6165,9 @@ function TraineeToday({ onNavigate, onShowToast, onShowCoachProfile }) {
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
             <Apple size={18} color={colors.success} />
-            <span style={{ fontSize: 14, fontWeight: 700, color: colors.textPrimary }}>Today's Nutrition</span>
+            <span style={{ fontSize: 14, fontWeight: 700, color: colors.textPrimary }}>{tr("Today's Nutrition")}</span>
           </div>
-          <button onClick={() => onNavigate("nutrition")} style={{ fontSize: 12, fontWeight: 600, color: colors.primary, background: "none", border: "none", cursor: "pointer" }}>View All →</button>
+          <button onClick={() => onNavigate("nutrition")} style={{ fontSize: 12, fontWeight: 600, color: colors.primary, background: "none", border: "none", cursor: "pointer" }}>{tr("View All →")}</button>
         </div>
 
         {/* Calorie Ring + Macros */}
@@ -5440,7 +6187,7 @@ function TraineeToday({ onNavigate, onShowToast, onShowCoachProfile }) {
             {Object.entries(macros).map(([key, val]) => (
               <div key={key} style={{ display: "flex", alignItems: "center", gap: 8 }}>
                 <div style={{ width: 8, height: 8, borderRadius: 2, background: macroColors[key], flexShrink: 0 }} />
-                <span style={{ fontSize: 11, fontWeight: 600, color: colors.textSecondary, width: 48, textTransform: "capitalize" }}>{key}</span>
+                <span style={{ fontSize: 11, fontWeight: 600, color: colors.textSecondary, width: 48 }}>{tr(key)}</span>
                 <div style={{ flex: 1, background: colors.surface, borderRadius: 3, height: 4, overflow: "hidden" }}>
                   <div style={{ width: `${Math.min((val.eaten / val.target) * 100, 100)}%`, height: "100%", background: macroColors[key], borderRadius: 3 }} />
                 </div>
@@ -5453,15 +6200,15 @@ function TraineeToday({ onNavigate, onShowToast, onShowCoachProfile }) {
         {/* Meal Checklist */}
         <div style={{ display: "flex", gap: 6 }}>
           {[
-            { key: "breakfast", label: "Bkfast", cal: 480 },
-            { key: "lunch", label: "Lunch", cal: 620 },
-            { key: "dinner", label: "Dinner", cal: 700 },
-            { key: "snack", label: "Snack", cal: 200 },
+            { key: "breakfast", label: tr("Bkfast"), cal: 480 },
+            { key: "lunch", label: tr("Lunch"), cal: 620 },
+            { key: "dinner", label: tr("Dinner"), cal: 700 },
+            { key: "snack", label: tr("Snack"), cal: 200 },
           ].map(meal => (
             <button key={meal.key} onClick={() => toggleMeal(meal.key)} style={{
               flex: 1, padding: "8px 4px", borderRadius: 10,
               border: `1.5px solid ${mealsDone[meal.key] ? colors.success + "50" : colors.border}`,
-              background: mealsDone[meal.key] ? colors.successLight : "#fff",
+              background: mealsDone[meal.key] ? colors.successLight : colors.card,
               cursor: "pointer", textAlign: "center", transition: "all 0.2s"
             }}>
               <div style={{ fontSize: 11, fontWeight: 700, color: mealsDone[meal.key] ? colors.success : colors.textPrimary }}>{meal.label}</div>
@@ -5476,7 +6223,7 @@ function TraineeToday({ onNavigate, onShowToast, onShowCoachProfile }) {
       <div style={{ margin: "0 20px 20px", background: colors.card, borderRadius: 14, padding: 14, border: `1px solid ${colors.border}` }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 10 }}>
           <Calendar size={16} color={colors.warning} />
-          <span style={{ fontSize: 13, fontWeight: 700, color: colors.textPrimary }}>Reminders</span>
+          <span style={{ fontSize: 13, fontWeight: 700, color: colors.textPrimary }}>{tr("Reminders")}</span>
           <div style={{ flex: 1 }} />
           <button onClick={() => setShowAddReminder(true)} style={{ width: 26, height: 26, borderRadius: 8, border: `1.5px solid ${colors.primary}30`, background: `${colors.primary}08`, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
             <Plus size={14} color={colors.primary} />
@@ -5496,15 +6243,15 @@ function TraineeToday({ onNavigate, onShowToast, onShowCoachProfile }) {
             </div>
             <div style={{ flex: 1 }}>
               <div style={{ fontSize: 13, fontWeight: 600, color: colors.textPrimary }}>{r.text}</div>
-              <div style={{ fontSize: 11, color: colors.textMuted }}>{r.time}</div>
+              <div style={{ fontSize: 11, color: colors.textMuted }}>{tr(r.time)}</div>
             </div>
             {!reminderSnoozed[r.id] ? (
-              <button onClick={(e) => { e.stopPropagation(); setReminderSnoozed(p => ({ ...p, [r.id]: true })); onShowToast("Reminder snoozed", "success"); }}
+              <button onClick={(e) => { e.stopPropagation(); setReminderSnoozed(p => ({ ...p, [r.id]: true })); onShowToast(tr("Reminder snoozed"), "success"); }}
                 style={{ background: colors.surface, border: "none", borderRadius: 6, padding: "4px 8px", cursor: "pointer", fontSize: 10, fontWeight: 600, color: colors.textMuted }}>
-                Snooze
+                {tr("Snooze")}
               </button>
             ) : (
-              <span style={{ fontSize: 10, fontWeight: 600, color: colors.textMuted }}>Snoozed</span>
+              <span style={{ fontSize: 10, fontWeight: 600, color: colors.textMuted }}>{tr("Snoozed")}</span>
             )}
           </div>
         ))}
@@ -5512,54 +6259,58 @@ function TraineeToday({ onNavigate, onShowToast, onShowCoachProfile }) {
 
       {/* Add Reminder Popup */}
       {showAddReminder && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 300, padding: 20 }}>
-          <div style={{ background: colors.card, borderRadius: 20, padding: 24, width: "100%", maxWidth: 340, boxShadow: "0 20px 60px rgba(0,0,0,0.3)" }}>
+        <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 300, padding: 20 }}>
+          <div style={{ background: colors.card, borderRadius: 20, padding: 24, width: "100%", maxWidth: 400, boxShadow: "0 20px 60px rgba(0,0,0,0.3)" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 20 }}>
-              <span style={{ fontSize: 16, fontWeight: 800, color: colors.textPrimary }}>New Reminder</span>
+              <span style={{ fontSize: 16, fontWeight: 800, color: colors.textPrimary }}>{tr("New Reminder")}</span>
               <button onClick={() => { setShowAddReminder(false); setNewReminder({ name: "", date: "", hour: "", icon: "" }); }} style={{ background: "none", border: "none", cursor: "pointer" }}>
                 <X size={20} color={colors.textMuted} />
               </button>
             </div>
             <div style={{ marginBottom: 14 }}>
-              <label style={{ fontSize: 12, fontWeight: 600, color: colors.textSecondary, display: "block", marginBottom: 5 }}>Name *</label>
+              <label style={{ fontSize: 12, fontWeight: 600, color: colors.textSecondary, display: "block", marginBottom: 5 }}>{tr("Name *")}</label>
               <input value={newReminder.name} onChange={e => setNewReminder(p => ({ ...p, name: e.target.value }))} placeholder="e.g. Take vitamins"
                 style={{ width: "100%", padding: "10px 14px", borderRadius: 10, border: `1.5px solid ${colors.border}`, fontSize: 14, outline: "none", boxSizing: "border-box", background: colors.background }} />
             </div>
             <div style={{ display: "flex", gap: 10, marginBottom: 14 }}>
               <div style={{ flex: 1 }}>
-                <label style={{ fontSize: 12, fontWeight: 600, color: colors.textSecondary, display: "block", marginBottom: 5 }}>Date *</label>
+                <label style={{ fontSize: 12, fontWeight: 600, color: colors.textSecondary, display: "block", marginBottom: 5 }}>{tr("Date *")}</label>
                 <input type="date" value={newReminder.date} onChange={e => setNewReminder(p => ({ ...p, date: e.target.value }))}
                   style={{ width: "100%", padding: "10px 14px", borderRadius: 10, border: `1.5px solid ${colors.border}`, fontSize: 13, outline: "none", boxSizing: "border-box", background: colors.background }} />
               </div>
               <div style={{ flex: 1 }}>
-                <label style={{ fontSize: 12, fontWeight: 600, color: colors.textSecondary, display: "block", marginBottom: 5 }}>Hour *</label>
+                <label style={{ fontSize: 12, fontWeight: 600, color: colors.textSecondary, display: "block", marginBottom: 5 }}>{tr("Hour *")}</label>
                 <input type="time" value={newReminder.hour} onChange={e => setNewReminder(p => ({ ...p, hour: e.target.value }))}
                   style={{ width: "100%", padding: "10px 14px", borderRadius: 10, border: `1.5px solid ${colors.border}`, fontSize: 13, outline: "none", boxSizing: "border-box", background: colors.background }} />
               </div>
             </div>
             <div style={{ marginBottom: 20 }}>
-              <label style={{ fontSize: 12, fontWeight: 600, color: colors.textSecondary, display: "block", marginBottom: 5 }}>Icon (optional)</label>
+              <label style={{ fontSize: 12, fontWeight: 600, color: colors.textSecondary, display: "block", marginBottom: 5 }}>{tr("Icon (optional)")}</label>
               <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
-                {["", "💊", "💧", "🏋️", "🥗", "😴", "📖", "🧘"].map(icon => (
-                  <button key={icon} onClick={() => setNewReminder(p => ({ ...p, icon }))}
-                    style={{ width: 36, height: 36, borderRadius: 10, border: newReminder.icon === icon ? `2px solid ${colors.primary}` : `1.5px solid ${colors.border}`, background: newReminder.icon === icon ? `${colors.primary}10` : colors.background, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>
-                    {icon || <span style={{ fontSize: 11, color: colors.textMuted }}>None</span>}
+                {[
+                  { key: "", label: null },
+                  { key: "💊", label: "💊" }, { key: "💧", label: "💧" }, { key: "🏋️", label: "🏋️" },
+                  { key: "🥗", label: "🥗" }, { key: "😴", label: "😴" }, { key: "📖", label: "📖" }, { key: "🧘", label: "🧘" }
+                ].map(item => (
+                  <button key={item.key} onClick={() => setNewReminder(p => ({ ...p, icon: item.key }))}
+                    style={{ width: 36, height: 36, borderRadius: 10, border: newReminder.icon === item.key ? `2px solid ${colors.primary}` : `1.5px solid ${colors.border}`, background: newReminder.icon === item.key ? `${colors.primary}10` : colors.background, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 16 }}>
+                    {item.label || <span style={{ fontSize: 11, color: colors.textMuted }}>{tr("None")}</span>}
                   </button>
                 ))}
               </div>
             </div>
             <div style={{ display: "flex", gap: 10 }}>
               <button onClick={() => { setShowAddReminder(false); setNewReminder({ name: "", date: "", hour: "", icon: "" }); }}
-                style={{ flex: 1, padding: "12px 0", borderRadius: 12, border: `1.5px solid ${colors.border}`, background: "#fff", fontSize: 14, fontWeight: 600, color: colors.textSecondary, cursor: "pointer" }}>Cancel</button>
+                style={{ flex: 1, padding: "12px 0", borderRadius: 12, border: `1.5px solid ${colors.border}`, background: "#fff", fontSize: 14, fontWeight: 600, color: colors.textSecondary, cursor: "pointer" }}>{tr("Cancel")}</button>
               <button onClick={() => {
-                if (!newReminder.name || !newReminder.date || !newReminder.hour) { onShowToast("Name, date and hour are required", "error"); return; }
+                if (!newReminder.name || !newReminder.date || !newReminder.hour) { onShowToast(tr("Name, date and hour are required"), "error"); return; }
                 const r = { id: `custom_${Date.now()}`, text: newReminder.name, type: "custom", time: `${new Date(newReminder.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })} at ${newReminder.hour}`, icon: newReminder.icon };
                 setCustomReminders(prev => [...prev, r]);
                 setNewReminder({ name: "", date: "", hour: "", icon: "" });
                 setShowAddReminder(false);
-                onShowToast("Reminder added", "success");
+                onShowToast(tr("Reminder added"), "success");
               }}
-                style={{ flex: 1, padding: "12px 0", borderRadius: 12, border: "none", background: colors.primary, color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 14px rgba(52,211,153,0.25)" }}>Add Reminder</button>
+                style={{ flex: 1, padding: "12px 0", borderRadius: 12, border: "none", background: colors.primary, color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 14px rgba(52,211,153,0.25)" }}>{tr("Add Reminder")}</button>
             </div>
           </div>
         </div>
@@ -5571,8 +6322,10 @@ function TraineeToday({ onNavigate, onShowToast, onShowCoachProfile }) {
 
       <div style={{ margin: "0 20px 20px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
-          <Award size={16} color="#F59E0B" />
-          <span style={{ fontSize: 15, fontWeight: 700, color: colors.textPrimary }}>Achievements</span>
+          <div style={{ width: 28, height: 28, borderRadius: 8, background: "linear-gradient(135deg, #FBBF24, #F97316)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 3px 10px rgba(251,191,36,0.4)" }}>
+            <Trophy size={14} color="#fff" strokeWidth={2.2} />
+          </div>
+          <span style={{ fontSize: 15, fontWeight: 700, color: colors.textPrimary }}>{tr("Achievements")}</span>
         </div>
 
         {/* Badges Grid */}
@@ -5584,40 +6337,35 @@ function TraineeToday({ onNavigate, onShowToast, onShowCoachProfile }) {
                 if (!b.earned && b.progress >= b.total) unlockBadge(b);
               }}
               style={{
-                background: b.earned ? colors.card : colors.surface,
-                borderRadius: 14, padding: "14px 8px", textAlign: "center",
-                border: `1.5px solid ${b.earned ? "#F59E0B40" : colors.border}`,
-                opacity: b.earned ? 1 : 0.6, cursor: "pointer",
-                position: "relative", transition: "all 0.2s"
+                background: b.earned
+                  ? (b.tier === "gold" ? "linear-gradient(145deg, #FFFBEB, #FEF3C7)" : b.tier === "silver" ? "linear-gradient(145deg, #F8FAFC, #F1F5F9)" : colors.card)
+                  : colors.surface,
+                borderRadius: 16, padding: "14px 8px", textAlign: "center",
+                border: `1.5px solid ${b.earned ? (b.tier === "gold" ? "#FBBF2440" : b.tier === "silver" ? "#94A3B830" : colors.border) : colors.border}`,
+                cursor: "pointer",
+                position: "relative", transition: "all 0.2s",
+                boxShadow: b.earned ? "0 2px 10px rgba(0,0,0,0.06)" : "none",
               }}>
-              <div style={{ fontSize: 22, marginBottom: 4, display: "flex", alignItems: "center", justifyContent: "center", opacity: b.earned ? 1 : 0.6 }}>
-                {(() => {
-                  const iconProps = { size: 22, color: b.earned ? colors.primary : colors.textMuted };
-                  switch(b.icon) {
-                    case "fire": return <Flame {...iconProps} />;
-                    case "bicep": return <Dumbbell {...iconProps} />;
-                    case "salad": return <Apple {...iconProps} />;
-                    case "trend": return <TrendingUp {...iconProps} />;
-                    case "camera": return <Camera {...iconProps} />;
-                    case "trophy": return <Trophy {...iconProps} />;
-                    case "star": return <Star {...iconProps} />;
-                    case "droplets": return <Droplets {...iconProps} />;
-                    default: return <Zap {...iconProps} />;
-                  }
-                })()}
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 6 }}>
+                <ModernBadgeIcon type={b.icon} size={38} earned={b.earned} tier={b.tier} />
               </div>
               <div style={{ fontSize: 10, fontWeight: 700, color: b.earned ? colors.textPrimary : colors.textMuted, lineHeight: 1.2 }}>{b.name}</div>
               {!b.earned && b.progress !== undefined && (
-                <div style={{ marginTop: 4 }}>
-                  <div style={{ background: colors.border, borderRadius: 2, height: 3, overflow: "hidden" }}>
-                    <div style={{ width: `${Math.min((typeof b.progress === "number" ? b.progress : 0) / (b.total || 1) * 100, 100)}%`, height: "100%", background: colors.primary, borderRadius: 2 }} />
+                <div style={{ marginTop: 5 }}>
+                  <div style={{ background: colors.border, borderRadius: 3, height: 4, overflow: "hidden" }}>
+                    <div style={{ width: `${Math.min((typeof b.progress === "number" ? b.progress : 0) / (b.total || 1) * 100, 100)}%`, height: "100%", background: "linear-gradient(90deg, #34D399, #059669)", borderRadius: 3 }} />
                   </div>
                   <div style={{ fontSize: 8, color: colors.textMuted, marginTop: 2 }}>
                     {typeof b.progress === "number" && b.total ? `${b.progress}/${b.total}` : ""}
                   </div>
                 </div>
               )}
-              {b.earned && <div style={{ fontSize: 8, color: "#F59E0B", fontWeight: 600, marginTop: 2 }}>{b.date}</div>}
+              {b.earned && (
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 3, marginTop: 3 }}>
+                  {b.tier === "gold" && <Star size={8} color="#F59E0B" fill="#F59E0B" />}
+                  <span style={{ fontSize: 8, color: b.tier === "gold" ? "#D97706" : b.tier === "silver" ? "#64748B" : "#F59E0B", fontWeight: 700 }}>{tr(b.date)}</span>
+                </div>
+              )}
 
               {/* Tooltip */}
               {showBadgeTooltip === b.id && (
@@ -5637,7 +6385,7 @@ function TraineeToday({ onNavigate, onShowToast, onShowCoachProfile }) {
 
         {/* Weekly Goals Progress */}
         <div style={{ background: colors.card, borderRadius: 16, padding: 16, border: `1px solid ${colors.border}` }}>
-          <div style={{ fontSize: 13, fontWeight: 700, color: colors.textPrimary, marginBottom: 12 }}>Weekly Goals</div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: colors.textPrimary, marginBottom: 12 }}>{tr("Weekly Goals")}</div>
           {weeklyGoals.map((g, i) => {
             const pct = Math.round((g.done / g.total) * 100);
             return (
@@ -5657,16 +6405,16 @@ function TraineeToday({ onNavigate, onShowToast, onShowCoachProfile }) {
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 6 }}>
               <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                 <Target size={14} color={colors.primary} />
-                <span style={{ fontSize: 12, fontWeight: 700, color: colors.primary }}>Monthly Goal</span>
+                <span style={{ fontSize: 12, fontWeight: 700, color: colors.primary }}>{tr("Monthly Goal")}</span>
               </div>
-              <span style={{ fontSize: 11, fontWeight: 600, color: colors.textSecondary }}>Reach 72 kg</span>
+              <span style={{ fontSize: 11, fontWeight: 600, color: colors.textSecondary }}>{tr("Reach 72 kg")}</span>
             </div>
             <div style={{ background: colors.surface, borderRadius: 4, height: 8, overflow: "hidden" }}>
               <div style={{ width: `${((76.2 - 74.5) / (76.2 - 72)) * 100}%`, height: "100%", background: gradients.workout, borderRadius: 4, transition: "width 0.5s ease" }} />
             </div>
             <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4 }}>
-              <span style={{ fontSize: 10, color: colors.textMuted }}>Started: 76.2 kg</span>
-              <span style={{ fontSize: 10, fontWeight: 600, color: colors.primary }}>74.5 kg → 72 kg</span>
+              <span style={{ fontSize: 10, color: colors.textMuted }}>{tr("Started: 76.2 kg")}</span>
+              <span style={{ fontSize: 10, fontWeight: 600, color: colors.primary }}>{tr("74.5 kg → 72 kg")}</span>
             </div>
           </div>
         </div>
@@ -5674,27 +6422,27 @@ function TraineeToday({ onNavigate, onShowToast, onShowCoachProfile }) {
 
       {/* ── Progress Photo Upload Bottom Sheet ── */}
       {showPhotoUpload && (
-        <BottomSheet title="Upload Progress Photo" onClose={() => setShowPhotoUpload(false)}>
+        <BottomSheet title={tr("Upload Progress Photo")} onClose={() => setShowPhotoUpload(false)}>
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             <div style={{
               border: `2px dashed ${colors.border}`, borderRadius: 16, padding: "40px 20px",
               textAlign: "center", cursor: "pointer", background: colors.surface
             }}>
               <Upload size={32} color={colors.textMuted} style={{ marginBottom: 8 }} />
-              <div style={{ fontSize: 14, fontWeight: 600, color: colors.textPrimary }}>Tap to upload photo</div>
-              <div style={{ fontSize: 12, color: colors.textMuted, marginTop: 4 }}>JPG, PNG up to 10 MB</div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: colors.textPrimary }}>{tr("Tap to upload photo")}</div>
+              <div style={{ fontSize: 12, color: colors.textMuted, marginTop: 4 }}>{tr("JPG, PNG up to 10 MB")}</div>
             </div>
             <div style={{ display: "flex", gap: 8 }}>
               <button style={{ flex: 1, padding: "10px 0", borderRadius: 12, border: `1.5px solid ${colors.border}`, background: "#fff", fontSize: 13, fontWeight: 600, color: colors.textSecondary, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
-                <Camera size={16} /> Take Photo
+                <Camera size={16} /> {tr("Take Photo")}
               </button>
               <button style={{ flex: 1, padding: "10px 0", borderRadius: 12, border: `1.5px solid ${colors.border}`, background: "#fff", fontSize: 13, fontWeight: 600, color: colors.textSecondary, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
-                <Image size={16} /> Gallery
+                <Image size={16} /> {tr("Gallery")}
               </button>
             </div>
-            <button onClick={() => { setShowPhotoUpload(false); onShowToast("Progress photo saved!", "success"); }}
+            <button onClick={() => { setShowPhotoUpload(false); onShowToast(tr("Progress photo saved!"), "success"); }}
               style={{ width: "100%", padding: "14px 0", borderRadius: 14, border: "none", background: colors.primary, color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 14px rgba(52,211,153,0.25)" }}>
-              Upload & Save
+              {tr("Upload & Save")}
             </button>
           </div>
         </BottomSheet>
@@ -5725,6 +6473,7 @@ function TraineeWorkout({ onBack, onShowToast }) {
   const [showNoteInput, setShowNoteInput] = useState(null);
   const [noteText, setNoteText] = useState("");
   const [weightOverride, setWeightOverride] = useState({});
+  const [repsInput, setRepsInput] = useState({});
   const [showWeightEdit, setShowWeightEdit] = useState(null);
   const [weightEditVal, setWeightEditVal] = useState("");
   const [selectedVideo, setSelectedVideo] = useState({});
@@ -5828,7 +6577,7 @@ function TraineeWorkout({ onBack, onShowToast }) {
     clearInterval(restRef.current);
     setMode("completed");
     setShowConfetti(true);
-    onShowToast("Workout complete!", "success");
+    onShowToast(tr("Workout complete!"), "success");
     setTimeout(() => setShowConfetti(false), 4000);
   };
 
@@ -6017,7 +6766,7 @@ function TraineeWorkout({ onBack, onShowToast }) {
         {/* ── Rest Timer Overlay ── */}
         {isResting && (
           <div style={{ margin: "0 20px 16px", background: `${colors.primary}08`, borderRadius: 18, padding: 20, textAlign: "center", border: `1.5px solid ${colors.primary}25`, animation: "fadeScale 0.3s ease" }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: colors.primary, textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>Rest Period</div>
+            <div style={{ fontSize: 11, fontWeight: 700, color: colors.primary, textTransform: "uppercase", letterSpacing: 1, marginBottom: 8 }}>{tr("Rest Period")}</div>
             {/* Circular Timer */}
             <div style={{ position: "relative", width: 100, height: 100, margin: "0 auto 12px" }}>
               <svg viewBox="0 0 100 100" style={{ width: 100, height: 100, transform: "rotate(-90deg)" }}>
@@ -6033,7 +6782,7 @@ function TraineeWorkout({ onBack, onShowToast }) {
             <div style={{ display: "flex", gap: 8, justifyContent: "center" }}>
               <button onClick={() => setRestTimer(t => Math.max(t - 15, 0))} style={{ padding: "6px 14px", borderRadius: 8, border: `1px solid ${colors.border}`, background: "#fff", fontSize: 12, fontWeight: 600, color: colors.textSecondary, cursor: "pointer" }}>-15s</button>
               <button onClick={() => { clearInterval(restRef.current); setIsResting(false); setRestTimer(0); }}
-                style={{ padding: "6px 14px", borderRadius: 8, border: "none", background: colors.primary, fontSize: 12, fontWeight: 700, color: "#fff", cursor: "pointer" }}>Skip Rest</button>
+                style={{ padding: "6px 14px", borderRadius: 8, border: "none", background: colors.primary, fontSize: 12, fontWeight: 700, color: "#fff", cursor: "pointer" }}>{tr("Skip Rest")}</button>
               <button onClick={() => setRestTimer(t => t + 15)} style={{ padding: "6px 14px", borderRadius: 8, border: `1px solid ${colors.border}`, background: "#fff", fontSize: 12, fontWeight: 600, color: colors.textSecondary, cursor: "pointer" }}>+15s</button>
             </div>
           </div>
@@ -6110,27 +6859,71 @@ function TraineeWorkout({ onBack, onShowToast }) {
                   </div>
                 )}
 
+                {/* ── Weight & Reps Log ── */}
+                <div style={{ background: colors.surface, borderRadius: 14, padding: "12px 14px", marginBottom: 10 }}>
+                  <div style={{ fontSize: 10, fontWeight: 700, color: colors.textMuted, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 8 }}>
+                    Log Set {currentEx.setsDone + 1}
+                  </div>
+                  <div style={{ display: "flex", gap: 10 }}>
+                    {/* Weight field */}
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: 10, fontWeight: 600, color: colors.textSecondary, marginBottom: 4 }}>{tr("Weight")}</div>
+                      <div style={{ display: "flex", alignItems: "center", background: colors.card, borderRadius: 10, border: `2px solid ${weightOverride[`${activeExIndex}-${currentEx.setsDone}`] ? colors.primary : colors.border}`, overflow: "hidden", transition: "border 0.2s" }}>
+                        <input
+                          type="text" inputMode="decimal"
+                          value={weightOverride[`${activeExIndex}-${currentEx.setsDone}`] || ""}
+                          onChange={e => setWeightOverride(p => ({ ...p, [`${activeExIndex}-${currentEx.setsDone}`]: e.target.value }))}
+                          placeholder="—"
+                          style={{ flex: 1, border: "none", outline: "none", fontSize: 20, fontWeight: 800, textAlign: "center", background: "transparent", color: colors.textPrimary, padding: "10px 0 10px 10px", width: 0 }}
+                        />
+                        <span style={{ fontSize: 11, fontWeight: 700, color: colors.textMuted, paddingRight: 10 }}>kg</span>
+                      </div>
+                    </div>
+                    {/* Reps field */}
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: 10, fontWeight: 600, color: colors.textSecondary, marginBottom: 4 }}>{tr("Reps")}</div>
+                      <div style={{ display: "flex", alignItems: "center", background: colors.card, borderRadius: 10, border: `2px solid ${repsInput[`${activeExIndex}-${currentEx.setsDone}`] ? colors.primary : colors.border}`, overflow: "hidden", transition: "border 0.2s" }}>
+                        <input
+                          type="text" inputMode="numeric"
+                          value={repsInput[`${activeExIndex}-${currentEx.setsDone}`] || ""}
+                          onChange={e => setRepsInput(p => ({ ...p, [`${activeExIndex}-${currentEx.setsDone}`]: e.target.value }))}
+                          placeholder="—"
+                          style={{ flex: 1, border: "none", outline: "none", fontSize: 20, fontWeight: 800, textAlign: "center", background: "transparent", color: colors.textPrimary, padding: "10px 0 10px 10px", width: 0 }}
+                        />
+                        <span style={{ fontSize: 11, fontWeight: 700, color: colors.textMuted, paddingRight: 10 }}>reps</span>
+                      </div>
+                    </div>
+                  </div>
+                  {!(weightOverride[`${activeExIndex}-${currentEx.setsDone}`] && repsInput[`${activeExIndex}-${currentEx.setsDone}`]) && (
+                    <div style={{ marginTop: 7, fontSize: 10, color: colors.error, fontWeight: 600, display: "flex", alignItems: "center", gap: 4 }}>
+                      <AlertTriangle size={10} color={colors.error} /> Enter weight & reps before completing this set
+                    </div>
+                  )}
+                </div>
+
                 {/* Action Buttons */}
-                <div style={{ display: "flex", gap: 8, marginTop: 4 }}>
+                <div style={{ display: "flex", gap: 8 }}>
                   <button onClick={() => { setShowSkipSetReason({ exIndex: activeExIndex, setIndex: currentEx.setsDone }); setSkipSetReasonText(""); }}
                     style={{ flex: 1, padding: "12px 0", borderRadius: 12, border: `1.5px solid ${colors.warning}30`, background: `${colors.warning}06`, fontSize: 12, fontWeight: 600, color: colors.warning, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
                     Skip Set
                   </button>
-                  <button onClick={() => completeSet(activeExIndex)} style={{ flex: 2, padding: "12px 0", borderRadius: 12, border: "none", background: colors.primary, fontSize: 14, fontWeight: 700, color: "#fff", cursor: "pointer", boxShadow: "0 4px 14px rgba(52,211,153,0.25)", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
-                    <Check size={16} strokeWidth={3} /> Complete Set {currentEx.setsDone + 1}
-                  </button>
+                  {(() => {
+                    const setKey = `${activeExIndex}-${currentEx.setsDone}`;
+                    const w = weightOverride[setKey];
+                    const r = repsInput[setKey];
+                    const canComplete = (w && w.trim()) && (r && r.trim());
+                    return (
+                      <button onClick={() => canComplete && completeSet(activeExIndex)}
+                        style={{ flex: 2, padding: "12px 0", borderRadius: 12, border: "none", background: canComplete ? colors.primary : colors.border, fontSize: 14, fontWeight: 700, color: canComplete ? "#fff" : colors.textMuted, cursor: canComplete ? "pointer" : "not-allowed", boxShadow: canComplete ? "0 4px 14px rgba(52,211,153,0.25)" : "none", display: "flex", alignItems: "center", justifyContent: "center", gap: 6, transition: "all 0.2s" }}>
+                        <Check size={16} strokeWidth={3} /> Complete Set {currentEx.setsDone + 1}
+                      </button>
+                    );
+                  })()}
                 </div>
                 <button onClick={() => { setShowSkipExReason(activeExIndex); setSkipExReasonText(""); }}
-                  style={{ width: "100%", marginTop: 6, padding: "8px 0", borderRadius: 10, border: `1.5px solid ${colors.border}`, background: "#fff", fontSize: 12, fontWeight: 600, color: colors.textMuted, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
+                  style={{ width: "100%", marginTop: 6, padding: "8px 0", borderRadius: 10, border: `1.5px solid ${colors.border}`, background: "transparent", fontSize: 12, fontWeight: 600, color: colors.textMuted, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
                   <ChevronRight size={12} /> Skip Entire Exercise
                 </button>
-                {/* Weight Input */}
-                <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8, padding: "6px 12px", borderRadius: 10, border: `1px solid ${colors.border}`, background: colors.background }}>
-                  <span style={{ fontSize: 12, fontWeight: 600, color: colors.textSecondary }}>Weight:</span>
-                  <input type="text" inputMode="numeric" value={weightOverride[activeExIndex] || currentEx.weight}
-                    onChange={e => setWeightOverride(p => ({ ...p, [activeExIndex]: e.target.value }))}
-                    style={{ flex: 1, border: "none", outline: "none", fontSize: 14, fontWeight: 700, textAlign: "center", background: "transparent", color: colors.textPrimary }} />
-                </div>
               </div>
             </div>
           </div>
@@ -6138,7 +6931,7 @@ function TraineeWorkout({ onBack, onShowToast }) {
 
         {/* ── Exercise Queue (scrollable) ── */}
         <div style={{ padding: "0 20px" }}>
-          <div style={{ fontSize: 11, fontWeight: 700, color: colors.textMuted, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 8 }}>All Exercises</div>
+          <div style={{ fontSize: 11, fontWeight: 700, color: colors.textMuted, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 8 }}>{tr("All Exercises")}</div>
           {exercises.map((ex, i) => (
             <div key={i} onClick={() => { if (!ex.done && !ex.skipped) setActiveExIndex(i); }}
               style={{
@@ -6162,7 +6955,7 @@ function TraineeWorkout({ onBack, onShowToast }) {
                   <div key={si} style={{ width: 4, height: 4, borderRadius: 2, background: si < ex.setsDone ? colors.success : colors.surface }} />
                 ))}
               </div>
-              {ex.skipped && <button onClick={(e) => { e.stopPropagation(); undoSkip(i); }} style={{ fontSize: 10, fontWeight: 600, color: colors.primary, background: "none", border: "none", cursor: "pointer" }}>Undo</button>}
+              {ex.skipped && <button onClick={(e) => { e.stopPropagation(); undoSkip(i); }} style={{ fontSize: 10, fontWeight: 600, color: colors.primary, background: "none", border: "none", cursor: "pointer" }}>{tr("Undo")}</button>}
             </div>
           ))}
 
@@ -6202,9 +6995,9 @@ function TraineeWorkout({ onBack, onShowToast }) {
                 style={{ width: "100%", padding: "12px 16px", borderRadius: 12, border: `1.5px solid ${colors.border}`, fontSize: 16, fontWeight: 700, textAlign: "center", outline: "none", boxSizing: "border-box" }} autoFocus />
             </div>
             <div style={{ display: "flex", gap: 10 }}>
-              <button onClick={() => setShowWeightEdit(null)} style={{ flex: 1, padding: "12px 0", borderRadius: 12, border: `1.5px solid ${colors.border}`, background: "#fff", fontSize: 14, fontWeight: 600, color: colors.textSecondary, cursor: "pointer" }}>Cancel</button>
+              <button onClick={() => setShowWeightEdit(null)} style={{ flex: 1, padding: "12px 0", borderRadius: 12, border: `1.5px solid ${colors.border}`, background: "#fff", fontSize: 14, fontWeight: 600, color: colors.textSecondary, cursor: "pointer" }}>{tr("Cancel")}</button>
               <button onClick={() => { setWeightOverride(p => ({ ...p, [showWeightEdit]: weightEditVal })); setShowWeightEdit(null); onShowToast("Weight updated", "success"); }}
-                style={{ flex: 1, padding: "12px 0", borderRadius: 12, border: "none", background: colors.primary, color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer" }}>Save</button>
+                style={{ flex: 1, padding: "12px 0", borderRadius: 12, border: "none", background: colors.primary, color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer" }}>{tr("Save")}</button>
             </div>
           </BottomSheet>
         )}
@@ -6287,7 +7080,7 @@ function TraineeWorkout({ onBack, onShowToast }) {
     <div>
       {/* Confetti */}
       {showConfetti && (
-        <div style={{ position: "fixed", inset: 0, pointerEvents: "none", zIndex: 999, overflow: "hidden" }}>
+        <div style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 999, overflow: "hidden" }}>
           {Array.from({ length: 40 }).map((_, i) => (
             <div key={i} style={{
               position: "absolute", top: -10, left: `${Math.random() * 100}%`,
@@ -6306,13 +7099,13 @@ function TraineeWorkout({ onBack, onShowToast }) {
         <div style={{ marginBottom: 12, animation: "bounce 0.6s ease", display: "flex", alignItems: "center", justifyContent: "center" }}>
           <Dumbbell size={64} color={colors.primary} />
         </div>
-        <div style={{ fontSize: 24, fontWeight: 900, color: colors.textPrimary, marginBottom: 4, letterSpacing: -0.5 }}>Workout Complete!</div>
+        <div style={{ fontSize: 24, fontWeight: 900, color: colors.textPrimary, marginBottom: 4, letterSpacing: -0.5 }}>{tr("Workout Complete!")}</div>
         <div style={{ fontSize: 14, color: colors.textSecondary, marginBottom: 20 }}>Amazing effort, Sarah!</div>
 
         {/* Stats Summary Card */}
         <div style={{ background: gradients.workout, borderRadius: 20, padding: 20, marginBottom: 20, textAlign: "left", position: "relative", overflow: "hidden" }}>
           <div style={{ position: "absolute", top: -20, right: -20, width: 80, height: 80, borderRadius: "50%", background: "rgba(255,255,255,0.06)" }} />
-          <div style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.7)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 12 }}>Workout Summary</div>
+          <div style={{ fontSize: 11, fontWeight: 700, color: "rgba(255,255,255,0.7)", textTransform: "uppercase", letterSpacing: 1, marginBottom: 12 }}>{tr("Workout Summary")}</div>
           <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
             {[
               { label: "Duration", value: formatTime(workoutTime), icon: Clock },
@@ -6348,13 +7141,15 @@ function TraineeWorkout({ onBack, onShowToast }) {
         {/* Badges Earned */}
         <div style={{ background: colors.card, borderRadius: 16, padding: 16, border: `1px solid ${colors.border}`, marginBottom: 16 }}>
           <div style={{ fontSize: 13, fontWeight: 700, color: colors.textPrimary, marginBottom: 12 }}>Badges Unlocked</div>
-          <div style={{ display: "flex", justifyContent: "center", gap: 16 }}>
+          <div style={{ display: "flex", justifyContent: "center", gap: 24 }}>
             {[
               { icon: "fire", name: "Streak Master", desc: "7-day streak!" },
               { icon: "star", name: "Full Effort", desc: "Complete all exercises" },
             ].map((b, i) => (
               <div key={i} style={{ textAlign: "center", animation: `fadeScale 0.4s ease ${i * 0.2}s both` }}>
-                <div style={{ fontSize: 36, marginBottom: 4, display: "flex", justifyContent: "center" }}>{getAchievementIcon(b.icon)}</div>
+                <div style={{ display: "flex", justifyContent: "center", marginBottom: 8 }}>
+                  <ModernBadgeIcon type={b.icon} size={52} earned={true} />
+                </div>
                 <div style={{ fontSize: 11, fontWeight: 700, color: colors.textPrimary }}>{b.name}</div>
                 <div style={{ fontSize: 9, color: colors.textMuted }}>{b.desc}</div>
               </div>
@@ -6364,7 +7159,7 @@ function TraineeWorkout({ onBack, onShowToast }) {
 
         {/* Weekly Progress */}
         <div style={{ background: colors.card, borderRadius: 16, padding: 16, border: `1px solid ${colors.border}`, marginBottom: 20 }}>
-          <div style={{ fontSize: 13, fontWeight: 700, color: colors.textPrimary, marginBottom: 8 }}>This Week</div>
+          <div style={{ fontSize: 13, fontWeight: 700, color: colors.textPrimary, marginBottom: 8 }}>{tr("This Week")}</div>
           <div style={{ display: "flex", gap: 4, marginBottom: 8 }}>
             {["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"].map((d, i) => (
               <div key={i} style={{ flex: 1, textAlign: "center" }}>
@@ -6393,7 +7188,7 @@ function TraineeWorkout({ onBack, onShowToast }) {
 
         {/* Action Buttons */}
         <div style={{ display: "flex", gap: 10, marginBottom: 20 }}>
-          <button onClick={onBack} style={{ flex: 1, padding: "14px 0", borderRadius: 14, border: `1.5px solid ${colors.border}`, background: "#fff", fontSize: 14, fontWeight: 600, color: colors.textSecondary, cursor: "pointer" }}>Back to Home</button>
+          <button onClick={onBack} style={{ flex: 1, padding: "14px 0", borderRadius: 14, border: `1.5px solid ${colors.border}`, background: "#fff", fontSize: 14, fontWeight: 600, color: colors.textSecondary, cursor: "pointer" }}>{tr("Back to Home")}</button>
           <button onClick={onBack} style={{ flex: 1, padding: "14px 0", borderRadius: 14, border: "none", background: colors.primary, color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 14px rgba(52,211,153,0.25)" }}>Share Results</button>
         </div>
       </div>
@@ -6517,7 +7312,7 @@ function TraineeNutrition({ onBack, onShowToast }) {
           <ChevronLeft size={20} color={colors.textPrimary} />
         </button>
         <div style={{ flex: 1 }}>
-          <h2 style={{ fontSize: 18, fontWeight: 800, color: colors.textPrimary, letterSpacing: -0.3 }}>Today's Nutrition</h2>
+          <h2 style={{ fontSize: 18, fontWeight: 800, color: colors.textPrimary, letterSpacing: -0.3 }}>{tr("Today's Nutrition")}</h2>
           <span style={{ fontSize: 12, color: colors.textSecondary }}>Assigned by Coach Mike</span>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
@@ -6599,7 +7394,7 @@ function TraineeNutrition({ onBack, onShowToast }) {
       <div style={{ margin: "0 20px 16px", padding: "16px", background: colors.card, borderRadius: 14, border: `1px solid ${colors.border}` }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
           <div>
-            <div style={{ fontSize: 12, fontWeight: 700, color: colors.textPrimary }}>Water Intake</div>
+            <div style={{ fontSize: 12, fontWeight: 700, color: colors.textPrimary }}>{tr("Water Intake")}</div>
             <div style={{ fontSize: 11, color: colors.textSecondary, marginTop: 2 }}>{waterIntake * 250} ml / 2,000 ml</div>
           </div>
           <button onClick={() => setWaterIntake(Math.min(8, waterIntake + 1))}
@@ -6650,8 +7445,8 @@ function TraineeNutrition({ onBack, onShowToast }) {
                     <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 2 }}>
                       <span style={{ fontSize: 14, fontWeight: 700, color: colors.textPrimary }}>{meal.slot}</span>
                       <span style={{ fontSize: 10, color: colors.textMuted }}>{meal.time}</span>
-                      {meal.done && <span style={{ fontSize: 9, fontWeight: 700, color: colors.success, background: colors.successLight, padding: "1px 6px", borderRadius: 4 }}>Logged</span>}
-                      {skippedMeals[meal.id] && <span style={{ fontSize: 9, fontWeight: 700, color: colors.warning, background: `${colors.warning}15`, padding: "1px 6px", borderRadius: 4 }}>Skipped</span>}
+                      {meal.done && <span style={{ fontSize: 9, fontWeight: 700, color: colors.success, background: colors.successLight, padding: "1px 6px", borderRadius: 4 }}>{tr("Logged")}</span>}
+                      {skippedMeals[meal.id] && <span style={{ fontSize: 9, fontWeight: 700, color: colors.warning, background: `${colors.warning}15`, padding: "1px 6px", borderRadius: 4 }}>{tr("Skipped")}</span>}
                     </div>
                     <div style={{ fontSize: 12, color: colors.textSecondary, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       {meal.items.map(i => i.name).join(", ") || "No items yet"}
@@ -6687,8 +7482,11 @@ function TraineeNutrition({ onBack, onShowToast }) {
                         <Apple size={13} color={colors.textMuted} />
                       </div>
                       <div style={{ flex: 1 }}>
-                        <div style={{ fontSize: 13, fontWeight: 600, color: colors.textPrimary }}>{item.name}</div>
-                        <div style={{ fontSize: 11, color: colors.textSecondary }}>{item.portion} · {item.cal} cal</div>
+                        <div style={{ display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
+                          <span style={{ fontSize: 13, fontWeight: 600, color: colors.textPrimary }}>{item.name}</span>
+                          <span style={{ fontSize: 10, fontWeight: 700, color: colors.primary, background: `${colors.primary}12`, padding: "1px 7px", borderRadius: 6, border: `1px solid ${colors.primary}20`, flexShrink: 0 }}>{item.portion}</span>
+                        </div>
+                        <div style={{ fontSize: 11, color: colors.textSecondary, marginTop: 1 }}>{item.cal} cal</div>
                       </div>
                       <div style={{ display: "flex", gap: 6 }}>
                         <div style={{ display: "flex", gap: 4 }}>
@@ -6773,8 +7571,8 @@ function TraineeNutrition({ onBack, onShowToast }) {
         {meals.length === 0 && (
           <div style={{ textAlign: "center", padding: "40px 20px" }}>
             <Apple size={40} color={colors.textMuted} style={{ marginBottom: 12 }} />
-            <div style={{ fontSize: 16, fontWeight: 700, color: colors.textPrimary, marginBottom: 4 }}>No meals planned yet</div>
-            <div style={{ fontSize: 13, color: colors.textSecondary, marginBottom: 16 }}>Start logging your meals to track your nutrition!</div>
+            <div style={{ fontSize: 16, fontWeight: 700, color: colors.textPrimary, marginBottom: 4 }}>{tr("No meals planned yet")}</div>
+            <div style={{ fontSize: 13, color: colors.textSecondary, marginBottom: 16 }}>{tr("Start logging your meals to track your nutrition!")}</div>
             <button onClick={() => setShowAddMeal(true)} style={{ padding: "12px 24px", borderRadius: 12, border: "none", background: colors.primary, color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer" }}>
               Add Your First Meal
             </button>
@@ -6799,8 +7597,12 @@ function TraineeNutrition({ onBack, onShowToast }) {
         {/* Nutrition Completed Message */}
         {nutritionCompleted && (
           <div style={{ textAlign: "center", padding: "20px 16px", background: `${colors.success}08`, borderRadius: 16, border: `1.5px solid ${colors.success}25`, marginBottom: 12 }}>
-            <div style={{ fontSize: 40, marginBottom: 8 }}>🎉</div>
-            <div style={{ fontSize: 18, fontWeight: 800, color: colors.success, marginBottom: 4 }}>Nutrition Complete!</div>
+            <div style={{ display: "flex", justifyContent: "center", marginBottom: 8 }}>
+              <div style={{ width: 56, height: 56, borderRadius: "50%", background: "linear-gradient(135deg, #34D399, #059669)", display: "flex", alignItems: "center", justifyContent: "center", boxShadow: "0 6px 20px rgba(52,211,153,0.4)" }}>
+                <CheckCircle2 size={28} color="#fff" strokeWidth={2.2} />
+              </div>
+            </div>
+            <div style={{ fontSize: 18, fontWeight: 800, color: colors.success, marginBottom: 4 }}>{tr("Nutrition Complete!")}</div>
             <div style={{ fontSize: 13, color: colors.textSecondary }}>
               {mealsDoneCount} meals logged, {skippedCount} skipped · Water: {finalWaterLiters}L
             </div>
@@ -6819,7 +7621,7 @@ function TraineeNutrition({ onBack, onShowToast }) {
             <MessageSquare size={15} color={colors.primary} />
           </div>
           <div style={{ flex: 1, textAlign: "left" }}>
-            <span style={{ fontSize: 13, fontWeight: 700, color: colors.textPrimary }}>Coach Notes & Tips</span>
+            <span style={{ fontSize: 13, fontWeight: 700, color: colors.textPrimary }}>{tr("Coach Notes & Tips")}</span>
           </div>
           {showCoachNotes ? <ChevronUp size={14} color={colors.textMuted} /> : <ChevronDown size={14} color={colors.textMuted} />}
         </button>
@@ -6887,7 +7689,7 @@ function TraineeNutrition({ onBack, onShowToast }) {
           </div>
           <div style={{ display: "flex", justifyContent: "space-between", marginTop: 4 }}>
             <span style={{ fontSize: 9, color: colors.textMuted }}>8 days ago</span>
-            <span style={{ fontSize: 9, color: colors.textMuted }}>Today</span>
+            <span style={{ fontSize: 9, color: colors.textMuted }}>{tr("Today")}</span>
           </div>
         </div>
 
@@ -6902,7 +7704,9 @@ function TraineeNutrition({ onBack, onShowToast }) {
               { icon: "droplets", name: "Hydrated", desc: "8 glasses × 7 days", earned: false, pct: 40 },
             ].map((b, i) => (
               <div key={i} style={{ flex: 1, textAlign: "center", padding: "10px 4px", borderRadius: 12, background: b.earned ? `${colors.success}06` : colors.surface, border: `1px solid ${b.earned ? colors.success + "20" : colors.border}` }}>
-                <div style={{ fontSize: 22, marginBottom: 4, filter: b.earned ? "none" : "grayscale(0.8)", display: "flex", justifyContent: "center", opacity: b.earned ? 1 : 0.6 }}>{getAchievementIcon(b.icon)}</div>
+                <div style={{ display: "flex", justifyContent: "center", marginBottom: 5 }}>
+                  <ModernBadgeIcon type={b.icon} size={32} earned={b.earned} />
+                </div>
                 <div style={{ fontSize: 9, fontWeight: 700, color: b.earned ? colors.textPrimary : colors.textMuted, lineHeight: 1.2 }}>{b.name}</div>
                 {!b.earned && b.pct !== undefined && (
                   <div style={{ marginTop: 4, background: colors.border, borderRadius: 2, height: 3, overflow: "hidden", marginInline: 4 }}>
@@ -7032,8 +7836,8 @@ function TraineeNutrition({ onBack, onShowToast }) {
                 ))}
               </div>
               <div style={{ display: "flex", gap: 8 }}>
-                <button onClick={() => setShowManualEntry(false)} style={{ flex: 1, padding: "10px 0", borderRadius: 10, border: `1.5px solid ${colors.border}`, background: "#fff", fontSize: 13, fontWeight: 600, color: colors.textSecondary, cursor: "pointer" }}>Back</button>
-                <button onClick={() => addManualFood(showFoodSearch)} style={{ flex: 1, padding: "10px 0", borderRadius: 10, border: "none", background: colors.primary, color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>Add Food</button>
+                <button onClick={() => setShowManualEntry(false)} style={{ flex: 1, padding: "10px 0", borderRadius: 10, border: `1.5px solid ${colors.border}`, background: "#fff", fontSize: 13, fontWeight: 600, color: colors.textSecondary, cursor: "pointer" }}>{tr("Back")}</button>
+                <button onClick={() => addManualFood(showFoodSearch)} style={{ flex: 1, padding: "10px 0", borderRadius: 10, border: "none", background: colors.primary, color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>{tr("Add Food")}</button>
               </div>
             </div>
           )}
@@ -7052,10 +7856,10 @@ function TraineeNutrition({ onBack, onShowToast }) {
 
       {/* Water Intake Prompt before final submit */}
       {showWaterPrompt && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 300, padding: 20 }}>
-          <div style={{ background: colors.card, borderRadius: 20, padding: 24, width: "100%", maxWidth: 320, boxShadow: "0 20px 60px rgba(0,0,0,0.3)", textAlign: "center" }}>
+        <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.5)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 300, padding: 20 }}>
+          <div style={{ background: colors.card, borderRadius: 20, padding: 24, width: "100%", maxWidth: 390, boxShadow: "0 20px 60px rgba(0,0,0,0.3)", textAlign: "center" }}>
             <div style={{ marginBottom: 12, display: "flex", justifyContent: "center" }}><Droplets size={40} color="#3B82F6" /></div>
-            <div style={{ fontSize: 18, fontWeight: 800, color: colors.textPrimary, marginBottom: 4 }}>Water Intake</div>
+            <div style={{ fontSize: 18, fontWeight: 800, color: colors.textPrimary, marginBottom: 4 }}>{tr("Water Intake")}</div>
             <div style={{ fontSize: 13, color: colors.textSecondary, marginBottom: 20 }}>How many liters of water did you drink today?</div>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 12, marginBottom: 20 }}>
               <button onClick={() => setFinalWaterLiters(v => String(Math.max(0, Number(v) - 0.5)))}
@@ -7069,9 +7873,9 @@ function TraineeNutrition({ onBack, onShowToast }) {
             </div>
             <div style={{ display: "flex", gap: 10 }}>
               <button onClick={() => setShowWaterPrompt(false)}
-                style={{ flex: 1, padding: "12px 0", borderRadius: 12, border: `1.5px solid ${colors.border}`, background: "#fff", fontSize: 14, fontWeight: 600, color: colors.textSecondary, cursor: "pointer" }}>Cancel</button>
+                style={{ flex: 1, padding: "12px 0", borderRadius: 12, border: `1.5px solid ${colors.border}`, background: "#fff", fontSize: 14, fontWeight: 600, color: colors.textSecondary, cursor: "pointer" }}>{tr("Cancel")}</button>
               <button onClick={() => { setShowWaterPrompt(false); setNutritionCompleted(true); onShowToast("Nutrition day complete!", "success"); }}
-                style={{ flex: 1, padding: "12px 0", borderRadius: 12, border: "none", background: colors.success, color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 14px rgba(16,185,129,0.25)" }}>Submit</button>
+                style={{ flex: 1, padding: "12px 0", borderRadius: 12, border: "none", background: colors.success, color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer", boxShadow: "0 4px 14px rgba(16,185,129,0.25)" }}>{tr("Submit")}</button>
             </div>
           </div>
         </div>
@@ -7287,7 +8091,7 @@ function TraineeProgress({ onBack, onShowToast }) {
           <ChevronLeft size={20} color={colors.textPrimary} />
         </button>
         <div style={{ flex: 1 }}>
-          <h2 style={{ fontSize: 18, fontWeight: 800, color: colors.textPrimary, letterSpacing: -0.3 }}>My Progress</h2>
+          <h2 style={{ fontSize: 18, fontWeight: 800, color: colors.textPrimary, letterSpacing: -0.3 }}>{tr("My Progress")}</h2>
           <span style={{ fontSize: 12, color: colors.textSecondary }}>Track your fitness journey</span>
         </div>
         {/* Time Range Selector */}
@@ -7314,7 +8118,7 @@ function TraineeProgress({ onBack, onShowToast }) {
               <div style={{ fontSize: 11, color: colors.textSecondary, marginTop: 2 }}>Sync workouts & health data</div>
             </div>
             <button onClick={() => setShowWatchAuth(true)}
-              style={{ padding: "6px 12px", borderRadius: 8, border: "none", background: colors.primary, color: "#000", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>Connect</button>
+              style={{ padding: "6px 12px", borderRadius: 8, border: "none", background: colors.primary, color: "#000", fontSize: 11, fontWeight: 700, cursor: "pointer" }}>{tr("Connect")}</button>
           </div>
         ) : (
           <div style={{ background: colors.card, borderRadius: 14, border: `1px solid ${colors.border}`, padding: 14 }}>
@@ -7347,8 +8151,8 @@ function TraineeProgress({ onBack, onShowToast }) {
 
       {/* Watch Auth Modal */}
       {showWatchAuth && (
-        <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 998, padding: 20 }}>
-          <div style={{ background: colors.card, borderRadius: 16, padding: 24, maxWidth: 320, animation: "fadeScale 0.25s ease" }}>
+        <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.4)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 998, padding: 20 }}>
+          <div style={{ background: colors.card, borderRadius: 16, padding: 24, maxWidth: 390, animation: "fadeScale 0.25s ease" }}>
             <h3 style={{ fontSize: 18, fontWeight: 700, color: colors.textPrimary, marginBottom: 8 }}>Connect Apple Watch</h3>
             <p style={{ fontSize: 13, color: colors.textSecondary, lineHeight: 1.5, marginBottom: 20 }}>Allow access to the following health data:</p>
             <div style={{ display: "flex", flexDirection: "column", gap: 12, marginBottom: 24 }}>
@@ -7360,8 +8164,8 @@ function TraineeProgress({ onBack, onShowToast }) {
               ))}
             </div>
             <div style={{ display: "flex", gap: 12 }}>
-              <button onClick={() => setShowWatchAuth(false)} style={{ flex: 1, padding: "12px 0", borderRadius: 12, border: `1.5px solid ${colors.border}`, background: colors.card, fontSize: 14, fontWeight: 600, color: colors.textSecondary, cursor: "pointer" }}>Deny</button>
-              <button onClick={() => { setWatchConnected(true); setShowWatchAuth(false); onShowToast("Apple Watch connected!", "success"); }} style={{ flex: 1, padding: "12px 0", borderRadius: 12, border: "none", background: colors.primary, color: "#000", fontSize: 14, fontWeight: 600, cursor: "pointer" }}>Allow</button>
+              <button onClick={() => setShowWatchAuth(false)} style={{ flex: 1, padding: "12px 0", borderRadius: 12, border: `1.5px solid ${colors.border}`, background: colors.card, fontSize: 14, fontWeight: 600, color: colors.textSecondary, cursor: "pointer" }}>{tr("Deny")}</button>
+              <button onClick={() => { setWatchConnected(true); setShowWatchAuth(false); onShowToast("Apple Watch connected!", "success"); }} style={{ flex: 1, padding: "12px 0", borderRadius: 12, border: "none", background: colors.primary, color: "#000", fontSize: 14, fontWeight: 600, cursor: "pointer" }}>{tr("Allow")}</button>
             </div>
           </div>
         </div>
@@ -7394,7 +8198,7 @@ function TraineeProgress({ onBack, onShowToast }) {
         {/* Weight Goal Progress */}
         <div style={{ background: colors.card, borderRadius: 14, padding: 14, border: `1px solid ${colors.border}`, marginBottom: 12 }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-            <span style={{ fontSize: 12, fontWeight: 700, color: colors.textPrimary }}>Weight Goal Progress</span>
+            <span style={{ fontSize: 12, fontWeight: 700, color: colors.textPrimary }}>{tr("Weight Goal Progress")}</span>
             <span style={{ fontSize: 11, fontWeight: 600, color: colors.primary }}>{Math.round(((startWeight - currentWeight) / (startWeight - goalWeight)) * 100)}% there</span>
           </div>
           <div style={{ background: colors.surface, borderRadius: 5, height: 8, overflow: "hidden", marginBottom: 6 }}>
@@ -7448,7 +8252,7 @@ function TraineeProgress({ onBack, onShowToast }) {
         {activeChart === "weight" && (
           <div style={{ background: colors.card, borderRadius: 16, padding: 16, border: `1px solid ${colors.border}` }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 8 }}>
-              <span style={{ fontSize: 13, fontWeight: 700, color: colors.textPrimary }}>Weight Trend</span>
+              <span style={{ fontSize: 13, fontWeight: 700, color: colors.textPrimary }}>{tr("Weight Trend")}</span>
               <div style={{ display: "flex", gap: 8 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 3 }}><div style={{ width: 8, height: 2, background: colors.primary, borderRadius: 1 }} /><span style={{ fontSize: 9, color: colors.textMuted }}>Actual</span></div>
                 <div style={{ display: "flex", alignItems: "center", gap: 3 }}><div style={{ width: 8, height: 2, background: colors.success, borderRadius: 1 }} /><span style={{ fontSize: 9, color: colors.textMuted }}>Goal</span></div>
@@ -7502,7 +8306,7 @@ function TraineeProgress({ onBack, onShowToast }) {
         {/* Body Measurements */}
         {activeChart === "body" && (
           <div style={{ background: colors.card, borderRadius: 16, padding: 16, border: `1px solid ${colors.border}` }}>
-            <div style={{ fontSize: 13, fontWeight: 700, color: colors.textPrimary, marginBottom: 12 }}>Body Measurements</div>
+            <div style={{ fontSize: 13, fontWeight: 700, color: colors.textPrimary, marginBottom: 12 }}>{tr("Body Measurements")}</div>
             {measurements.map((m, i) => {
               const change = m.current - m.prev;
               const totalChange = m.current - m.start;
@@ -7542,7 +8346,7 @@ function TraineeProgress({ onBack, onShowToast }) {
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                   <Camera size={14} color={colors.textPrimary} />
-                  <span style={{ fontSize: 13, fontWeight: 700, color: colors.textPrimary }}>Progress Photos</span>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: colors.textPrimary }}>{tr("Progress Photos")}</span>
                   <span style={{ fontSize: 10, fontWeight: 600, color: colors.textMuted, background: colors.surface, padding: "1px 6px", borderRadius: 6 }}>{allPhotoSets.length} sets</span>
                 </div>
                 <button style={{ fontSize: 11, fontWeight: 600, color: colors.primary, background: "none", border: "none", cursor: "pointer" }}>+ Upload</button>
@@ -7591,7 +8395,7 @@ function TraineeProgress({ onBack, onShowToast }) {
           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 14 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
               <Activity size={14} color="#8B5CF6" />
-              <span style={{ fontSize: 13, fontWeight: 700, color: colors.textPrimary }}>InBody Reports</span>
+              <span style={{ fontSize: 13, fontWeight: 700, color: colors.textPrimary }}>{tr("InBody Reports")}</span>
               <span style={{ fontSize: 10, fontWeight: 600, color: colors.textMuted, background: colors.surface, padding: "1px 6px", borderRadius: 6 }}>{traineeInbodyReports.length}</span>
             </div>
             <button style={{ fontSize: 11, fontWeight: 600, color: "#8B5CF6", background: "none", border: "none", cursor: "pointer" }}>+ Upload</button>
@@ -7640,16 +8444,21 @@ function TraineeProgress({ onBack, onShowToast }) {
           <div style={{ fontSize: 11, fontWeight: 700, color: colors.textMuted, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 8 }}>Earned ({earnedBadges.length})</div>
           <div style={{ display: "flex", gap: 8, overflowX: "auto", paddingBottom: 4 }}>
             {earnedBadges.map(b => {
-              const badgeIconData = getBadgeIcon(b.name);
-              const BadgeIcon = badgeIconData.icon;
               return (
               <div key={b.id} onClick={() => setShowBadgeDetail(showBadgeDetail === b.id ? null : b.id)}
-                style={{ minWidth: 80, background: colors.card, borderRadius: 14, padding: "12px 8px", textAlign: "center", border: `1.5px solid ${tierColors[b.tier]}30`, cursor: "pointer", position: "relative", flexShrink: 0 }}>
-                <div style={{ marginBottom: 4, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <BadgeIcon size={28} color={badgeIconData.color} />
+                style={{
+                  minWidth: 84, borderRadius: 16, padding: "14px 8px", textAlign: "center", cursor: "pointer", position: "relative", flexShrink: 0,
+                  background: b.tier === "gold" ? "linear-gradient(145deg, #FFFBEB, #FEF3C7)" : b.tier === "silver" ? "linear-gradient(145deg, #F8FAFC, #F1F5F9)" : colors.card,
+                  border: `1.5px solid ${b.tier === "gold" ? "#FBBF2440" : b.tier === "silver" ? "#94A3B830" : colors.border}`,
+                  boxShadow: "0 2px 10px rgba(0,0,0,0.06)",
+                }}>
+                <div style={{ marginBottom: 6, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <ModernBadgeIcon type={b.icon} size={40} earned={true} tier={b.tier} />
                 </div>
                 <div style={{ fontSize: 9, fontWeight: 700, color: colors.textPrimary, lineHeight: 1.2 }}>{b.name}</div>
-                <div style={{ fontSize: 8, color: tierColors[b.tier], fontWeight: 600, marginTop: 2 }}>{b.date}</div>
+                <div style={{ fontSize: 8, color: tierColors[b.tier], fontWeight: 700, marginTop: 2, display: "flex", alignItems: "center", justifyContent: "center", gap: 2 }}>
+                  {b.tier === "gold" && <Star size={6} color={tierColors.gold} fill={tierColors.gold} />}{b.date}
+                </div>
                 {showBadgeDetail === b.id && (
                   <div style={{ position: "absolute", bottom: "calc(100% + 8px)", left: "50%", transform: "translateX(-50%)", background: colors.textPrimary, color: "#fff", padding: "8px 12px", borderRadius: 10, fontSize: 10, whiteSpace: "nowrap", zIndex: 10, boxShadow: "0 4px 12px rgba(0,0,0,0.2)", animation: "fadeScale 0.2s ease" }}>
                     {b.criteria}
@@ -7666,13 +8475,9 @@ function TraineeProgress({ onBack, onShowToast }) {
         <div>
           <div style={{ fontSize: 11, fontWeight: 700, color: colors.textMuted, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 8 }}>In Progress ({lockedBadges.length})</div>
           {lockedBadges.map(b => {
-            const badgeIconData = getBadgeIcon(b.name);
-            const BadgeIcon = badgeIconData.icon;
             return (
             <div key={b.id} style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 14px", background: colors.card, borderRadius: 12, border: `1px solid ${colors.border}`, marginBottom: 8 }}>
-              <div style={{ filter: "grayscale(0.6)", opacity: 0.7 }}>
-                <BadgeIcon size={24} color={badgeIconData.color} />
-              </div>
+              <ModernBadgeIcon type={b.icon} size={40} earned={false} />
               <div style={{ flex: 1 }}>
                 <div style={{ fontSize: 13, fontWeight: 600, color: colors.textPrimary }}>{b.name}</div>
                 <div style={{ fontSize: 11, color: colors.textSecondary }}>{b.desc}</div>
@@ -7695,9 +8500,9 @@ function TraineeProgress({ onBack, onShowToast }) {
         <div style={{ background: colors.card, borderRadius: 16, padding: 14, border: `1px solid ${colors.border}` }}>
           <div style={{ display: "flex", padding: "0 0 8px", borderBottom: `1px solid ${colors.surface}`, marginBottom: 4 }}>
             <span style={{ flex: 2, fontSize: 10, fontWeight: 700, color: colors.textMuted }}>Metric</span>
-            <span style={{ flex: 1, fontSize: 10, fontWeight: 700, color: colors.textMuted, textAlign: "center" }}>This Week</span>
+            <span style={{ flex: 1, fontSize: 10, fontWeight: 700, color: colors.textMuted, textAlign: "center" }}>{tr("This Week")}</span>
             <span style={{ flex: 1, fontSize: 10, fontWeight: 700, color: colors.textMuted, textAlign: "center" }}>Last Week</span>
-            <span style={{ width: 40, fontSize: 10, fontWeight: 700, color: colors.textMuted, textAlign: "right" }}>Change</span>
+            <span style={{ width: 40, fontSize: 10, fontWeight: 700, color: colors.textMuted, textAlign: "right" }}>{tr("Change")}</span>
           </div>
           {weekComparison.map((row, i) => (
             <div key={i} style={{ display: "flex", alignItems: "center", padding: "8px 0", borderBottom: i < weekComparison.length - 1 ? `1px solid ${colors.surface}` : "none" }}>
@@ -7765,8 +8570,8 @@ function TraineeProgress({ onBack, onShowToast }) {
           </div>
           <div style={{ background: colors.successLight, borderRadius: 12, padding: "10px 14px", marginBottom: 20, fontSize: 13, color: colors.success }}>0.5 kg down from last week. Great progress!</div>
           <div style={{ display: "flex", gap: 10 }}>
-            <button onClick={() => setShowWeightSheet(false)} style={{ flex: 1, padding: "14px 0", borderRadius: 14, border: `1.5px solid ${colors.border}`, background: "#fff", color: colors.textSecondary, fontSize: 14, fontWeight: 600, cursor: "pointer" }}>Cancel</button>
-            <button onClick={() => { setShowWeightSheet(false); onShowToast("Weight logged", "success"); }} style={{ flex: 1, padding: "14px 0", borderRadius: 14, border: "none", background: colors.primary, color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer" }}>Log Weight</button>
+            <button onClick={() => setShowWeightSheet(false)} style={{ flex: 1, padding: "14px 0", borderRadius: 14, border: `1.5px solid ${colors.border}`, background: "#fff", color: colors.textSecondary, fontSize: 14, fontWeight: 600, cursor: "pointer" }}>{tr("Cancel")}</button>
+            <button onClick={() => { setShowWeightSheet(false); onShowToast("Weight logged", "success"); }} style={{ flex: 1, padding: "14px 0", borderRadius: 14, border: "none", background: colors.primary, color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer" }}>{tr("Log Weight")}</button>
           </div>
         </BottomSheet>
       )}
@@ -7783,8 +8588,8 @@ function TraineeProgress({ onBack, onShowToast }) {
             ))}
           </div>
           <div style={{ display: "flex", gap: 10 }}>
-            <button onClick={() => setShowMeasureSheet(false)} style={{ flex: 1, padding: "12px 0", borderRadius: 12, border: `1.5px solid ${colors.border}`, background: "#fff", color: colors.textSecondary, fontSize: 14, fontWeight: 600, cursor: "pointer" }}>Cancel</button>
-            <button onClick={() => { setShowMeasureSheet(false); onShowToast("Measurements logged", "success"); }} style={{ flex: 1, padding: "12px 0", borderRadius: 12, border: "none", background: colors.primary, color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer" }}>Save</button>
+            <button onClick={() => setShowMeasureSheet(false)} style={{ flex: 1, padding: "12px 0", borderRadius: 12, border: `1.5px solid ${colors.border}`, background: "#fff", color: colors.textSecondary, fontSize: 14, fontWeight: 600, cursor: "pointer" }}>{tr("Cancel")}</button>
+            <button onClick={() => { setShowMeasureSheet(false); onShowToast("Measurements logged", "success"); }} style={{ flex: 1, padding: "12px 0", borderRadius: 12, border: "none", background: colors.primary, color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer" }}>{tr("Save")}</button>
           </div>
         </BottomSheet>
       )}
@@ -7892,12 +8697,12 @@ function TraineeChat({ onBack, onShowToast }) {
       updateMsgStatus(msgId, "sent");
       setTimeout(() => updateMsgStatus(msgId, "delivered"), 1000);
     }, 800);
-    onShowToast("Resending message...");
+    onShowToastr("Resending message...");
   };
 
   const deleteMessage = (msgId) => {
     setMessages(prev => prev.map(m => m.id === msgId ? { ...m, type: "deleted", text: "Message removed" } : m));
-    onShowToast("Message deleted");
+    onShowToastr("Message deleted");
   };
 
   const toggleMute = () => {
@@ -7984,7 +8789,7 @@ function TraineeChat({ onBack, onShowToast }) {
             }}>
               <MessageSquare size={24} color={colors.primary} />
             </div>
-            <h3 style={{ fontSize: 15, fontWeight: 700, color: colors.textPrimary, marginBottom: 4 }}>Start your conversation!</h3>
+            <h3 style={{ fontSize: 15, fontWeight: 700, color: colors.textPrimary, marginBottom: 4 }}>{tr("Start your conversation!")}</h3>
             <p style={{ fontSize: 12, color: colors.textSecondary, lineHeight: 1.5, marginBottom: 16 }}>
               Say hello to {coach.name}. Ask questions about your workouts, nutrition, or progress.
             </p>
@@ -8051,7 +8856,7 @@ function TraineeChat({ onBack, onShowToast }) {
                           display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: 6
                         }}>
                           <Image size={28} color={isMe ? colors.primary : colors.textSecondary} />
-                          <span style={{ fontSize: 10, color: colors.textMuted }}>📸 Photo</span>
+                          <span style={{ fontSize: 10, color: colors.textMuted, display: "inline-flex", alignItems: "center", gap: 2 }}><Camera size={9} /> Photo</span>
                         </div>
                         {m.caption && (
                           <div style={{ padding: "8px 12px", background: isMe ? colors.primary : colors.card, fontSize: 12, color: isMe ? "#fff" : colors.textPrimary }}>
@@ -8204,15 +9009,15 @@ function TraineeChat({ onBack, onShowToast }) {
               if (att.label === "Photo" || att.label === "Camera") {
                 sendMessage("", "image", { imageUrl: "uploaded-photo.jpg", caption: "" });
                 setShowAttach(false);
-                onShowToast("Photo sent!");
+                onShowToastr("Photo sent!");
               } else if (att.label === "File") {
                 sendMessage("", "attachment", { fileName: "workout-log.pdf", fileSize: "128 KB" });
                 setShowAttach(false);
-                onShowToast("File sent!");
+                onShowToastr("File sent!");
               } else {
                 sendMessage("", "attachment", { fileName: "Weekly-Workout-Summary.pdf", fileSize: "85 KB" });
                 setShowAttach(false);
-                onShowToast("Workout log shared!");
+                onShowToastr("Workout log shared!");
               }
             }} style={{
               display: "flex", flexDirection: "column", alignItems: "center", gap: 6,
@@ -8290,7 +9095,7 @@ function TraineeChat({ onBack, onShowToast }) {
       {/* ── Coach Info Panel ── */}
       {showCoachInfo && (
         <div style={{
-          position: "fixed", inset: 0, background: "rgba(0,0,0,0.4)", display: "flex", alignItems: "flex-end", zIndex: 998
+          position: "absolute", inset: 0, background: "rgba(0,0,0,0.4)", display: "flex", alignItems: "flex-end", zIndex: 998
         }} onClick={() => setShowCoachInfo(false)}>
           <div onClick={e => e.stopPropagation()} style={{
             width: "100%", maxHeight: "65%", background: "#fff", borderRadius: "20px 20px 0 0",
@@ -8320,12 +9125,14 @@ function TraineeChat({ onBack, onShowToast }) {
             {/* Stats */}
             <div style={{ display: "flex", gap: 12, marginBottom: 20 }}>
               {[
-                { label: "Rating", value: `⭐ ${coach.rating}` },
+                { label: "Rating", value: coach.rating, isRating: true },
                 { label: "Clients", value: coach.clients },
                 { label: "Experience", value: coach.experience },
               ].map(s => (
                 <div key={s.label} style={{ flex: 1, textAlign: "center", padding: 10, background: colors.surface, borderRadius: 10 }}>
-                  <div style={{ fontSize: 16, fontWeight: 800, color: colors.textPrimary }}>{s.value}</div>
+                  <div style={{ fontSize: 16, fontWeight: 800, color: colors.textPrimary, display: "flex", alignItems: "center", justifyContent: "center", gap: 3 }}>
+                    {s.isRating ? <><Star size={13} color="#F59E0B" fill="#F59E0B" />{s.value}</> : s.value}
+                  </div>
                   <div style={{ fontSize: 10, fontWeight: 600, color: colors.textMuted, marginTop: 2 }}>{s.label}</div>
                 </div>
               ))}
@@ -8337,7 +9144,7 @@ function TraineeChat({ onBack, onShowToast }) {
                 background: "#fff", fontSize: 13, fontWeight: 600, color: colors.textSecondary, cursor: "pointer",
                 display: "flex", alignItems: "center", justifyContent: "center", gap: 6
               }}>
-                {isMuted ? <Bell size={15} /> : <span>🔇</span>} {isMuted ? "Unmute" : "Mute"}
+                {isMuted ? <Bell size={15} /> : <BellOff size={15} />} {isMuted ? "Unmute" : "Mute"}
               </button>
               <button onClick={() => setShowCoachInfo(false)} style={{
                 flex: 1, padding: "12px 0", borderRadius: 12, border: "none",
@@ -8353,7 +9160,7 @@ function TraineeChat({ onBack, onShowToast }) {
       {/* ── Image Preview Modal ── */}
       {showImagePreview && (
         <div style={{
-          position: "fixed", inset: 0, background: "rgba(0,0,0,0.85)", display: "flex", flexDirection: "column",
+          position: "absolute", inset: 0, background: "rgba(0,0,0,0.85)", display: "flex", flexDirection: "column",
           alignItems: "center", justifyContent: "center", zIndex: 999, animation: "fadeScale 0.2s ease"
         }}>
           <button onClick={() => setShowImagePreview(null)} style={{
@@ -8386,9 +9193,9 @@ function TraineeChat({ onBack, onShowToast }) {
 
 function UpgradeModal({ onClose, onUpgrade }) {
   return (
-    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 999, padding: 20 }}>
+    <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.55)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 999, padding: 20 }}>
       <div style={{
-        width: "100%", maxWidth: 340, background: "#fff", borderRadius: 24, overflow: "hidden",
+        width: "100%", maxWidth: 400, background: "#fff", borderRadius: 24, overflow: "hidden",
         animation: "fadeScale 0.3s ease", boxShadow: "0 25px 60px rgba(0,0,0,0.25)"
       }}>
         {/* Premium Header */}
@@ -8406,7 +9213,7 @@ function UpgradeModal({ onClose, onUpgrade }) {
           }}>
             <Users size={26} color="#fff" />
           </div>
-          <h2 style={{ fontSize: 20, fontWeight: 900, color: "#fff", marginBottom: 4 }}>Upgrade to Pro</h2>
+          <h2 style={{ fontSize: 20, fontWeight: 900, color: "#fff", marginBottom: 4 }}>{tr("Upgrade to Pro")}</h2>
           <p style={{ fontSize: 12, color: "rgba(255,255,255,0.7)" }}>Grow your coaching business</p>
         </div>
 
@@ -8420,7 +9227,7 @@ function UpgradeModal({ onClose, onUpgrade }) {
           }}>
             <AlertTriangle size={18} color={colors.warning} style={{ flexShrink: 0 }} />
             <div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: colors.textPrimary }}>Client limit reached</div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: colors.textPrimary }}>{tr("Client limit reached")}</div>
               <div style={{ fontSize: 11, color: colors.textSecondary, marginTop: 2 }}>
                 You've reached your 3 free client spots. Upgrade to add unlimited clients.
               </div>
@@ -8503,7 +9310,7 @@ function CoachWorkoutsList({ sets, onSetUpdate, onCreate, onNavigate, onShowToas
   const deleteSet = (id) => {
     onSetUpdate(prev => prev.filter(s => s.id !== id));
     setShowDeleteConfirm(null);
-    onShowToast("Workout set deleted");
+    onShowToastr("Workout set deleted");
   };
 
   const filteredSets = sets.filter(s => {
@@ -8520,7 +9327,7 @@ function CoachWorkoutsList({ sets, onSetUpdate, onCreate, onNavigate, onShowToas
           <ChevronLeft size={20} color={colors.textPrimary} />
         </button>
         <div style={{ flex: 1 }}>
-          <h2 style={{ fontSize: 18, fontWeight: 800, color: colors.textPrimary }}>Workout Plans</h2>
+          <h2 style={{ fontSize: 18, fontWeight: 800, color: colors.textPrimary }}>{tr("Workout Plans")}</h2>
           <span style={{ fontSize: 11, color: colors.textSecondary }}>{filteredSets.length} plan{filteredSets.length !== 1 ? "s" : ""}</span>
         </div>
         <button onClick={onCreate} style={{
@@ -8620,7 +9427,7 @@ function CoachNutritionList({ sets, onSetUpdate, onCreate, onNavigate, onShowToa
   const deleteSet = (id) => {
     onSetUpdate(prev => prev.filter(s => s.id !== id));
     setShowDeleteConfirm(null);
-    onShowToast("Nutrition plan deleted");
+    onShowToastr("Nutrition plan deleted");
   };
 
   const filteredSets = sets.filter(s => {
@@ -8637,7 +9444,7 @@ function CoachNutritionList({ sets, onSetUpdate, onCreate, onNavigate, onShowToa
           <ChevronLeft size={20} color={colors.textPrimary} />
         </button>
         <div style={{ flex: 1 }}>
-          <h2 style={{ fontSize: 18, fontWeight: 800, color: colors.textPrimary }}>Nutrition Plans</h2>
+          <h2 style={{ fontSize: 18, fontWeight: 800, color: colors.textPrimary }}>{tr("Nutrition Plans")}</h2>
           <span style={{ fontSize: 11, color: colors.textSecondary }}>{filteredSets.length} plan{filteredSets.length !== 1 ? "s" : ""}</span>
         </div>
         <button onClick={onCreate} style={{
@@ -8728,7 +9535,7 @@ function CoachNutritionList({ sets, onSetUpdate, onCreate, onNavigate, onShowToa
 // LOGIN / ROLE SELECTION SCREEN
 // ═══════════════════════════════════════════════════════
 
-function LoginScreen({ onLogin }) {
+function LoginScreen({ onLogin, onLanguageChange, currentLanguage = "English" }) {
   const [authScreen, setAuthScreen] = useState("role-select"); // role-select | coach-login | coach-signup | trainee-login
   const [selectedRole, setSelectedRole] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -8741,7 +9548,7 @@ function LoginScreen({ onLogin }) {
   const [loginServerError, setLoginServerError] = useState("");
 
   // Coach Signup state
-  const [signupData, setSignupData] = useState({ firstName: "", lastName: "", email: "", password: "", confirmPw: "", gym: "" });
+  const [signupData, setSignupData] = useState({ firstName: "", lastName: "", email: "", password: "", confirmPw: "", gym: "", gender: "" });
   const [signupShowPw, setSignupShowPw] = useState(false);
   const [signupShowConfirm, setSignupShowConfirm] = useState(false);
   const [signupErrors, setSignupErrors] = useState({});
@@ -8918,7 +9725,7 @@ function LoginScreen({ onLogin }) {
           <ChevronLeft size={18} color="#fff" />
         </button>
 
-        <LogoHeader subtitle="Reset your password" />
+        <LogoHeader subtitle={tr("Reset your password")} />
 
         {forgotSent ? (
           <div style={{ textAlign: "center", animation: "fadeScale 0.3s ease" }}>
@@ -8928,7 +9735,7 @@ function LoginScreen({ onLogin }) {
             }}>
               <Mail size={28} color="#10B981" />
             </div>
-            <h2 style={{ fontSize: 18, fontWeight: 800, color: "#fff", marginBottom: 6 }}>Check your email</h2>
+            <h2 style={{ fontSize: 18, fontWeight: 800, color: "#fff", marginBottom: 6 }}>{tr("Check your email")}</h2>
             <p style={{ fontSize: 13, color: "rgba(255,255,255,0.6)", lineHeight: 1.6, marginBottom: 24 }}>
               We sent a password reset link to <strong style={{ color: "#fff" }}>{forgotEmail}</strong>. Please check your inbox.
             </p>
@@ -8945,7 +9752,7 @@ function LoginScreen({ onLogin }) {
               Enter the email address associated with your account and we'll send a reset link.
             </p>
             <div style={{ marginBottom: 16 }}>
-              <label style={labelStyle}>Email Address</label>
+              <label style={labelStyle}>{tr("Email Address")}</label>
               <div style={{ position: "relative" }}>
                 <Mail size={16} color="rgba(255,255,255,0.3)" style={{ position: "absolute", left: 14, top: 16 }} />
                 <input
@@ -8969,12 +9776,30 @@ function LoginScreen({ onLogin }) {
   if (authScreen === "role-select") {
     return (
       <div style={{ height: "100%", background: gradients.onboarding, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", padding: 28, textAlign: "center" }}>
-        <LogoHeader subtitle="Train smarter. Together." />
+        <LogoHeader subtitle={tr("Train smarter. Together.")} />
+
+        {/* Language Toggle */}
+        <div style={{ display: "flex", gap: 6, marginBottom: 24, background: "rgba(255,255,255,0.08)", borderRadius: 16, padding: 5, width: "100%" }}>
+          {[{ key: "English", label: "🇺🇸 English" }, { key: "Arabic", label: "🇸🇦 العربية" }].map(lang => (
+            <button key={lang.key}
+              onClick={() => { if (onLanguageChange) onLanguageChange(lang.key); }}
+              style={{
+                flex: 1, padding: "12px 0", borderRadius: 12, border: "none",
+                background: currentLanguage === lang.key ? "rgba(255,255,255,0.22)" : "transparent",
+                color: currentLanguage === lang.key ? "#fff" : "rgba(255,255,255,0.45)",
+                fontSize: 14, fontWeight: 700, cursor: "pointer", transition: "all 0.2s",
+                boxShadow: currentLanguage === lang.key ? "0 3px 12px rgba(0,0,0,0.2)" : "none",
+                letterSpacing: 0.2
+              }}>
+              {lang.label}
+            </button>
+          ))}
+        </div>
 
         <div style={{ width: "100%", display: "flex", flexDirection: "column", gap: 10, marginBottom: 20 }}>
           {[
-            { key: "coach", icon: Users, title: "I'm a Coach", desc: "Manage clients, create plans & track progress", gradient: "linear-gradient(135deg, #34D399, #0A3D22)" },
-            { key: "trainee", icon: Dumbbell, title: "I'm a Trainee", desc: "Follow plans, log workouts & hit your goals", gradient: "linear-gradient(135deg, #0A3D22, #34D399)" }
+            { key: "coach", icon: Users, title: tr("I'm a Coach"), desc: tr("Manage clients, create plans & track progress"), gradient: "linear-gradient(135deg, #34D399, #0A3D22)" },
+            { key: "trainee", icon: Dumbbell, title: tr("I'm a Trainee"), desc: tr("Follow plans, log workouts & hit your goals"), gradient: "linear-gradient(135deg, #0A3D22, #34D399)" }
           ].map(r => (
             <button key={r.key} onClick={() => setSelectedRole(r.key)} style={{
               width: "100%", padding: "18px 16px", borderRadius: 16,
@@ -9018,7 +9843,7 @@ function LoginScreen({ onLogin }) {
             transition: "all 0.2s", boxShadow: selectedRole ? "0 4px 20px rgba(0,0,0,0.15)" : "none"
           }}
         >
-          Continue →
+          {tr("Continue")} →
         </button>
       </div>
     );
@@ -9038,7 +9863,7 @@ function LoginScreen({ onLogin }) {
           <ChevronLeft size={18} color="#fff" />
         </button>
 
-        <LogoHeader subtitle="Welcome back, Coach" />
+        <LogoHeader subtitle={tr("Welcome back, Coach")} />
 
         <div style={{ animation: "slideUp 0.3s ease" }}>
           {/* Server Error */}
@@ -9051,7 +9876,7 @@ function LoginScreen({ onLogin }) {
 
           {/* Email */}
           <div style={{ marginBottom: 14 }}>
-            <label style={labelStyle}>Email Address</label>
+            <label style={labelStyle}>{tr("Email Address")}</label>
             <div style={{ position: "relative" }}>
               <Mail size={16} color="rgba(255,255,255,0.3)" style={{ position: "absolute", left: 14, top: 16 }} />
               <input
@@ -9066,7 +9891,7 @@ function LoginScreen({ onLogin }) {
 
           {/* Password */}
           <div style={{ marginBottom: 6 }}>
-            <label style={labelStyle}>Password</label>
+            <label style={labelStyle}>{tr("Password")}</label>
             <PasswordInput
               value={loginPassword} onChange={e => { setLoginPassword(e.target.value); setLoginErrors(p => ({ ...p, password: "" })); }}
               show={loginShowPw} onToggle={() => setLoginShowPw(!loginShowPw)}
@@ -9090,7 +9915,7 @@ function LoginScreen({ onLogin }) {
 
           {/* Sign up link */}
           <div style={{ textAlign: "center", marginTop: 20 }}>
-            <span style={{ fontSize: 13, color: "rgba(255,255,255,0.5)" }}>Don't have an account? </span>
+            <span style={{ fontSize: 13, color: "rgba(255,255,255,0.5)" }}>{tr("Don't have an account? ")}</span>
             <button onClick={() => { setAuthScreen("coach-signup"); setLoginErrors({}); }} style={{
               background: "none", border: "none", color: "#fff", fontSize: 13, fontWeight: 700,
               cursor: "pointer", textDecoration: "underline"
@@ -9151,6 +9976,30 @@ function LoginScreen({ onLogin }) {
             </div>
           </div>
 
+
+          {/* Gender */}
+          <div style={{ marginBottom: 12 }}>
+            <label style={labelStyle}>{tr("Gender *")}</label>
+            <div style={{ display: "flex", gap: 8 }}>
+              {[
+                { key: "Male",   icon: "♂", label: tr("Male") },
+                { key: "Female", icon: "♀", label: tr("Female") },
+                { key: "Other",  icon: "⚧", label: tr("Other") },
+              ].map(g => (
+                <button key={g.key} onClick={() => updateSignup("gender", signupData.gender === g.key ? "" : g.key)}
+                  style={{
+                    flex: 1, padding: "10px 6px", borderRadius: 12,
+                    border: `2px solid ${signupData.gender === g.key ? "#34D399" : "rgba(255,255,255,0.2)"}`,
+                    background: signupData.gender === g.key ? "rgba(52,211,153,0.15)" : "rgba(255,255,255,0.06)",
+                    cursor: "pointer", textAlign: "center", transition: "all 0.15s"
+                  }}>
+                  <div style={{ fontSize: 18, marginBottom: 2 }}>{g.icon}</div>
+                  <div style={{ fontSize: 11, fontWeight: 600, color: signupData.gender === g.key ? "#34D399" : "rgba(255,255,255,0.6)" }}>{g.label}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Email */}
           <div style={{ marginBottom: 12 }}>
             <label style={labelStyle}>Email Address *</label>
@@ -9201,7 +10050,7 @@ function LoginScreen({ onLogin }) {
 
           {/* Gym / Studio Name (optional) */}
           <div style={{ marginBottom: 16 }}>
-            <label style={labelStyle}>Gym / Studio Name <span style={{ opacity: 0.5 }}>(optional)</span></label>
+            <label style={labelStyle}>{tr("Gym / Studio Name ")}<span style={{ opacity: 0.5 }}>(optional)</span></label>
             <input type="text" value={signupData.gym} onChange={e => updateSignup("gym", e.target.value)}
               placeholder="FitFactory, Gold's Gym..." style={inputStyle(false)} />
           </div>
@@ -9218,7 +10067,7 @@ function LoginScreen({ onLogin }) {
             </button>
             <div>
               <span style={{ fontSize: 12, color: "rgba(255,255,255,0.6)", lineHeight: 1.5 }}>
-                I agree to the <button style={{ background: "none", border: "none", color: "#fff", fontSize: 12, fontWeight: 700, cursor: "pointer", textDecoration: "underline", padding: 0 }}>Terms & Conditions</button> and <button style={{ background: "none", border: "none", color: "#fff", fontSize: 12, fontWeight: 700, cursor: "pointer", textDecoration: "underline", padding: 0 }}>Privacy Policy</button>
+                I agree to the <button style={{ background: "none", border: "none", color: "#fff", fontSize: 12, fontWeight: 700, cursor: "pointer", textDecoration: "underline", padding: 0 }}>{tr("Terms & Conditions")}</button> and <button style={{ background: "none", border: "none", color: "#fff", fontSize: 12, fontWeight: 700, cursor: "pointer", textDecoration: "underline", padding: 0 }}>{tr("Privacy Policy")}</button>
               </span>
               {signupErrors.terms && <div style={{ ...errorStyle, marginTop: 2 }}><AlertTriangle size={10} /> {signupErrors.terms}</div>}
             </div>
@@ -9229,7 +10078,7 @@ function LoginScreen({ onLogin }) {
 
           {/* Login link */}
           <div style={{ textAlign: "center", marginTop: 16, paddingBottom: 20 }}>
-            <span style={{ fontSize: 13, color: "rgba(255,255,255,0.5)" }}>Already have an account? </span>
+            <span style={{ fontSize: 13, color: "rgba(255,255,255,0.5)" }}>{tr("Already have an account? ")}</span>
             <button onClick={() => { setAuthScreen("coach-login"); setSignupErrors({}); }} style={{
               background: "none", border: "none", color: "#fff", fontSize: 13, fontWeight: 700,
               cursor: "pointer", textDecoration: "underline"
@@ -9280,7 +10129,7 @@ function LoginScreen({ onLogin }) {
 
           {/* Email */}
           <div style={{ marginBottom: 14 }}>
-            <label style={labelStyle}>Email Address</label>
+            <label style={labelStyle}>{tr("Email Address")}</label>
             <div style={{ position: "relative" }}>
               <Mail size={16} color="rgba(255,255,255,0.3)" style={{ position: "absolute", left: 14, top: 16 }} />
               <input
@@ -9295,7 +10144,7 @@ function LoginScreen({ onLogin }) {
 
           {/* Password */}
           <div style={{ marginBottom: 6 }}>
-            <label style={labelStyle}>Password</label>
+            <label style={labelStyle}>{tr("Password")}</label>
             <PasswordInput
               value={traineePassword} onChange={e => { setTraineePassword(e.target.value); setTraineeErrors(p => ({ ...p, password: "" })); }}
               show={traineeShowPw} onToggle={() => setTraineeShowPw(!traineeShowPw)}
@@ -9335,7 +10184,435 @@ function LoginScreen({ onLogin }) {
 // COACH SETTINGS
 // ═══════════════════════════════════════════════════════
 
-function CoachSettings({ onShowToast, onNavigate, onLogout }) {
+function TraineeSettings({ onShowToast, onNavigate, onLogout, onLanguageChange, currentLanguage = "English" }) {
+  const [activeSection, setActiveSection] = useState(null);
+  const [profile, setProfile] = useState({
+    name: "Sarah M.", email: "sarah.m@email.com", phone: "+1 (555) 987-6543", bio: "Fitness enthusiast, working towards my goal weight!", avatar: null
+  });
+  const [editField, setEditField] = useState(null);
+  const [editValue, setEditValue] = useState("");
+
+  const [showPasswordForm, setShowPasswordForm] = useState(false);
+  const [passwords, setPasswords] = useState({ current: "", newPass: "", confirm: "" });
+  const [showPassCurrent, setShowPassCurrent] = useState(false);
+  const [showPassNew, setShowPassNew] = useState(false);
+  const [showPassConfirm, setShowPassConfirm] = useState(false);
+
+  const [notifications, setNotifications] = useState({
+    pushMaster: true, emailMaster: false,
+    workoutReminders: true, nutritionReminders: true, messages: true,
+    weeklyReport: true, coachUpdates: true, achievements: true,
+    dndEnabled: false, dndStart: "22:00", dndEnd: "07:00"
+  });
+
+  const [preferences, setPreferences] = useState({
+    theme: "light", units: "metric", language: currentLanguage, weightUnit: "kg"
+  });
+
+  const [twoFactor, setTwoFactor] = useState(false);
+  const [showDevices, setShowDevices] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  const toggleNotif = (key) => setNotifications(p => ({ ...p, [key]: !p[key] }));
+
+  const profileCompletion = () => {
+    let filled = 0;
+    if (profile.name) filled++;
+    if (profile.email) filled++;
+    if (profile.phone) filled++;
+    if (profile.bio) filled++;
+    if (profile.avatar) filled++;
+    return Math.round((filled / 5) * 100);
+  };
+
+  const passwordStrength = (pass) => {
+    if (!pass) return { label: "", color: colors.border, pct: 0 };
+    let score = 0;
+    if (pass.length >= 8) score++;
+    if (/[A-Z]/.test(pass)) score++;
+    if (/[0-9]/.test(pass)) score++;
+    if (/[^A-Za-z0-9]/.test(pass)) score++;
+    if (pass.length >= 12) score++;
+    const levels = [
+      { label: "Too short", color: colors.error, pct: 20 },
+      { label: "Weak", color: colors.error, pct: 35 },
+      { label: "Fair", color: colors.warning, pct: 55 },
+      { label: "Good", color: "#3B82F6", pct: 75 },
+      { label: "Strong", color: colors.success, pct: 100 },
+    ];
+    return levels[Math.min(score, 4)];
+  };
+
+  const startEdit = (field) => { setEditField(field); setEditValue(profile[field]); };
+  const saveEdit = () => {
+    if (editValue.trim()) {
+      setProfile(p => ({ ...p, [editField]: editValue.trim() }));
+      onShowToast(`${editField.charAt(0).toUpperCase() + editField.slice(1)} updated`, "success");
+    }
+    setEditField(null);
+  };
+
+  const handlePasswordSave = () => {
+    if (!passwords.current) { onShowToast("Enter current password", "error"); return; }
+    if (passwords.newPass.length < 8) { onShowToast("Password must be at least 8 characters", "error"); return; }
+    if (passwords.newPass !== passwords.confirm) { onShowToast("Passwords do not match", "error"); return; }
+    onShowToast("Password updated successfully", "success");
+    setPasswords({ current: "", newPass: "", confirm: "" });
+    setShowPasswordForm(false);
+  };
+
+  const devices = [
+    { name: "iPhone 13 Pro Max", browser: "Safari", location: "Cairo, EG", lastActive: "Active now", current: true },
+    { name: "MacBook Air", browser: "Chrome 120", location: "Cairo, EG", lastActive: "2 hours ago", current: false },
+  ];
+
+  const pCompletion = profileCompletion();
+  const pStrength = passwordStrength(passwords.newPass);
+
+  const ToggleSwitch = ({ on, onToggle }) => (
+    <button onClick={onToggle} style={{
+      width: 46, height: 26, borderRadius: 13, border: "none",
+      background: on ? colors.primary : colors.border,
+      position: "relative", cursor: "pointer", transition: "background 0.2s", flexShrink: 0
+    }}>
+      <div style={{
+        width: 20, height: 20, borderRadius: 10, background: "#fff",
+        position: "absolute", top: 3, left: on ? 23 : 3,
+        transition: "left 0.2s", boxShadow: "0 1px 4px rgba(0,0,0,0.15)"
+      }} />
+    </button>
+  );
+
+  const SectionHeader = ({ icon: Icon, iconColor, title, subtitle, isOpen, onToggle }) => (
+    <button onClick={onToggle} style={{
+      width: "100%", background: colors.card, borderRadius: 16, padding: "16px 18px",
+      border: `1px solid ${isOpen ? colors.primary : colors.border}`,
+      display: "flex", alignItems: "center", gap: 14, cursor: "pointer",
+      boxShadow: isOpen ? "0 2px 12px rgba(52,211,153,0.1)" : "0 1px 3px rgba(0,0,0,0.04)",
+      transition: "all 0.2s"
+    }}>
+      <div style={{
+        width: 42, height: 42, borderRadius: 12,
+        background: isOpen ? `${iconColor}15` : colors.surface,
+        display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0
+      }}>
+        <Icon size={20} color={isOpen ? iconColor : colors.textMuted} />
+      </div>
+      <div style={{ flex: 1, textAlign: "left" }}>
+        <div style={{ fontSize: 15, fontWeight: 700, color: colors.textPrimary }}>{title}</div>
+        <div style={{ fontSize: 12, color: colors.textSecondary, marginTop: 1 }}>{subtitle}</div>
+      </div>
+      {isOpen ? <ChevronUp size={18} color={colors.primary} /> : <ChevronDown size={18} color={colors.textMuted} />}
+    </button>
+  );
+
+  const sections = [
+    { id: "account",       icon: User,     iconColor: colors.primary, title: tr("Account"),       subtitle: tr("Profile, email, password") },
+    { id: "notifications", icon: Bell,     iconColor: "#F59E0B",       title: tr("Notifications"), subtitle: tr("Push, email, Do Not Disturb") },
+    { id: "preferences",   icon: Settings, iconColor: "#8B5CF6",       title: tr("App Preferences"), subtitle: tr("Theme, units, language") },
+    { id: "security",      icon: Shield,   iconColor: colors.error,    title: tr("Security & Privacy"), subtitle: tr("2FA, devices, data") },
+  ];
+
+  return (
+    <div style={{ padding: "0 20px 20px" }}>
+      {/* Header */}
+      <div style={{ marginBottom: 20 }}>
+        <h1 style={{ fontSize: 26, fontWeight: 800, color: colors.textPrimary, letterSpacing: -0.5, marginBottom: 4 }}>{tr("Settings")}</h1>
+        <p style={{ fontSize: 14, color: colors.textSecondary }}>{tr("Manage your account & preferences")}</p>
+      </div>
+
+      {/* Profile Quick Card */}
+      <div style={{ background: colors.card, borderRadius: 18, padding: 18, border: `1px solid ${colors.border}`, marginBottom: 20, boxShadow: "0 2px 8px rgba(0,0,0,0.04)" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 14, marginBottom: 12 }}>
+          <div style={{ width: 56, height: 56, borderRadius: 16, background: gradients.workout, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 22, fontWeight: 800, color: "#fff", position: "relative" }}>
+            {profile.avatar ? <img src={profile.avatar} alt="" style={{ width: "100%", height: "100%", borderRadius: 16, objectFit: "cover" }} /> : profile.name.split(" ").map(w => w[0]).join("")}
+            <div style={{ position: "absolute", bottom: -2, right: -2, width: 20, height: 20, borderRadius: "50%", background: colors.primary, border: "2px solid #fff", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
+              <Camera size={10} color="#fff" />
+            </div>
+          </div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 17, fontWeight: 700, color: colors.textPrimary }}>{profile.name}</div>
+            <div style={{ fontSize: 13, color: colors.textSecondary }}>{profile.email}</div>
+            <div style={{ fontSize: 11, color: colors.textMuted, marginTop: 3 }}>Member since Feb 2026</div>
+          </div>
+        </div>
+        <div>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 5 }}>
+            <span style={{ fontSize: 12, fontWeight: 600, color: colors.textSecondary }}>{tr("Profile Completion")}</span>
+            <span style={{ fontSize: 12, fontWeight: 700, color: pCompletion === 100 ? colors.success : colors.primary }}>{pCompletion}%</span>
+          </div>
+          <div style={{ background: colors.surface, borderRadius: 4, height: 6, overflow: "hidden" }}>
+            <div style={{ width: `${pCompletion}%`, height: "100%", background: pCompletion === 100 ? colors.success : colors.primary, borderRadius: 4, transition: "width 0.5s ease" }} />
+          </div>
+          {pCompletion < 100 && <p style={{ fontSize: 11, color: colors.textMuted, marginTop: 4 }}>Add a profile photo to reach 100%</p>}
+        </div>
+      </div>
+
+      {/* Settings Sections */}
+      <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+        {sections.map(sec => (
+          <div key={sec.id}>
+            <SectionHeader icon={sec.icon} iconColor={sec.iconColor} title={sec.title} subtitle={sec.subtitle}
+              isOpen={activeSection === sec.id} onToggle={() => setActiveSection(activeSection === sec.id ? null : sec.id)} />
+
+            {/* ── ACCOUNT ── */}
+            {activeSection === sec.id && sec.id === "account" && (
+              <div style={{ background: colors.card, borderRadius: "0 0 16px 16px", padding: "8px 18px 18px", marginTop: -8, border: `1px solid ${colors.border}`, borderTop: "none" }}>
+                {[
+                  { field: "name", label: tr("Full Name"), icon: User, iconColor: colors.primary },
+                  { field: "email", label: tr("Email"), icon: Mail, iconColor: "#3B82F6" },
+                  { field: "phone", label: tr("Phone"), icon: Phone, iconColor: colors.success },
+                ].map(({ field, label, icon: Icon, iconColor }) => (
+                  <div key={field}>
+                    {editField === field ? (
+                      <div style={{ padding: "10px 0", borderBottom: `1px solid ${colors.surface}` }}>
+                        <div style={{ fontSize: 11, fontWeight: 700, color: colors.textMuted, marginBottom: 6, textTransform: "uppercase", letterSpacing: 0.5 }}>{label}</div>
+                        <div style={{ display: "flex", gap: 8 }}>
+                          <input autoFocus value={editValue} onChange={e => setEditValue(e.target.value)}
+                            style={{ flex: 1, height: 40, borderRadius: 10, border: `1.5px solid ${colors.primary}`, padding: "0 12px", fontSize: 14, outline: "none", color: colors.textPrimary, background: colors.background }} />
+                          <button onClick={saveEdit} style={{ padding: "0 16px", height: 40, borderRadius: 10, border: "none", background: colors.primary, color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>{tr("Save")}</button>
+                          <button onClick={() => setEditField(null)} style={{ padding: "0 12px", height: 40, borderRadius: 10, border: `1px solid ${colors.border}`, background: "#fff", color: colors.textSecondary, fontSize: 13, cursor: "pointer" }}>{tr("Cancel")}</button>
+                        </div>
+                      </div>
+                    ) : (
+                      <button onClick={() => startEdit(field)} style={{ width: "100%", padding: "13px 0", display: "flex", alignItems: "center", gap: 12, background: "none", border: "none", borderBottom: `1px solid ${colors.surface}`, cursor: "pointer" }}>
+                        <div style={{ width: 32, height: 32, borderRadius: 9, background: `${iconColor}10`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                          <Icon size={15} color={iconColor} />
+                        </div>
+                        <div style={{ flex: 1, textAlign: "left" }}>
+                          <div style={{ fontSize: 11, fontWeight: 600, color: colors.textMuted, textTransform: "uppercase", letterSpacing: 0.4 }}>{label}</div>
+                          <div style={{ fontSize: 14, fontWeight: 600, color: colors.textPrimary, marginTop: 1 }}>{profile[field] || <span style={{ color: colors.textMuted, fontStyle: "italic" }}>Not set</span>}</div>
+                        </div>
+                        <Edit3 size={14} color={colors.textMuted} />
+                      </button>
+                    )}
+                  </div>
+                ))}
+
+                {/* Change Password */}
+                <div style={{ marginTop: 10 }}>
+                  <button onClick={() => setShowPasswordForm(!showPasswordForm)} style={{ width: "100%", padding: "13px 0", display: "flex", alignItems: "center", gap: 12, background: "none", border: "none", borderBottom: `1px solid ${colors.surface}`, cursor: "pointer" }}>
+                    <div style={{ width: 32, height: 32, borderRadius: 9, background: `${colors.warning}10`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <Lock size={15} color={colors.warning} />
+                    </div>
+                    <div style={{ flex: 1, textAlign: "left" }}>
+                      <div style={{ fontSize: 14, fontWeight: 600, color: colors.textPrimary }}>{tr("Change Password")}</div>
+                    </div>
+                    {showPasswordForm ? <ChevronUp size={16} color={colors.textMuted} /> : <ChevronRight size={16} color={colors.textMuted} />}
+                  </button>
+
+                  {showPasswordForm && (
+                    <div style={{ padding: "14px 0", display: "flex", flexDirection: "column", gap: 10 }}>
+                      {[
+                        { key: "current", label: "Current Password", show: showPassCurrent, setShow: setShowPassCurrent },
+                        { key: "newPass", label: "New Password", show: showPassNew, setShow: setShowPassNew },
+                        { key: "confirm", label: "Confirm New Password", show: showPassConfirm, setShow: setShowPassConfirm },
+                      ].map(({ key, label, show, setShow }) => (
+                        <div key={key}>
+                          <div style={{ fontSize: 11, fontWeight: 700, color: colors.textMuted, marginBottom: 5, textTransform: "uppercase", letterSpacing: 0.4 }}>{label}</div>
+                          <div style={{ position: "relative" }}>
+                            <input type={show ? "text" : "password"} value={passwords[key]}
+                              onChange={e => setPasswords(p => ({ ...p, [key]: e.target.value }))}
+                              style={{ width: "100%", height: 44, borderRadius: 10, border: `1.5px solid ${colors.border}`, padding: "0 44px 0 14px", fontSize: 14, outline: "none", background: colors.background, color: colors.textPrimary, boxSizing: "border-box" }} />
+                            <button onClick={() => setShow(!show)} style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", padding: 0 }}>
+                              {show ? <EyeOff size={16} color={colors.textMuted} /> : <Eye size={16} color={colors.textMuted} />}
+                            </button>
+                          </div>
+                          {key === "newPass" && passwords.newPass && (
+                            <div style={{ marginTop: 6 }}>
+                              <div style={{ height: 4, borderRadius: 2, background: colors.surface, overflow: "hidden" }}>
+                                <div style={{ width: `${pStrength.pct}%`, height: "100%", background: pStrength.color, transition: "all 0.3s" }} />
+                              </div>
+                              <span style={{ fontSize: 11, color: pStrength.color, fontWeight: 600 }}>{pStrength.label}</span>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                      <button onClick={handlePasswordSave}
+                        style={{ width: "100%", padding: "12px 0", borderRadius: 12, border: "none", background: colors.primary, color: "#fff", fontSize: 14, fontWeight: 700, cursor: "pointer", marginTop: 4 }}>
+                        {tr("Update Password")}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* ── NOTIFICATIONS ── */}
+            {activeSection === sec.id && sec.id === "notifications" && (
+              <div style={{ background: colors.card, borderRadius: "0 0 16px 16px", padding: "8px 18px 18px", marginTop: -8, border: `1px solid ${colors.border}`, borderTop: "none" }}>
+                {/* Master toggles */}
+                <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
+                  {[{ key: "pushMaster", label: "Push", icon: Bell }, { key: "emailMaster", label: "Email", icon: Mail }].map(t => (
+                    <button key={t.key} onClick={() => toggleNotif(t.key)} style={{
+                      flex: 1, padding: "12px 14px", borderRadius: 12,
+                      border: `1.5px solid ${notifications[t.key] ? colors.primary : colors.border}`,
+                      background: notifications[t.key] ? colors.primaryLight : "#fff",
+                      display: "flex", alignItems: "center", gap: 8, cursor: "pointer"
+                    }}>
+                      <t.icon size={16} color={notifications[t.key] ? colors.primary : colors.textMuted} />
+                      <span style={{ fontSize: 13, fontWeight: 600, color: notifications[t.key] ? colors.primary : colors.textSecondary }}>{t.label}</span>
+                      <span style={{ marginLeft: "auto", fontSize: 11, fontWeight: 700, color: notifications[t.key] ? colors.success : colors.textMuted }}>{notifications[t.key] ? "ON" : "OFF"}</span>
+                    </button>
+                  ))}
+                </div>
+
+                <div style={{ fontSize: 11, fontWeight: 700, color: colors.textMuted, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 10 }}>Categories</div>
+                {[
+                  { key: "workoutReminders",  icon: Dumbbell,      iconColor: colors.primary, label: tr("Workout Reminders"),  desc: tr("Session starts & reminders") },
+                  { key: "nutritionReminders", icon: Apple,         iconColor: colors.success,  label: tr("Nutrition Reminders"), desc: tr("Meal logging reminders") },
+                  { key: "messages",           icon: MessageSquare, iconColor: "#8B5CF6",       label: tr("Coach Messages"),      desc: tr("Messages from your coach") },
+                  { key: "coachUpdates",       icon: Bell,          iconColor: "#F59E0B",       label: tr("Plan Updates"),        desc: tr("When coach updates your plan") },
+                  { key: "achievements",       icon: Award,         iconColor: colors.warning,  label: tr("Achievements"),        desc: tr("Badges and milestones") },
+                ].map(item => (
+                  <div key={item.key} style={{ display: "flex", alignItems: "center", gap: 12, padding: "12px 0", borderBottom: `1px solid ${colors.surface}` }}>
+                    <div style={{ width: 34, height: 34, borderRadius: 9, background: `${item.iconColor}10`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <item.icon size={16} color={item.iconColor} />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ fontSize: 14, fontWeight: 600, color: colors.textPrimary }}>{item.label}</div>
+                      <div style={{ fontSize: 11, color: colors.textSecondary, marginTop: 1 }}>{item.desc}</div>
+                    </div>
+                    <ToggleSwitch on={notifications[item.key]} onToggle={() => toggleNotif(item.key)} />
+                  </div>
+                ))}
+
+                {/* Do Not Disturb */}
+                <div style={{ marginTop: 14, padding: 14, background: colors.surface, borderRadius: 12 }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: notifications.dndEnabled ? 12 : 0 }}>
+                    <div>
+                      <div style={{ fontSize: 14, fontWeight: 600, color: colors.textPrimary }}>Do Not Disturb</div>
+                      <div style={{ fontSize: 11, color: colors.textSecondary, marginTop: 1 }}>Silence all notifications</div>
+                    </div>
+                    <ToggleSwitch on={notifications.dndEnabled} onToggle={() => toggleNotif("dndEnabled")} />
+                  </div>
+                  {notifications.dndEnabled && (
+                    <div style={{ display: "flex", gap: 10 }}>
+                      {[{ label: "From", key: "dndStart" }, { label: "To", key: "dndEnd" }].map(({ label, key }) => (
+                        <div key={key} style={{ flex: 1 }}>
+                          <div style={{ fontSize: 11, fontWeight: 600, color: colors.textMuted, marginBottom: 5 }}>{label}</div>
+                          <input type="time" value={notifications[key]} onChange={e => setNotifications(p => ({ ...p, [key]: e.target.value }))}
+                            style={{ width: "100%", height: 38, borderRadius: 8, border: `1.5px solid ${colors.border}`, padding: "0 10px", fontSize: 13, outline: "none", background: "#fff", color: colors.textPrimary, boxSizing: "border-box" }} />
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* ── APP PREFERENCES ── */}
+            {activeSection === sec.id && sec.id === "preferences" && (
+              <div style={{ background: colors.card, borderRadius: "0 0 16px 16px", padding: "8px 18px 18px", marginTop: -8, border: `1px solid ${colors.border}`, borderTop: "none" }}>
+                {/* Theme */}
+                <div style={{ marginBottom: 18 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: colors.textMuted, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 10 }}>{tr("Theme")}</div>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    {[{ key: "light", icon: Sun, label: tr("Light") }, { key: "dark", icon: Moon, label: tr("Dark") }].map(t => (
+                      <button key={t.key} onClick={() => setPreferences(p => ({ ...p, theme: t.key }))} style={{
+                        flex: 1, padding: "10px 0", borderRadius: 12,
+                        border: `2px solid ${preferences.theme === t.key ? colors.primary : colors.border}`,
+                        background: preferences.theme === t.key ? colors.primaryLight : "#fff",
+                        display: "flex", flexDirection: "column", alignItems: "center", gap: 5, cursor: "pointer"
+                      }}>
+                        <t.icon size={18} color={preferences.theme === t.key ? colors.primary : colors.textMuted} />
+                        <span style={{ fontSize: 11, fontWeight: 600, color: preferences.theme === t.key ? colors.primary : colors.textSecondary }}>{t.label}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Units */}
+                <div style={{ marginBottom: 18 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: colors.textMuted, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 10 }}>{tr("Units")}</div>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    {[{ key: "metric", label: tr("Metric"), sub: tr("kg / km / °C") }, { key: "imperial", label: tr("Imperial"), sub: tr("lbs / mi / °F") }].map(u => (
+                      <button key={u.key} onClick={() => setPreferences(p => ({ ...p, units: u.key }))} style={{
+                        flex: 1, padding: "12px 10px", borderRadius: 12,
+                        border: `2px solid ${preferences.units === u.key ? colors.primary : colors.border}`,
+                        background: preferences.units === u.key ? colors.primaryLight : "#fff",
+                        cursor: "pointer", textAlign: "center"
+                      }}>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: preferences.units === u.key ? colors.primary : colors.textPrimary }}>{u.label}</div>
+                        <div style={{ fontSize: 10, color: colors.textMuted, marginTop: 2 }}>{u.sub}</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Language */}
+                <div>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: colors.textMuted, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 10 }}>{tr("Language")}</div>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    {[{ key: "English", label: "🇺🇸 English" }, { key: "Arabic", label: "🇸🇦 العربية" }].map(lang => (
+                      <button key={lang.key} onClick={() => { setPreferences(p => ({ ...p, language: lang.key })); onLanguageChange && onLanguageChange(lang.key); onShowToast(lang.key === "Arabic" ? tr("Language changed to Arabic") : tr("Language changed to English"), "success"); }} style={{
+                        flex: 1, padding: "12px 10px", borderRadius: 12,
+                        border: `2px solid ${preferences.language === lang.key ? colors.primary : colors.border}`,
+                        background: preferences.language === lang.key ? colors.primaryLight : "#fff",
+                        cursor: "pointer", fontSize: 13, fontWeight: 600,
+                        color: preferences.language === lang.key ? colors.primary : colors.textPrimary
+                      }}>
+                        {lang.label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* ── SECURITY & PRIVACY ── */}
+            {activeSection === sec.id && sec.id === "security" && (
+              <div style={{ background: colors.card, borderRadius: "0 0 16px 16px", padding: "8px 18px 18px", marginTop: -8, border: `1px solid ${colors.border}`, borderTop: "none" }}>
+                {/* 2FA */}
+                <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "14px 0", borderBottom: `1px solid ${colors.surface}` }}>
+                  <div style={{ width: 34, height: 34, borderRadius: 9, background: `${colors.success}10`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <Shield size={16} color={colors.success} />
+                  </div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 14, fontWeight: 600, color: colors.textPrimary }}>Two-Factor Authentication</div>
+                    <div style={{ fontSize: 11, color: twoFactor ? colors.success : colors.textMuted, marginTop: 1 }}>{twoFactor ? "Enabled — your account is protected" : "Add an extra layer of security"}</div>
+                  </div>
+                  <ToggleSwitch on={twoFactor} onToggle={() => { setTwoFactor(!twoFactor); onShowToast(twoFactor ? "2FA disabled" : "2FA enabled", twoFactor ? "error" : "success"); }} />
+                </div>
+
+                {/* Delete Account */}
+                <button onClick={() => setShowDeleteConfirm(true)} style={{ width: "100%", padding: "14px 0", display: "flex", alignItems: "center", gap: 12, background: "none", border: "none", cursor: "pointer" }}>
+                  <div style={{ width: 34, height: 34, borderRadius: 9, background: `${colors.error}10`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                    <Trash2 size={16} color={colors.error} />
+                  </div>
+                  <div style={{ flex: 1, textAlign: "left" }}>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: colors.error }}>Delete Account</div>
+                    <div style={{ fontSize: 11, color: colors.textSecondary, marginTop: 1 }}>Permanently remove your account and data</div>
+                  </div>
+                  <ChevronRight size={16} color={colors.error} />
+                </button>
+
+                {showDeleteConfirm && (
+                  <div style={{ marginTop: 12, padding: 16, background: `${colors.error}08`, borderRadius: 12, border: `1px solid ${colors.error}25` }}>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: colors.error, marginBottom: 6 }}>Are you sure?</div>
+                    <div style={{ fontSize: 12, color: colors.textSecondary, marginBottom: 14 }}>This action is permanent and cannot be undone. All your data will be deleted.</div>
+                    <div style={{ display: "flex", gap: 8 }}>
+                      <button onClick={() => setShowDeleteConfirm(false)} style={{ flex: 1, padding: "10px 0", borderRadius: 10, border: `1px solid ${colors.border}`, background: "#fff", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>Cancel</button>
+                      <button onClick={() => { onShowToast("Account deleted", "error"); onLogout(); }} style={{ flex: 1, padding: "10px 0", borderRadius: 10, border: "none", background: colors.error, color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>Delete</button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
+
+      {/* Logout */}
+      <button onClick={onLogout} style={{ width: "100%", marginTop: 20, padding: "14px 0", borderRadius: 14, border: `1.5px solid ${colors.error}30`, background: `${colors.error}06`, fontSize: 14, fontWeight: 700, color: colors.error, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 8 }}>
+        <LogOut size={16} /> {tr("Log Out")}
+      </button>
+      <div style={{ textAlign: "center", marginTop: 16, fontSize: 11, color: colors.textMuted }}>guider. v2.4.1 · Made with ❤️</div>
+    </div>
+  );
+}
+
+function CoachSettings({ onShowToast, onNavigate, onLogout, onLanguageChange, currentLanguage = "English" }) {
   const [activeSection, setActiveSection] = useState(null);
   const [profile, setProfile] = useState({
     name: "Coach Mike", email: "mike@fitcoach.pro", phone: "+1 (555) 123-4567",
@@ -9394,7 +10671,7 @@ function CoachSettings({ onShowToast, onNavigate, onLogout }) {
 
   // Preferences
   const [preferences, setPreferences] = useState({
-    theme: "light", units: "metric", language: "English", calendarStart: "Monday", defaultView: "dashboard"
+    theme: "light", units: "metric", language: currentLanguage, calendarStart: "Monday", defaultView: "dashboard"
   });
 
   // Subscription
@@ -9473,11 +10750,11 @@ function CoachSettings({ onShowToast, onNavigate, onLogout }) {
   );
 
   const sections = [
-    { id: "account", icon: User, iconColor: colors.primary, title: "Account Information", subtitle: "Profile, email, password" },
-    { id: "notifications", icon: Bell, iconColor: "#F59E0B", title: "Notifications", subtitle: "Push, email, Do Not Disturb" },
-    { id: "preferences", icon: Settings, iconColor: "#8B5CF6", title: "App Preferences", subtitle: "Theme, units, language" },
-    { id: "subscription", icon: CreditCard, iconColor: colors.success, title: "Subscription & Billing", subtitle: "Pro Plan · Renews Mar 15" },
-    { id: "security", icon: Shield, iconColor: colors.error, title: "Security & Privacy", subtitle: "2FA, devices, data" },
+    { id: "account", icon: User, iconColor: colors.primary, title: tr("Account Information"), subtitle: tr("Profile, email, password") },
+    { id: "notifications", icon: Bell, iconColor: "#F59E0B", title: tr("Notifications"), subtitle: tr("Push, email, Do Not Disturb") },
+    { id: "preferences", icon: Settings, iconColor: "#8B5CF6", title: tr("App Preferences"), subtitle: tr("Theme, units, language") },
+    { id: "subscription", icon: CreditCard, iconColor: colors.success, title: tr("Subscription & Billing"), subtitle: tr("Pro Plan · Renews Mar 15") },
+    { id: "security", icon: Shield, iconColor: colors.error, title: tr("Security & Privacy"), subtitle: tr("2FA, devices, data") },
   ];
 
   const billingHistory = [
@@ -9537,8 +10814,8 @@ function CoachSettings({ onShowToast, onNavigate, onLogout }) {
     <div style={{ padding: "0 20px 20px" }}>
       {/* Header */}
       <div style={{ marginBottom: 20 }}>
-        <h1 style={{ fontSize: 26, fontWeight: 800, color: colors.textPrimary, letterSpacing: -0.5, marginBottom: 4 }}>Settings</h1>
-        <p style={{ fontSize: 14, color: colors.textSecondary }}>Manage your account & preferences</p>
+        <h1 style={{ fontSize: 26, fontWeight: 800, color: colors.textPrimary, letterSpacing: -0.5, marginBottom: 4 }}>{tr("Settings")}</h1>
+        <p style={{ fontSize: 14, color: colors.textSecondary }}>{tr("Manage your account & preferences")}</p>
       </div>
 
       {/* Profile Quick Card */}
@@ -9569,7 +10846,7 @@ function CoachSettings({ onShowToast, onNavigate, onLogout }) {
         {/* Profile Completion */}
         <div style={{ marginTop: 4 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 6 }}>
-            <span style={{ fontSize: 12, fontWeight: 600, color: colors.textSecondary }}>Profile Completion</span>
+            <span style={{ fontSize: 12, fontWeight: 600, color: colors.textSecondary }}>{tr("Profile Completion")}</span>
             <span style={{ fontSize: 12, fontWeight: 700, color: pCompletion === 100 ? colors.success : colors.primary }}>{pCompletion}%</span>
           </div>
           <div style={{ background: colors.surface, borderRadius: 4, height: 6, overflow: "hidden" }}>
@@ -9664,7 +10941,7 @@ function CoachSettings({ onShowToast, onNavigate, onLogout }) {
                     <div style={{ padding: "16px 0 0", display: "flex", flexDirection: "column", gap: 12 }}>
                       {/* Current Password */}
                       <div>
-                        <label style={{ fontSize: 12, fontWeight: 600, color: colors.textSecondary, display: "block", marginBottom: 4 }}>Current Password</label>
+                        <label style={{ fontSize: 12, fontWeight: 600, color: colors.textSecondary, display: "block", marginBottom: 4 }}>{tr("Current Password")}</label>
                         <div style={{ position: "relative" }}>
                           <input
                             type={showPassCurrent ? "text" : "password"}
@@ -9679,7 +10956,7 @@ function CoachSettings({ onShowToast, onNavigate, onLogout }) {
                       </div>
                       {/* New Password */}
                       <div>
-                        <label style={{ fontSize: 12, fontWeight: 600, color: colors.textSecondary, display: "block", marginBottom: 4 }}>New Password</label>
+                        <label style={{ fontSize: 12, fontWeight: 600, color: colors.textSecondary, display: "block", marginBottom: 4 }}>{tr("New Password")}</label>
                         <div style={{ position: "relative" }}>
                           <input
                             type={showPassNew ? "text" : "password"}
@@ -9695,7 +10972,7 @@ function CoachSettings({ onShowToast, onNavigate, onLogout }) {
                         {passwords.newPass && (
                           <div style={{ marginTop: 6 }}>
                             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
-                              <span style={{ fontSize: 11, color: colors.textMuted }}>Password Strength</span>
+                              <span style={{ fontSize: 11, color: colors.textMuted }}>{tr("Password Strength")}</span>
                               <span style={{ fontSize: 11, fontWeight: 700, color: pStrength.color }}>{pStrength.label}</span>
                             </div>
                             <div style={{ background: colors.surface, borderRadius: 3, height: 4, overflow: "hidden" }}>
@@ -9706,7 +10983,7 @@ function CoachSettings({ onShowToast, onNavigate, onLogout }) {
                       </div>
                       {/* Confirm Password */}
                       <div>
-                        <label style={{ fontSize: 12, fontWeight: 600, color: colors.textSecondary, display: "block", marginBottom: 4 }}>Confirm New Password</label>
+                        <label style={{ fontSize: 12, fontWeight: 600, color: colors.textSecondary, display: "block", marginBottom: 4 }}>{tr("Confirm New Password")}</label>
                         <div style={{ position: "relative" }}>
                           <input
                             type={showPassConfirm ? "text" : "password"}
@@ -9722,7 +10999,7 @@ function CoachSettings({ onShowToast, onNavigate, onLogout }) {
                           </button>
                         </div>
                         {passwords.confirm && passwords.confirm !== passwords.newPass && (
-                          <p style={{ fontSize: 11, color: colors.error, marginTop: 4 }}>Passwords do not match</p>
+                          <p style={{ fontSize: 11, color: colors.error, marginTop: 4 }}>{tr("Passwords do not match")}</p>
                         )}
                       </div>
                       {/* Save Button */}
@@ -9859,7 +11136,7 @@ function CoachSettings({ onShowToast, onNavigate, onLogout }) {
                     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                       <Moon size={16} color="#8B5CF6" />
                       <div>
-                        <div style={{ fontSize: 14, fontWeight: 600, color: colors.textPrimary }}>Do Not Disturb</div>
+                        <div style={{ fontSize: 14, fontWeight: 600, color: colors.textPrimary }}>{tr("Do Not Disturb")}</div>
                         <div style={{ fontSize: 11, color: colors.textSecondary }}>Silence all notifications</div>
                       </div>
                     </div>
@@ -9891,99 +11168,56 @@ function CoachSettings({ onShowToast, onNavigate, onLogout }) {
             {activeSection === sec.id && sec.id === "preferences" && (
               <div style={{ background: colors.card, borderRadius: "0 0 16px 16px", padding: "8px 18px 18px", marginTop: -8, border: `1px solid ${colors.border}`, borderTop: "none" }}>
                 {/* Theme */}
-                <div style={{ padding: "12px 0 16px", borderBottom: `1px solid ${colors.surface}` }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: colors.textMuted, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 10 }}>Theme</div>
+                <div style={{ marginBottom: 18 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: colors.textMuted, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 10 }}>{tr("Theme")}</div>
                   <div style={{ display: "flex", gap: 8 }}>
-                    {[
-                      { key: "light", icon: Sun, label: "Light" },
-                      { key: "dark", icon: Moon, label: "Dark" },
-                      { key: "system", icon: Smartphone, label: "System" },
-                    ].map(t => (
+                    {[{ key: "light", icon: Sun, label: tr("Light") }, { key: "dark", icon: Moon, label: tr("Dark") }].map(t => (
                       <button key={t.key} onClick={() => setPreferences(p => ({ ...p, theme: t.key }))} style={{
-                        flex: 1, padding: "12px 8px", borderRadius: 12,
+                        flex: 1, padding: "10px 0", borderRadius: 12,
                         border: `2px solid ${preferences.theme === t.key ? colors.primary : colors.border}`,
                         background: preferences.theme === t.key ? colors.primaryLight : "#fff",
-                        display: "flex", flexDirection: "column", alignItems: "center", gap: 6, cursor: "pointer"
+                        display: "flex", flexDirection: "column", alignItems: "center", gap: 5, cursor: "pointer"
                       }}>
-                        <t.icon size={20} color={preferences.theme === t.key ? colors.primary : colors.textMuted} />
-                        <span style={{ fontSize: 12, fontWeight: 600, color: preferences.theme === t.key ? colors.primary : colors.textSecondary }}>{t.label}</span>
+                        <t.icon size={18} color={preferences.theme === t.key ? colors.primary : colors.textMuted} />
+                        <span style={{ fontSize: 11, fontWeight: 600, color: preferences.theme === t.key ? colors.primary : colors.textSecondary }}>{t.label}</span>
                       </button>
                     ))}
                   </div>
                 </div>
 
                 {/* Units */}
-                <div style={{ padding: "12px 0 16px", borderBottom: `1px solid ${colors.surface}` }}>
-                  <div style={{ fontSize: 11, fontWeight: 700, color: colors.textMuted, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 10 }}>Units</div>
+                <div style={{ marginBottom: 18 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: colors.textMuted, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 10 }}>{tr("Units")}</div>
                   <div style={{ display: "flex", gap: 8 }}>
-                    {[
-                      { key: "metric", label: "Metric", desc: "kg, cm" },
-                      { key: "imperial", label: "Imperial", desc: "lbs, in" },
-                    ].map(u => (
+                    {[{ key: "metric", label: tr("Metric"), sub: tr("kg / km / °C") }, { key: "imperial", label: tr("Imperial"), sub: tr("lbs / mi / °F") }].map(u => (
                       <button key={u.key} onClick={() => setPreferences(p => ({ ...p, units: u.key }))} style={{
-                        flex: 1, padding: "12px 14px", borderRadius: 12,
+                        flex: 1, padding: "12px 10px", borderRadius: 12,
                         border: `2px solid ${preferences.units === u.key ? colors.primary : colors.border}`,
                         background: preferences.units === u.key ? colors.primaryLight : "#fff",
-                        textAlign: "center", cursor: "pointer"
+                        cursor: "pointer", textAlign: "center"
                       }}>
-                        <div style={{ fontSize: 14, fontWeight: 700, color: preferences.units === u.key ? colors.primary : colors.textPrimary }}>{u.label}</div>
-                        <div style={{ fontSize: 11, color: preferences.units === u.key ? colors.primary : colors.textSecondary, marginTop: 2 }}>{u.desc}</div>
+                        <div style={{ fontSize: 13, fontWeight: 700, color: preferences.units === u.key ? colors.primary : colors.textPrimary }}>{u.label}</div>
+                        <div style={{ fontSize: 10, color: colors.textMuted, marginTop: 2 }}>{u.sub}</div>
                       </button>
                     ))}
                   </div>
                 </div>
 
                 {/* Language */}
-                <div style={{ padding: "12px 0 16px", borderBottom: `1px solid ${colors.surface}` }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                    <div style={{ width: 34, height: 34, borderRadius: 9, background: `${colors.primary}10`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <Globe size={16} color={colors.primary} />
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 14, fontWeight: 600, color: colors.textPrimary }}>Language</div>
-                    </div>
-                    <select value={preferences.language} onChange={e => setPreferences(p => ({ ...p, language: e.target.value }))}
-                      style={{ padding: "6px 10px", borderRadius: 8, border: `1px solid ${colors.border}`, fontSize: 13, color: colors.textPrimary, background: "#fff", cursor: "pointer" }}>
-                      {["English", "Spanish", "French", "German", "Arabic", "Portuguese"].map(l => (
-                        <option key={l} value={l}>{l}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                {/* Calendar Start Day */}
-                <div style={{ padding: "12px 0 16px", borderBottom: `1px solid ${colors.surface}` }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                    <div style={{ width: 34, height: 34, borderRadius: 9, background: `${colors.warning}10`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <Calendar size={16} color={colors.warning} />
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 14, fontWeight: 600, color: colors.textPrimary }}>Week Starts On</div>
-                    </div>
-                    <select value={preferences.calendarStart} onChange={e => setPreferences(p => ({ ...p, calendarStart: e.target.value }))}
-                      style={{ padding: "6px 10px", borderRadius: 8, border: `1px solid ${colors.border}`, fontSize: 13, color: colors.textPrimary, background: "#fff", cursor: "pointer" }}>
-                      {["Monday", "Sunday", "Saturday"].map(d => (
-                        <option key={d} value={d}>{d}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                {/* Default View */}
-                <div style={{ padding: "12px 0 0" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-                    <div style={{ width: 34, height: 34, borderRadius: 9, background: `${colors.success}10`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <Home size={16} color={colors.success} />
-                    </div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ fontSize: 14, fontWeight: 600, color: colors.textPrimary }}>Default View</div>
-                    </div>
-                    <select value={preferences.defaultView} onChange={e => setPreferences(p => ({ ...p, defaultView: e.target.value }))}
-                      style={{ padding: "6px 10px", borderRadius: 8, border: `1px solid ${colors.border}`, fontSize: 13, color: colors.textPrimary, background: "#fff", cursor: "pointer" }}>
-                      {[["dashboard", "Dashboard"], ["trainees", "Trainees"], ["chat", "Chat"]].map(([v, l]) => (
-                        <option key={v} value={v}>{l}</option>
-                      ))}
-                    </select>
+                <div>
+                  <div style={{ fontSize: 11, fontWeight: 700, color: colors.textMuted, textTransform: "uppercase", letterSpacing: 0.8, marginBottom: 10 }}>{tr("Language")}</div>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    {[{ key: "English", label: "🇺🇸 English" }, { key: "Arabic", label: "🇸🇦 العربية" }].map(lang => (
+                      <button key={lang.key} onClick={() => { setPreferences(p => ({ ...p, language: lang.key })); onLanguageChange && onLanguageChange(lang.key); onShowToast(lang.key === "Arabic" ? tr("Language changed to Arabic") : tr("Language changed to English"), "success"); }} style={{
+                        flex: 1, padding: "12px 10px", borderRadius: 12,
+                        border: `2px solid ${preferences.language === lang.key ? colors.primary : colors.border}`,
+                        background: preferences.language === lang.key ? colors.primaryLight : "#fff",
+                        cursor: "pointer", fontSize: 13, fontWeight: 600,
+                        color: preferences.language === lang.key ? colors.primary : colors.textPrimary
+                      }}>
+                        {lang.label}
+                      </button>
+                    ))}
                   </div>
                 </div>
               </div>
@@ -10063,7 +11297,7 @@ function CoachSettings({ onShowToast, onNavigate, onLogout }) {
                       <div key={i} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "10px 0", borderBottom: i < billingHistory.length - 1 ? `1px solid ${colors.surface}` : "none" }}>
                         <div>
                           <div style={{ fontSize: 13, fontWeight: 600, color: colors.textPrimary }}>{b.desc}</div>
-                          <div style={{ fontSize: 11, color: colors.textSecondary }}>{b.date}</div>
+                          <div style={{ fontSize: 11, color: colors.textSecondary }}>{tr(b.date)}</div>
                         </div>
                         <div style={{ textAlign: "right" }}>
                           <div style={{ fontSize: 14, fontWeight: 700, color: colors.textPrimary }}>{b.amount}</div>
@@ -10101,7 +11335,7 @@ function CoachSettings({ onShowToast, onNavigate, onLogout }) {
                     <Key size={18} color={twoFactor ? colors.success : colors.warning} />
                   </div>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: colors.textPrimary }}>Two-Factor Authentication</div>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: colors.textPrimary }}>{tr("Two-Factor Authentication")}</div>
                     <div style={{ fontSize: 12, color: twoFactor ? colors.success : colors.warning, fontWeight: 600 }}>
                       {twoFactor ? "Enabled — Authenticator app" : "Not enabled — Recommended"}
                     </div>
@@ -10202,7 +11436,7 @@ function CoachSettings({ onShowToast, onNavigate, onLogout }) {
             <HelpCircle size={18} color={colors.primary} />
           </div>
           <div style={{ flex: 1, textAlign: "left" }}>
-            <div style={{ fontSize: 14, fontWeight: 600, color: colors.textPrimary }}>Help & Support</div>
+            <div style={{ fontSize: 14, fontWeight: 600, color: colors.textPrimary }}>{tr("Help & Support")}</div>
             <div style={{ fontSize: 12, color: colors.textSecondary }}>FAQ, contact us, report a bug</div>
           </div>
           <ChevronRight size={16} color={colors.textMuted} />
@@ -10218,7 +11452,7 @@ function CoachSettings({ onShowToast, onNavigate, onLogout }) {
             <LogOut size={18} color={colors.error} />
           </div>
           <div style={{ flex: 1, textAlign: "left" }}>
-            <div style={{ fontSize: 14, fontWeight: 700, color: colors.error }}>Log Out</div>
+            <div style={{ fontSize: 14, fontWeight: 700, color: colors.error }}>{tr("Log Out")}</div>
           </div>
         </button>
 
@@ -10281,20 +11515,436 @@ const getNutritionIcon = (type) => {
   }
 };
 
-const getAchievementIcon = (type) => {
-  const iconProps = { size: 18, color: "#fff" };
-  switch(type) {
-    case "fire": return <Flame {...iconProps} />;
-    case "bicep": return <Dumbbell {...iconProps} />;
-    case "salad": return <Apple {...iconProps} />;
-    case "target": return <Target {...iconProps} />;
-    case "droplets": return <Droplets {...iconProps} />;
-    case "trophy": return <Trophy {...iconProps} />;
-    case "medal": return <Award {...iconProps} />;
-    case "star": return <Star {...iconProps} />;
-    default: return <Zap {...iconProps} />;
-  }
+// ─── Modern Badge Icon Component ───
+const BADGE_ICON_MAP = {
+  fire:     { Icon: Flame,      gradient: "linear-gradient(135deg, #FF6B35, #EF4444)", glow: "rgba(239,68,68,0.40)",     ring: "#FF6B35" },
+  bicep:    { Icon: Dumbbell,   gradient: "linear-gradient(135deg, #34D399, #059669)", glow: "rgba(52,211,153,0.38)",    ring: "#34D399" },
+  salad:    { Icon: Leaf,       gradient: "linear-gradient(135deg, #22C55E, #16A34A)", glow: "rgba(34,197,94,0.38)",     ring: "#22C55E" },
+  target:   { Icon: Target,     gradient: "linear-gradient(135deg, #F59E0B, #D97706)", glow: "rgba(245,158,11,0.40)",    ring: "#F59E0B" },
+  droplets: { Icon: Droplets,   gradient: "linear-gradient(135deg, #38BDF8, #2563EB)", glow: "rgba(56,189,248,0.38)",    ring: "#38BDF8" },
+  trophy:   { Icon: Trophy,     gradient: "linear-gradient(135deg, #FBBF24, #F59E0B)", glow: "rgba(251,191,36,0.45)",    ring: "#FBBF24" },
+  medal:    { Icon: Award,      gradient: "linear-gradient(135deg, #FBBF24, #F97316)", glow: "rgba(251,191,36,0.42)",    ring: "#FBBF24" },
+  star:     { Icon: Star,       gradient: "linear-gradient(135deg, #A78BFA, #7C3AED)", glow: "rgba(167,139,250,0.38)",   ring: "#A78BFA" },
+  camera:   { Icon: Camera,     gradient: "linear-gradient(135deg, #60A5FA, #7C3AED)", glow: "rgba(96,165,250,0.35)",    ring: "#60A5FA" },
+  trend:    { Icon: TrendingUp, gradient: "linear-gradient(135deg, #34D399, #0891B2)", glow: "rgba(52,211,153,0.35)",    ring: "#34D399" },
+  zap:      { Icon: Zap,        gradient: "linear-gradient(135deg, #34D399, #059669)", glow: "rgba(52,211,153,0.38)",    ring: "#34D399" },
 };
+
+const ModernBadgeIcon = ({ type = "star", size = 36, earned = true, tier = null, style: extraStyle = {} }) => {
+  const data = BADGE_ICON_MAP[type] || BADGE_ICON_MAP.zap;
+  const { Icon, gradient, glow, ring } = data;
+  const iconSize = Math.round(size * 0.48);
+  const tierRingColor = tier === "gold" ? "#FBBF24" : tier === "silver" ? "#94A3B8" : tier === "bronze" ? "#CD7F32" : ring;
+
+  return (
+    <div style={{
+      width: size, height: size, borderRadius: "50%", flexShrink: 0,
+      background: earned ? gradient : "linear-gradient(135deg, #94A3B8, #64748B)",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      boxShadow: earned ? `0 4px 16px ${glow}, inset 0 1px 0 rgba(255,255,255,0.28)` : "none",
+      filter: earned ? "none" : "grayscale(1)",
+      opacity: earned ? 1 : 0.4,
+      position: "relative",
+      border: (earned && tier) ? `2px solid ${tierRingColor}` : "2px solid transparent",
+      transition: "all 0.2s",
+      ...extraStyle,
+    }}>
+      <Icon size={iconSize} color="#fff" strokeWidth={2.2} />
+    </div>
+  );
+};
+
+// ─── Notification Icon Component ───
+const NotifIconBadge = ({ iconType, color, size = 32 }) => {
+  const iconMap = {
+    message:  MessageSquare,
+    workout:  Dumbbell,
+    checkin:  FileText,
+    trophy:   Trophy,
+    nutrition: Leaf,
+    chart:    TrendingUp,
+    bell:     Bell,
+    star:     Star,
+  };
+  const Icon = iconMap[iconType] || Bell;
+  return (
+    <div style={{
+      width: size, height: size, borderRadius: Math.round(size * 0.28),
+      background: `${color}18`,
+      display: "flex", alignItems: "center", justifyContent: "center",
+      flexShrink: 0,
+      border: `1.5px solid ${color}25`,
+    }}>
+      <Icon size={Math.round(size * 0.5)} color={color} strokeWidth={2} />
+    </div>
+  );
+};
+
+const getAchievementIcon = (type, earned = true, size = 28) => {
+  return <ModernBadgeIcon type={type} size={size} earned={earned} />;
+};
+
+// TRAINEE ONBOARDING: INTAKE FORM
+// ═══════════════════════════════════════════════════════
+function TraineeIntakeFlow({ onComplete }) {
+  const [step, setStep] = useState(0);
+  const [data, setData] = useState({
+    goal: "", availability: "", experience: "", dietary: "",
+    injuries: "", sleep: "", medicalConditions: "", notes: ""
+  });
+
+  // Gradient icon badge matching app style
+  const GradBadge = ({ icon: Icon, gradient, size = 52 }) => (
+    <div style={{
+      width: size, height: size, borderRadius: size * 0.28, flexShrink: 0,
+      background: gradient, display: "flex", alignItems: "center", justifyContent: "center",
+      boxShadow: `0 6px 20px ${gradient.includes("F97") ? "rgba(249,115,22,0.4)" : gradient.includes("8B5") ? "rgba(139,92,246,0.4)" : gradient.includes("EF4") ? "rgba(239,68,68,0.35)" : gradient.includes("3B8") ? "rgba(59,130,246,0.4)" : "rgba(52,211,153,0.4)"}`,
+    }}>
+      <Icon size={size * 0.42} color="#fff" strokeWidth={2.2} />
+    </div>
+  );
+
+  const questions = [
+    {
+      key: "goal", type: "chips",
+      title: "What's your main goal?", subtitle: "We'll build your entire plan around this.",
+      Icon: Target, gradient: "linear-gradient(135deg,#34D399,#10B981)",
+      options: [
+        { value: "Lose Weight",  Icon: Flame,    gradient: "linear-gradient(135deg,#F97316,#EF4444)", sub: "Burn fat & tone up" },
+        { value: "Build Muscle", Icon: Dumbbell, gradient: "linear-gradient(135deg,#34D399,#10B981)", sub: "Gain size & strength" },
+        { value: "Get Fit",      Icon: Activity, gradient: "linear-gradient(135deg,#3B82F6,#8B5CF6)", sub: "Improve endurance" },
+        { value: "Performance",  Icon: Zap,      gradient: "linear-gradient(135deg,#F59E0B,#F97316)", sub: "Sport & competition" },
+      ]
+    },
+    {
+      key: "availability", type: "chips",
+      title: "Days per week?", subtitle: "We'll schedule sessions to fit your life.",
+      Icon: Calendar, gradient: "linear-gradient(135deg,#3B82F6,#8B5CF6)",
+      options: [
+        { value: "2 days",  Icon: Circle,    gradient: "linear-gradient(135deg,#94A3B8,#64748B)", sub: "Light schedule" },
+        { value: "3 days",  Icon: BarChart2, gradient: "linear-gradient(135deg,#34D399,#10B981)", sub: "Moderate" },
+        { value: "4 days",  Icon: TrendingUp,gradient: "linear-gradient(135deg,#3B82F6,#8B5CF6)", sub: "Dedicated" },
+        { value: "5+ days", Icon: Zap,       gradient: "linear-gradient(135deg,#F97316,#EF4444)", sub: "High commitment" },
+      ]
+    },
+    {
+      key: "experience", type: "chips",
+      title: "Training experience?", subtitle: "Helps us dial in the right intensity level.",
+      Icon: Dumbbell, gradient: "linear-gradient(135deg,#F97316,#EF4444)",
+      options: [
+        { value: "Beginner",     Icon: Star,      gradient: "linear-gradient(135deg,#34D399,#10B981)", sub: "Just starting out" },
+        { value: "Intermediate", Icon: TrendingUp, gradient: "linear-gradient(135deg,#3B82F6,#8B5CF6)", sub: "1–3 years" },
+        { value: "Advanced",     Icon: Award,      gradient: "linear-gradient(135deg,#F97316,#EF4444)", sub: "3+ years" },
+        { value: "Athlete",      Icon: Zap,        gradient: "linear-gradient(135deg,#F59E0B,#F97316)", sub: "Competitive level" },
+      ]
+    },
+    {
+      key: "dietary", type: "chips",
+      title: "Dietary preferences?", subtitle: "Your coach designs meals around your needs.",
+      Icon: Apple, gradient: "linear-gradient(135deg,#10B981,#059669)",
+      options: [
+        { value: "No restrictions", Icon: CheckCircle2, gradient: "linear-gradient(135deg,#34D399,#10B981)", sub: "Everything goes" },
+        { value: "Halal",           Icon: Shield,       gradient: "linear-gradient(135deg,#8B5CF6,#6D28D9)", sub: "Halal certified" },
+        { value: "Vegetarian",      Icon: Leaf,         gradient: "linear-gradient(135deg,#10B981,#059669)", sub: "Plant-based" },
+        { value: "Keto / Low-carb", Icon: Flame,        gradient: "linear-gradient(135deg,#F59E0B,#F97316)", sub: "High fat, low carb" },
+      ]
+    },
+    {
+      key: "injuries", type: "text",
+      title: "Any injuries?", subtitle: "We'll design around them — nothing will make it worse.",
+      Icon: Activity, gradient: "linear-gradient(135deg,#EF4444,#DC2626)",
+      placeholder: "e.g. Lower back pain, knee issue, shoulder injury… or type None",
+    },
+    {
+      key: "sleep", type: "chips",
+      title: "Sleep per night?", subtitle: "Recovery is 50% of your results.",
+      Icon: Moon, gradient: "linear-gradient(135deg,#8B5CF6,#6D28D9)",
+      options: [
+        { value: "Under 5h",  Icon: AlertTriangle, gradient: "linear-gradient(135deg,#EF4444,#DC2626)", sub: "Very low" },
+        { value: "5–6 hours", Icon: Clock,         gradient: "linear-gradient(135deg,#F59E0B,#F97316)", sub: "Below average" },
+        { value: "7–8 hours", Icon: CheckCircle2,  gradient: "linear-gradient(135deg,#34D399,#10B981)", sub: "Ideal range" },
+        { value: "9+ hours",  Icon: Star,          gradient: "linear-gradient(135deg,#3B82F6,#8B5CF6)", sub: "Great rest" },
+      ]
+    },
+    {
+      key: "medicalConditions", type: "text",
+      title: "Medical conditions?", subtitle: "Diabetes, hypertension, heart conditions, etc.",
+      Icon: Shield, gradient: "linear-gradient(135deg,#F59E0B,#F97316)",
+      placeholder: "e.g. Type 2 Diabetes, Hypertension, Asthma… or type None",
+    },
+    {
+      key: "notes", type: "text",
+      title: "Anything else?", subtitle: "Your coach reads this before your very first session.",
+      Icon: Edit3, gradient: "linear-gradient(135deg,#3B82F6,#8B5CF6)",
+      placeholder: "Anything specific you'd like your coach to know…",
+      optional: true,
+    },
+  ];
+
+  const q = questions[step];
+  const totalSteps = questions.length;
+  const progress = ((step + 1) / totalSteps) * 100;
+  const canProceed = q.optional || (data[q.key] && data[q.key].trim());
+
+  const go = (dir) => {
+    if (dir === 1 && step < totalSteps - 1) setStep(s => s + 1);
+    else if (dir === -1 && step > 0) setStep(s => s - 1);
+    else if (dir === 1 && step === totalSteps - 1) onComplete(data);
+  };
+
+  return (
+    <div style={{ position: "absolute", inset: 0, zIndex: 600, background: gradients.onboarding, display: "flex", flexDirection: "column" }}>
+      {/* Decorative blobs */}
+      <div style={{ position: "absolute", top: -60, right: -60, width: 220, height: 220, borderRadius: "50%", background: "rgba(52,211,153,0.12)", pointerEvents: "none" }} />
+      <div style={{ position: "absolute", bottom: 100, left: -80, width: 260, height: 260, borderRadius: "50%", background: "rgba(139,92,246,0.1)", pointerEvents: "none" }} />
+
+      {/* Header */}
+      <div style={{ padding: "36px 24px 0", flexShrink: 0 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 22 }}>
+          <span style={{ fontSize: 20, fontWeight: 900, color: "#fff", letterSpacing: -0.5 }}>guider<span style={{ color: "#34D399" }}>.</span></span>
+
+        </div>
+        {/* Segmented progress */}
+        <div style={{ display: "flex", gap: 4, marginBottom: 6 }}>
+          {questions.map((_, i) => (
+            <div key={i} style={{ flex: 1, height: 3, borderRadius: 2, background: i < step ? "#34D399" : i === step ? "rgba(52,211,153,0.6)" : "rgba(255,255,255,0.15)", transition: "background 0.4s" }} />
+          ))}
+        </div>
+        <div style={{ fontSize: 10, fontWeight: 700, color: "rgba(255,255,255,0.5)", letterSpacing: 1, textTransform: "uppercase" }}>Step {step + 1} of {totalSteps}</div>
+      </div>
+
+      {/* Question body */}
+      <div style={{ flex: 1, padding: "24px 24px 0", overflowY: "auto" }}>
+        {/* Icon badge */}
+        <div style={{ marginBottom: 18 }}>
+          <GradBadge icon={q.Icon} gradient={q.gradient} size={56} />
+        </div>
+        <h2 style={{ fontSize: 24, fontWeight: 900, color: "#fff", lineHeight: 1.25, marginBottom: 6, letterSpacing: -0.5 }}>{q.title}</h2>
+        <p style={{ fontSize: 13, color: "rgba(255,255,255,0.6)", marginBottom: 24, lineHeight: 1.6 }}>{q.subtitle}</p>
+
+        {/* Chip options */}
+        {q.type === "chips" && (
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10 }}>
+            {q.options.map(opt => {
+              const selected = data[q.key] === opt.value;
+              return (
+                <button key={opt.value}
+                  onClick={() => { setData(p => ({ ...p, [q.key]: opt.value })); setTimeout(() => go(1), 240); }}
+                  style={{
+                    padding: "16px 10px 14px", borderRadius: 18,
+                    border: `2px solid ${selected ? "#34D399" : "rgba(255,255,255,0.12)"}`,
+                    background: selected ? "rgba(52,211,153,0.2)" : "rgba(255,255,255,0.06)",
+                    cursor: "pointer", textAlign: "center", transition: "all 0.18s",
+                    transform: selected ? "scale(1.04)" : "scale(1)",
+                    position: "relative", overflow: "hidden"
+                  }}>
+                  {selected && <div style={{ position: "absolute", top: 8, right: 8, width: 18, height: 18, borderRadius: "50%", background: "#34D399", display: "flex", alignItems: "center", justifyContent: "center" }}><Check size={10} color="#fff" strokeWidth={3} /></div>}
+                  <div style={{
+                    width: 40, height: 40, borderRadius: 12, background: opt.gradient,
+                    display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 10px",
+                    boxShadow: selected ? "0 4px 14px rgba(0,0,0,0.25)" : "0 2px 8px rgba(0,0,0,0.2)"
+                  }}>
+                    <opt.Icon size={18} color="#fff" strokeWidth={2.2} />
+                  </div>
+                  <div style={{ fontSize: 12, fontWeight: 800, color: "#fff", lineHeight: 1.2 }}>{opt.value}</div>
+                  <div style={{ fontSize: 10, color: "rgba(255,255,255,0.5)", marginTop: 3 }}>{opt.sub}</div>
+                </button>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Text input */}
+        {q.type === "text" && (
+          <div>
+            <textarea
+              value={data[q.key]}
+              onChange={e => setData(p => ({ ...p, [q.key]: e.target.value }))}
+              placeholder={q.placeholder}
+              rows={4}
+              autoFocus
+              style={{
+                width: "100%", padding: "16px", borderRadius: 16,
+                border: `2px solid ${data[q.key] ? "#34D399" : "rgba(255,255,255,0.15)"}`,
+                background: "rgba(255,255,255,0.08)", color: "#fff", fontSize: 14,
+                outline: "none", resize: "none", fontFamily: "inherit",
+                boxSizing: "border-box", lineHeight: 1.6, transition: "border 0.2s",
+              }}
+            />
+            {q.optional && (
+              <div style={{ display: "flex", alignItems: "center", gap: 5, marginTop: 8 }}>
+                <div style={{ width: 14, height: 14, borderRadius: 4, background: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.2)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                  <Star size={8} color="rgba(255,255,255,0.5)" />
+                </div>
+                <span style={{ fontSize: 11, color: "rgba(255,255,255,0.4)" }}>Optional — you can skip this one</span>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Nav buttons */}
+      <div style={{ padding: "20px 24px 44px", flexShrink: 0, display: "flex", gap: 10 }}>
+        {step > 0 && (
+          <button onClick={() => go(-1)} style={{ width: 52, height: 54, borderRadius: 16, border: "2px solid rgba(255,255,255,0.15)", background: "rgba(255,255,255,0.08)", color: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <ChevronLeft size={20} color="rgba(255,255,255,0.8)" />
+          </button>
+        )}
+        {q.type === "text" && (
+          <button onClick={() => go(1)} disabled={!canProceed} style={{
+            flex: 1, height: 54, borderRadius: 16, border: "none",
+            background: canProceed ? "linear-gradient(135deg,#34D399,#10B981)" : "rgba(255,255,255,0.12)",
+            color: canProceed ? "#0A3D22" : "rgba(255,255,255,0.3)",
+            fontSize: 15, fontWeight: 800, cursor: canProceed ? "pointer" : "not-allowed",
+            transition: "all 0.2s", boxShadow: canProceed ? "0 6px 24px rgba(52,211,153,0.45)" : "none",
+            display: "flex", alignItems: "center", justifyContent: "center", gap: 8
+          }}>
+            {step === totalSteps - 1
+              ? <><CheckCircle2 size={18} /> Complete Profile</>
+              : <>Next <ChevronRight size={16} /></>}
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// TRAINEE TOUR GUIDE
+// ═══════════════════════════════════════════════════════
+function TraineeTourOverlay({ step, steps, onNext, onSkip }) {
+  if (!steps[step]) return null;
+  const s = steps[step];
+  const isLast = step === steps.length - 1;
+  const cardAtBottom = s.cardPos !== "top";
+  const isDark = colors.background === "#0A0A0F";
+
+  // Lucide icon rendered in gradient pill — matches app badge style
+  const TourIcon = ({ icon: Icon, gradient, glow }) => (
+    <div style={{
+      width: 44, height: 44, borderRadius: 14, flexShrink: 0,
+      background: gradient || "linear-gradient(135deg,#34D399,#10B981)",
+      display: "flex", alignItems: "center", justifyContent: "center",
+      boxShadow: `0 4px 16px ${glow || "rgba(52,211,153,0.4)"}`,
+    }}>
+      <Icon size={20} color="#fff" strokeWidth={2.2} />
+    </div>
+  );
+
+  const cardBg = "#ffffff";
+  const textPrimary = "#0F172A";
+  const textSecondary = "#64748B";
+  const trackBg = "#E2E8F0";
+
+  return (
+    <div style={{ position: "absolute", inset: 0, zIndex: 800, pointerEvents: "none" }}>
+      {/* Overlay */}
+      <div style={{
+        position: "absolute", inset: 0,
+        background: `radial-gradient(ellipse ${s.spotW || 260}px ${s.spotH || 120}px at ${s.spotX}% ${s.spotY}%, transparent 0%, transparent 55%, rgba(0,0,0,0.85) 100%)`,
+        pointerEvents: "all"
+      }} onClick={e => e.stopPropagation()} />
+
+      {/* Pulsing highlight ring */}
+      <div style={{
+        position: "absolute",
+        left: `calc(${s.spotX}% - ${(s.spotW || 260) / 2}px)`,
+        top: `calc(${s.spotY}% - ${(s.spotH || 120) / 2}px)`,
+        width: s.spotW || 260, height: s.spotH || 120,
+        borderRadius: s.round ? "50%" : s.radius || 16,
+        border: "2.5px solid rgba(52,211,153,0.85)",
+        boxShadow: "0 0 0 4px rgba(52,211,153,0.15), inset 0 0 20px rgba(52,211,153,0.05)",
+        animation: "tourPulse 2s ease-in-out infinite",
+        pointerEvents: "none"
+      }} />
+
+      {/* Corner dot accent */}
+      <div style={{
+        position: "absolute",
+        left: `calc(${s.spotX}% + ${(s.spotW || 260) / 2 - 6}px)`,
+        top: `calc(${s.spotY}% - ${(s.spotH || 120) / 2 - 6}px)`,
+        width: 12, height: 12, borderRadius: "50%",
+        background: "#34D399", border: "2px solid #fff",
+        boxShadow: "0 2px 8px rgba(52,211,153,0.6)",
+        pointerEvents: "none"
+      }} />
+
+      {/* Tour card */}
+      <div style={{
+        position: "absolute",
+        ...(cardAtBottom ? { bottom: 84, left: 14, right: 14 } : { top: 60, left: 14, right: 14 }),
+        background: cardBg, borderRadius: 22,
+        padding: "16px 18px 15px",
+        boxShadow: "0 24px 60px rgba(0,0,0,0.5), 0 4px 20px rgba(0,0,0,0.2)",
+        pointerEvents: "all", overflow: "hidden"
+      }}>
+        {/* Green accent strip */}
+        <div style={{ position: "absolute", top: 0, left: 0, right: 0, height: 3, background: "linear-gradient(90deg,#34D399,#10B981,#8B5CF6)", borderRadius: "22px 22px 0 0" }} />
+
+        {/* Page section label */}
+        {s.section && (
+          <div style={{ display: "flex", alignItems: "center", gap: 5, marginBottom: 10, marginTop: 4 }}>
+            <div style={{ width: 6, height: 6, borderRadius: "50%", background: s.sectionColor || "#34D399" }} />
+            <span style={{ fontSize: 9, fontWeight: 800, color: s.sectionColor || "#34D399", textTransform: "uppercase", letterSpacing: 1 }}>{s.section}</span>
+          </div>
+        )}
+
+        {/* Step progress dots */}
+        <div style={{ display: "flex", gap: 3, marginBottom: 12, flexWrap: "wrap" }}>
+          {steps.map((_, i) => (
+            <div key={i} style={{
+              height: 3, flex: 1, minWidth: 4, borderRadius: 2,
+              background: i < step ? "#34D399" : i === step ? "#10B981" : trackBg,
+              transition: "background 0.3s"
+            }} />
+          ))}
+        </div>
+
+        {/* Icon + text */}
+        <div style={{ display: "flex", alignItems: "flex-start", gap: 12, marginBottom: 14 }}>
+          <TourIcon icon={s.Icon} gradient={s.gradient} glow={s.glow} />
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: 14, fontWeight: 900, color: textPrimary, marginBottom: 4, lineHeight: 1.25, letterSpacing: -0.2 }}>{s.title}</div>
+            <div style={{ fontSize: 11.5, color: textSecondary, lineHeight: 1.55 }}>{s.desc}</div>
+          </div>
+        </div>
+
+        {/* Step counter + buttons */}
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <span style={{ fontSize: 10, fontWeight: 700, color: "#94A3B8", minWidth: 32 }}>{step + 1}/{steps.length}</span>
+          <button onClick={onSkip} style={{ flex: 1, padding: "9px 0", borderRadius: 10, border: "1.5px solid #E2E8F0", background: "#fff", fontSize: 11, fontWeight: 700, color: "#94A3B8", cursor: "pointer" }}>
+            Skip
+          </button>
+          <button onClick={onNext} style={{
+            flex: 2.5, padding: "9px 0", borderRadius: 10, border: "none",
+            background: isLast ? "linear-gradient(135deg,#F97316,#EF4444)" : "linear-gradient(135deg,#34D399,#10B981)",
+            fontSize: 12, fontWeight: 800, color: "#fff", cursor: "pointer",
+            boxShadow: isLast ? "0 4px 14px rgba(249,115,22,0.4)" : "0 4px 14px rgba(52,211,153,0.35)",
+            display: "flex", alignItems: "center", justifyContent: "center", gap: 6
+          }}>
+            {isLast ? <><Zap size={14} /> Let's go!</> : <>Next <ChevronRight size={13} /></>}
+          </button>
+        </div>
+      </div>
+
+      {/* Arrow pointer from card to spotlight */}
+      {s.arrowDir && (
+        <div style={{
+          position: "absolute",
+          left: `calc(${s.spotX}% - 7px)`,
+          top: cardAtBottom
+            ? `calc(${s.spotY}% + ${(s.spotH || 120) / 2 + 2}px)`
+            : `calc(${s.spotY}% - ${(s.spotH || 120) / 2 + 18}px)`,
+          width: 0, height: 0,
+          borderLeft: "7px solid transparent", borderRight: "7px solid transparent",
+          ...(cardAtBottom
+            ? { borderTop: "none", borderBottom: "11px solid rgba(52,211,153,0.9)" }
+            : { borderTop: "11px solid rgba(52,211,153,0.9)", borderBottom: "none" }),
+          pointerEvents: "none"
+        }} />
+      )}
+    </div>
+  );
+}
 
 // MAIN APP
 // ═══════════════════════════════════════════════════════
@@ -10302,10 +11952,15 @@ const getAchievementIcon = (type) => {
 export default function FitCoachProPrototype() {
   const [role, setRole] = useState(null);
   const [screen, setScreen] = useState("home");
+  const [pendingTraineeId, setPendingTraineeId] = useState(null);
   const [coachTab, setCoachTab] = useState("home");
   const [traineeTab, setTraineeTab] = useState("today");
   const [toast, setToast] = useState(null);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [appLanguage, setAppLanguage] = useState("English");
+  const isArabic = appLanguage === "Arabic";
+  _lang = appLanguage; // sync global for child components
+
 
   // Apply theme based on dark mode state
   colors = isDarkMode ? { ...darkTheme } : { ...lightTheme };
@@ -10318,12 +11973,12 @@ export default function FitCoachProPrototype() {
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);
   const [showNotifDropdown, setShowNotifDropdown] = useState(false);
   const notifItems = [
-    { id: 1, icon: MessageSquare, color: "#8B5CF6", title: "Coach Mike sent a message", desc: "Great progress this week! Let's adjust your...", time: "10 min ago", unread: true },
-    { id: 2, icon: Dumbbell, color: colors.primary, title: "Workout reminder", desc: "Fat Burn — Monday starts in 1 hour", time: "1h", unread: true },
-    { id: 3, icon: Bell, color: colors.warning, title: "Weekly check-in due", desc: "Log your weight and measurements", time: "Today", unread: false },
-    { id: 4, icon: Star, color: "#F97316", title: "New achievement unlocked!", desc: "You earned the 'Consistency King' badge", time: "Yesterday", unread: false },
-    { id: 5, icon: Apple, color: colors.success, title: "Nutrition plan updated", desc: "Coach adjusted your meal plan for next week", time: "2 days ago", unread: false },
-    { id: 6, icon: TrendingUp, color: "#3B82F6", title: "Weekly progress report", desc: "Your adherence was 85% this week — nice!", time: "3 days ago", unread: false },
+    { id: 1, iconType: "message",   color: "#8B5CF6", title: "Coach Mike sent a message",  desc: "Great progress this week! Let's adjust your...", time: "10 min ago", unread: true },
+    { id: 2, iconType: "workout",   color: "#34D399", title: "Workout reminder",            desc: "Fat Burn — Monday starts in 1 hour",            time: "1h",         unread: true },
+    { id: 3, iconType: "checkin",   color: "#F59E0B", title: "Weekly check-in due",         desc: "Log your weight and measurements",              time: "Today",      unread: false },
+    { id: 4, iconType: "trophy",    color: "#F97316", title: "New achievement unlocked!",   desc: "You earned the 'Consistency King' badge",       time: "Yesterday",  unread: false },
+    { id: 5, iconType: "nutrition", color: "#10B981", title: "Nutrition plan updated",      desc: "Coach adjusted your meal plan for next week",   time: "2 days ago", unread: false },
+    { id: 6, iconType: "chart",     color: "#3B82F6", title: "Weekly progress report",      desc: "Your adherence was 85% this week — nice!",     time: "3 days ago", unread: false },
   ];
   const [showProfileSheet, setShowProfileSheet] = useState(false);
   const [showChangePassword, setShowChangePassword] = useState(false);
@@ -10334,59 +11989,75 @@ export default function FitCoachProPrototype() {
   const [showPwCurrent, setShowPwCurrent] = useState(false);
   const [showPwNew, setShowPwNew] = useState(false);
 
-  // ── First-Login Trainee Intake Form ──
-  const [showIntakeForm, setShowIntakeForm] = useState(false);
-  const [intakeCompleted, setIntakeCompleted] = useState(false);
+  // ── Trainee Onboarding Phase ──
+  const [traineePhase, setTraineePhase] = useState("intake"); // "intake" | "tour" | "app"
+  const [tourStep, setTourStep] = useState(0);
   const [intakeData, setIntakeData] = useState({
-    goal: "", trainingDuration: "", previousTraining: "", stopReason: "",
-    diseases: "", allergies: "", injuries: "", medications: "",
-    availability: "", dietaryPreferences: "", sleepPattern: "", hydration: "",
-    occupation: "", notes: ""
+    goal: "", availability: "", experience: "", dietary: "",
+    injuries: "", sleep: "", medicalConditions: "", notes: ""
   });
-  const [intakeStep, setIntakeStep] = useState(0);
 
-  const intakeFields = [
-    { key: "goal", label: "What is your fitness goal?", placeholder: "e.g., Lose weight, Build muscle, Get fit...", icon: Target },
-    { key: "trainingDuration", label: "How long have you been training?", placeholder: "e.g., 6 months, 2 years, Never...", icon: Clock },
-    { key: "previousTraining", label: "Any previous training experience?", placeholder: "e.g., Gym, CrossFit, Sports...", icon: Dumbbell },
-    { key: "stopReason", label: "If you stopped before, why?", placeholder: "e.g., Injury, Time constraints, Motivation...", icon: RotateCcw },
-    { key: "diseases", label: "Any medical conditions?", placeholder: "e.g., Diabetes, Hypertension, None...", icon: Shield },
-    { key: "allergies", label: "Any food or drug allergies?", placeholder: "e.g., Peanuts, Lactose, None...", icon: AlertTriangle },
-    { key: "injuries", label: "Any current or past injuries?", placeholder: "e.g., Knee injury, Lower back...", icon: Activity },
-    { key: "medications", label: "Currently taking any medications?", placeholder: "e.g., Insulin, Supplements, None...", icon: FileText },
-    { key: "availability", label: "Weekly training availability?", placeholder: "e.g., 4 days/week, Mornings only...", icon: Calendar },
-    { key: "dietaryPreferences", label: "Dietary preferences or restrictions?", placeholder: "e.g., Vegetarian, Halal, No restrictions...", icon: Apple },
-    { key: "sleepPattern", label: "Average sleep hours per night?", placeholder: "e.g., 6-7 hours, Irregular...", icon: Moon },
-    { key: "hydration", label: "Daily water intake?", placeholder: "e.g., 2 liters, Not enough...", icon: Droplets },
-    { key: "occupation", label: "What's your occupation?", placeholder: "e.g., Office worker, Student, Physical labor...", icon: User },
-    { key: "notes", label: "Anything else your coach should know?", placeholder: "Any additional notes...", icon: Edit3 },
+  const tourSteps = [
+    // ── TODAY PAGE ──
+    { page:"today",    section:"Today",      sectionColor:"#34D399", Icon:Home,         gradient:"linear-gradient(135deg,#34D399,#10B981)", glow:"rgba(52,211,153,0.45)",  title:"Welcome to your Home!",          desc:"This is your daily command centre. Every important thing for today is surfaced right here.",                                   spotX:50, spotY:16,  spotW:370, spotH:72,  cardPos:"bottom", arrowDir:true },
+    { page:"today",    section:"Today",      sectionColor:"#34D399", Icon:Flame,        gradient:"linear-gradient(135deg,#F97316,#EF4444)", glow:"rgba(249,115,22,0.45)",   title:"Streak & Badges Banner",         desc:"Your current workout streak and unlocked badges live up here. Keep the streak alive — it motivates you daily!",               spotX:50, spotY:26,  spotW:370, spotH:80,  cardPos:"bottom", arrowDir:true },
+    { page:"today",    section:"Today",      sectionColor:"#34D399", Icon:User,         gradient:"linear-gradient(135deg,#8B5CF6,#6D28D9)", glow:"rgba(139,92,246,0.45)",   title:"My Coach",                       desc:"Tap the coach avatar (top right) to view your coach's profile, certifications, and contact info.",                             spotX:88, spotY:5.5, spotW:46,  spotH:46,  round:true, cardPos:"bottom", arrowDir:false },
+    { page:"today",    section:"Today",      sectionColor:"#34D399", Icon:Dumbbell,     gradient:"linear-gradient(135deg,#34D399,#10B981)", glow:"rgba(52,211,153,0.45)",   title:"Today's Workout Card",           desc:"Your assigned workout is shown here — name, muscle focus, exercises, and estimated duration. Tap Resume to begin.",            spotX:50, spotY:43,  spotW:370, spotH:88,  cardPos:"bottom", arrowDir:true },
+    { page:"today",    section:"Today",      sectionColor:"#34D399", Icon:Apple,        gradient:"linear-gradient(135deg,#10B981,#059669)", glow:"rgba(16,185,129,0.45)",   title:"Nutrition Summary",              desc:"See today's calories and macros at a glance. The coloured rings fill up as you log meals throughout the day.",                  spotX:50, spotY:62,  spotW:370, spotH:100, cardPos:"bottom", arrowDir:true },
+    { page:"today",    section:"Today",      sectionColor:"#34D399", Icon:CheckCircle2, gradient:"linear-gradient(135deg,#10B981,#059669)", glow:"rgba(16,185,129,0.45)",   title:"Meal Check Cards",               desc:"Tap Breakfast, Lunch, Dinner, or Snack to mark each meal as logged. Coach Mike tracks this.",                                   spotX:50, spotY:76,  spotW:370, spotH:68,  cardPos:"top",    arrowDir:true },
+    { page:"today",    section:"Today",      sectionColor:"#34D399", Icon:Bell,         gradient:"linear-gradient(135deg,#F59E0B,#F97316)", glow:"rgba(245,158,11,0.45)",   title:"Reminders & Schedule",          desc:"Scheduled sessions, supplement reminders, and rest day notes from your coach appear here. Tap + to add your own.",             spotX:50, spotY:88,  spotW:370, spotH:72,  cardPos:"top",    arrowDir:true },
+    { page:"today",    section:"Today",      sectionColor:"#34D399", Icon:Target,       gradient:"linear-gradient(135deg,#3B82F6,#8B5CF6)", glow:"rgba(59,130,246,0.45)",   title:"Coach Goals",                   desc:"Your coach's weekly and monthly goals for you. Hit these targets to stay on track for your transformation.",                    spotX:50, spotY:55,  spotW:370, spotH:80,  cardPos:"bottom", arrowDir:true },
+    // ── WORKOUT PAGE ──
+    { page:"workout",  section:"Workout",    sectionColor:"#34D399", Icon:Dumbbell,     gradient:"linear-gradient(135deg,#34D399,#10B981)", glow:"rgba(52,211,153,0.45)",   title:"Your Workout Plan",              desc:"All exercises assigned by your coach are listed here with sets, reps, rest time, and coaching notes.",                          spotX:50, spotY:30,  spotW:370, spotH:170, cardPos:"bottom", arrowDir:true },
+    { page:"workout",  section:"Workout",    sectionColor:"#34D399", Icon:Play,         gradient:"linear-gradient(135deg,#34D399,#10B981)", glow:"rgba(52,211,153,0.45)",   title:"Start Your Session",            desc:"Tap any exercise to expand it — you'll see demo notes, sets progress, and a Start Set button to begin the guided flow.",        spotX:50, spotY:52,  spotW:370, spotH:100, cardPos:"bottom", arrowDir:true },
+    { page:"workout",  section:"Workout",    sectionColor:"#34D399", Icon:Activity,     gradient:"linear-gradient(135deg,#F97316,#EF4444)", glow:"rgba(249,115,22,0.45)",   title:"Log Weight & Reps",             desc:"Enter your actual weight and reps for each set. This data is saved and shared with your coach automatically.",                  spotX:50, spotY:68,  spotW:370, spotH:140, cardPos:"top",    arrowDir:true },
+    { page:"workout",  section:"Workout",    sectionColor:"#34D399", Icon:Clock,        gradient:"linear-gradient(135deg,#8B5CF6,#6D28D9)", glow:"rgba(139,92,246,0.45)",   title:"Rest Timer",                    desc:"After completing a set, the rest timer starts automatically. You'll see a countdown ring and +/- buttons to adjust it.",        spotX:50, spotY:55,  spotW:280, spotH:240, cardPos:"bottom", arrowDir:true },
+    { page:"workout",  section:"Workout",    sectionColor:"#34D399", Icon:RotateCcw,    gradient:"linear-gradient(135deg,#F59E0B,#F97316)", glow:"rgba(245,158,11,0.45)",   title:"Skip & Notes",                  desc:"Can't do an exercise? Tap Skip and leave a reason. Your coach can see which sets or exercises were skipped and why.",           spotX:50, spotY:40,  spotW:370, spotH:90,  cardPos:"bottom", arrowDir:true },
+    { page:"workout",  section:"Workout",    sectionColor:"#34D399", Icon:CheckCircle2, gradient:"linear-gradient(135deg,#34D399,#10B981)", glow:"rgba(52,211,153,0.45)",   title:"Workout Complete 🎉",           desc:"Finish all exercises and you'll see a celebration screen with your performance summary, new badges, and coach notification.",    spotX:50, spotY:35,  spotW:370, spotH:120, cardPos:"bottom", arrowDir:true },
+    // ── NUTRITION PAGE ──
+    { page:"nutrition",section:"Nutrition",  sectionColor:"#10B981", Icon:Apple,        gradient:"linear-gradient(135deg,#10B981,#059669)", glow:"rgba(16,185,129,0.45)",   title:"Your Nutrition Plan",           desc:"Your coach-assigned meal plan lives here. Each meal slot shows what to eat and the calorie and macro targets.",                  spotX:50, spotY:22,  spotW:370, spotH:80,  cardPos:"bottom", arrowDir:true },
+    { page:"nutrition",section:"Nutrition",  sectionColor:"#10B981", Icon:BarChart2,    gradient:"linear-gradient(135deg,#3B82F6,#8B5CF6)", glow:"rgba(59,130,246,0.45)",   title:"Macro Rings",                   desc:"Protein, carbs, and fat rings fill up in real time as you log food. Aim to hit all three rings by end of day.",                  spotX:50, spotY:30,  spotW:300, spotH:160, cardPos:"bottom", arrowDir:true },
+    { page:"nutrition",section:"Nutrition",  sectionColor:"#10B981", Icon:Plus,         gradient:"linear-gradient(135deg,#34D399,#10B981)", glow:"rgba(52,211,153,0.45)",   title:"Log Your Food",                 desc:"Tap the + button on any meal to search foods, enter custom items, or scan a barcode. It's fast — under 30 seconds per meal.",   spotX:50, spotY:55,  spotW:370, spotH:200, cardPos:"top",    arrowDir:true },
+    { page:"nutrition",section:"Nutrition",  sectionColor:"#10B981", Icon:Droplets,     gradient:"linear-gradient(135deg,#3B82F6,#6D28D9)", glow:"rgba(59,130,246,0.4)",    title:"Water Intake",                  desc:"Track your daily hydration here. Tap + or - to update your water intake. Your coach gets notified if you're under target.",      spotX:50, spotY:75,  spotW:370, spotH:80,  cardPos:"top",    arrowDir:true },
+    { page:"nutrition",section:"Nutrition",  sectionColor:"#10B981", Icon:MessageSquare,gradient:"linear-gradient(135deg,#F59E0B,#F97316)", glow:"rgba(245,158,11,0.4)",    title:"Coach Nutrition Notes",         desc:"Daily tips, meal reminders, and dietary advice from Coach Mike appear at the bottom. Always worth a read.",                      spotX:50, spotY:87,  spotW:370, spotH:80,  cardPos:"top",    arrowDir:true },
+    // ── PROGRESS PAGE ──
+    { page:"progress", section:"Progress",   sectionColor:"#8B5CF6", Icon:TrendingUp,   gradient:"linear-gradient(135deg,#8B5CF6,#6D28D9)", glow:"rgba(139,92,246,0.45)",   title:"Progress Overview",             desc:"This is your progress hub. Weight trend, macros, body measurements, photos, and InBody reports all live here.",                  spotX:50, spotY:22,  spotW:370, spotH:80,  cardPos:"bottom", arrowDir:true },
+    { page:"progress", section:"Progress",   sectionColor:"#8B5CF6", Icon:Activity,     gradient:"linear-gradient(135deg,#34D399,#10B981)", glow:"rgba(52,211,153,0.45)",   title:"Weight Trend Chart",            desc:"Your weekly weigh-ins are plotted on this chart. Tap any point to see that day's entry and how far you've come.",                spotX:50, spotY:40,  spotW:370, spotH:160, cardPos:"bottom", arrowDir:true },
+    { page:"progress", section:"Progress",   sectionColor:"#8B5CF6", Icon:Scale,        gradient:"linear-gradient(135deg,#F97316,#EF4444)", glow:"rgba(249,115,22,0.45)",   title:"Log Your Weight",               desc:"Tap the weight card to log today's weight. Your coach sees this in real time and can adjust your plan based on trends.",          spotX:50, spotY:65,  spotW:370, spotH:80,  cardPos:"top",    arrowDir:true },
+    { page:"progress", section:"Progress",   sectionColor:"#8B5CF6", Icon:Camera,       gradient:"linear-gradient(135deg,#3B82F6,#8B5CF6)", glow:"rgba(59,130,246,0.45)",   title:"Progress Photos",               desc:"Upload front, side, and back photos weekly. Side-by-side comparison mode shows you how much your body has transformed.",           spotX:50, spotY:72,  spotW:370, spotH:100, cardPos:"top",    arrowDir:true },
+    { page:"progress", section:"Progress",   sectionColor:"#8B5CF6", Icon:BarChart2,    gradient:"linear-gradient(135deg,#8B5CF6,#6D28D9)", glow:"rgba(139,92,246,0.45)",   title:"InBody Reports",                desc:"Upload your InBody scan PDFs here. Your coach uses these to fine-tune muscle vs fat targets in your plan.",                       spotX:50, spotY:82,  spotW:370, spotH:80,  cardPos:"top",    arrowDir:true },
+    { page:"progress", section:"Progress",   sectionColor:"#8B5CF6", Icon:Award,        gradient:"linear-gradient(135deg,#F59E0B,#F97316)", glow:"rgba(245,158,11,0.45)",   title:"Achievements & Streak",         desc:"Earn badges for consistency, hitting milestones, and logging streaks. Share them with friends or show your coach!",              spotX:50, spotY:60,  spotW:370, spotH:100, cardPos:"top",    arrowDir:true },
+    // ── CHAT PAGE ──
+    { page:"chat",     section:"Chat",       sectionColor:"#8B5CF6", Icon:MessageSquare,gradient:"linear-gradient(135deg,#8B5CF6,#6D28D9)", glow:"rgba(139,92,246,0.45)",   title:"Chat With Coach Mike",          desc:"Send messages, questions, progress updates, or just check in. Your coach typically replies within a few hours.",                  spotX:50, spotY:45,  spotW:370, spotH:280, cardPos:"bottom", arrowDir:false },
+    { page:"chat",     section:"Chat",       sectionColor:"#8B5CF6", Icon:Send,         gradient:"linear-gradient(135deg,#34D399,#10B981)", glow:"rgba(52,211,153,0.45)",   title:"Send a Message",                desc:"Type your message in the bar at the bottom, or use Quick Replies to send common check-in messages with one tap.",                 spotX:50, spotY:90,  spotW:370, spotH:70,  cardPos:"top",    arrowDir:true },
+    // ── SETTINGS ──
+    { page:"settings", section:"Settings",   sectionColor:"#64748B", Icon:User,         gradient:"linear-gradient(135deg,#34D399,#10B981)", glow:"rgba(52,211,153,0.45)",   title:"Account & Profile",             desc:"Update your name, email, and phone here. Your coach sees your profile info to personalise your plan even further.",              spotX:50, spotY:28,  spotW:370, spotH:120, cardPos:"bottom", arrowDir:true },
+    { page:"settings", section:"Settings",   sectionColor:"#64748B", Icon:Bell,         gradient:"linear-gradient(135deg,#F59E0B,#F97316)", glow:"rgba(245,158,11,0.45)",   title:"Notification Controls",         desc:"Toggle workout reminders, coach messages, plan updates, and achievements on or off. You control your own noise level.",          spotX:50, spotY:50,  spotW:370, spotH:90,  cardPos:"bottom", arrowDir:true },
+    { page:"settings", section:"Settings",   sectionColor:"#64748B", Icon:Settings,     gradient:"linear-gradient(135deg,#8B5CF6,#6D28D9)", glow:"rgba(139,92,246,0.45)",   title:"App Preferences",               desc:"Switch between Light and Dark theme, change units (metric or imperial), and set your preferred language.",                       spotX:50, spotY:68,  spotW:370, spotH:90,  cardPos:"top",    arrowDir:true },
+    { page:"settings", section:"Settings",   sectionColor:"#64748B", Icon:Shield,       gradient:"linear-gradient(135deg,#EF4444,#DC2626)", glow:"rgba(239,68,68,0.4)",     title:"Security & Privacy",            desc:"Enable two-factor authentication to keep your account safe. You can also delete your account here if needed.",                   spotX:50, spotY:82,  spotW:370, spotH:80,  cardPos:"top",    arrowDir:true },
+    // ── BOTTOM NAV ──
+    { page:"today",    section:"Navigation", sectionColor:"#34D399", Icon:Home,         gradient:"linear-gradient(135deg,#34D399,#10B981)", glow:"rgba(52,211,153,0.45)",   title:"Bottom Navigation",             desc:"These 5 tabs get you anywhere in the app instantly — Today, Workout, Nutrition, Progress, and Chat. You're all set!",            spotX:50, spotY:95,  spotW:400, spotH:56,  radius:0, cardPos:"top", arrowDir:true },
   ];
-
-  const submitIntake = () => {
-    setIntakeCompleted(true);
-    setShowIntakeForm(false);
-    showToast("Profile completed! Your coach can now see your info.", "success");
-  };
 
   // ── Coach Profile Popup (for trainee home) ──
   const [showCoachProfile, setShowCoachProfile] = useState(false);
   const coachProfileData = {
     name: "Coach Mike",
     avatar: null,
-    bio: "Certified PT with 8+ years experience in strength & conditioning. Specialized in body transformations and competition prep.",
+    bio: tr("Certified PT with 8+ years experience in strength & conditioning. Specialized in body transformations and competition prep."),
     certifications: [
-      { title: "NASM Certified Personal Trainer", year: "2018" },
-      { title: "CrossFit Level 2 Trainer", year: "2020" },
-      { title: "Precision Nutrition Level 1", year: "2021" },
+      { title: tr("NASM Certified Personal Trainer"), year: "2018" },
+      { title: tr("CrossFit Level 2 Trainer"), year: "2020" },
+      { title: tr("Precision Nutrition Level 1"), year: "2021" },
     ],
     champions: [
-      { title: "Regional Bodybuilding 1st Place", year: "2019" },
-      { title: "National Fitness Challenge Winner", year: "2022" },
+      { title: tr("Regional Bodybuilding 1st Place"), year: "2019" },
+      { title: tr("National Fitness Challenge Winner"), year: "2022" },
     ],
     transformations: [
-      { title: "Client lost 30kg in 6 months", before: "110kg", after: "80kg" },
-      { title: "Client gained 12kg muscle in 8 months", before: "65kg", after: "77kg" },
-      { title: "Post-pregnancy body transformation", before: "85kg", after: "62kg" },
+      { title: tr("Client lost 30kg in 6 months"), before: "110kg", after: "80kg" },
+      { title: tr("Client gained 12kg muscle in 8 months"), before: "65kg", after: "77kg" },
+      { title: tr("Post-pregnancy body transformation"), before: "85kg", after: "62kg" },
     ],
   };
 
@@ -10474,15 +12145,15 @@ export default function FitCoachProPrototype() {
   const showToast = (msg, type) => setToast({ msg, type });
 
   const coachScreens = {
-    home: <CoachDashboard onNavigate={s => setScreen(s)} onShowToast={showToast} freemium={{ isPremium, clientCount, CLIENT_FREE_LIMIT, canAddClient, workoutSets, nutritionSets, onUpgrade: () => setShowUpgradeModal(true) }} />,
-    "coach-trainees": <CoachTraineesTab onNavigate={s => setScreen(s)} onShowToast={showToast} freemium={{ isPremium, clientCount, CLIENT_FREE_LIMIT, canAddClient, onUpgrade: () => setShowUpgradeModal(true), onClientCountChange: setClientCount }} />,
+    home: <CoachDashboard onNavigate={s => setScreen(s)} onShowToast={showToast} freemium={{ isPremium, clientCount, CLIENT_FREE_LIMIT, canAddClient, workoutSets, nutritionSets, onUpgrade: () => setShowUpgradeModal(true) }} onOpenTrainee={(id) => { setPendingTraineeId(id); setScreen("coach-trainees"); }} />,
+    "coach-trainees": <CoachTraineesTab onNavigate={s => setScreen(s)} onShowToast={showToast} freemium={{ isPremium, clientCount, CLIENT_FREE_LIMIT, canAddClient, onUpgrade: () => setShowUpgradeModal(true), onClientCountChange: setClientCount }} initialTraineeId={pendingTraineeId} />,
     "trainee-detail": <TraineeDetail onBack={() => setScreen("home")} onNavigate={s => setScreen(s)} onShowToast={showToast} />,
     "workout-builder": <WorkoutBuilder onBack={() => setScreen("coach-workouts")} onShowToast={showToast} />,
     "nutrition-builder": <NutritionPlanBuilder onBack={() => setScreen("coach-nutrition")} onShowToast={showToast} />,
     "coach-workouts": <CoachWorkoutsList sets={workoutSets} onSetUpdate={setWorkoutSets} onCreate={() => { setShowCreateMenu(false); setScreen("workout-builder"); }} onNavigate={s => setScreen(s)} onShowToast={showToast} />,
     "coach-nutrition": <CoachNutritionList sets={nutritionSets} onSetUpdate={setNutritionSets} onCreate={() => { setShowCreateMenu(false); setScreen("nutrition-builder"); }} onNavigate={s => setScreen(s)} onShowToast={showToast} />,
     "coach-chat": <CoachChatSystem onShowToast={showToast} onNavigate={s => setScreen(s)} />,
-    "coach-settings": <CoachSettings onShowToast={showToast} onNavigate={s => setScreen(s)} onLogout={() => setShowLogoutConfirm(true)} />,
+    "coach-settings": <CoachSettings onShowToast={showToast} onNavigate={s => setScreen(s)} onLogout={() => setShowLogoutConfirm(true)} onLanguageChange={setAppLanguage} currentLanguage={appLanguage} />,
   };
 
   const traineeScreens = {
@@ -10491,13 +12162,14 @@ export default function FitCoachProPrototype() {
     nutrition: <TraineeNutrition onBack={() => setScreen("today")} onShowToast={showToast} />,
     progress: <TraineeProgress onBack={() => setScreen("today")} onShowToast={showToast} />,
     chat: <TraineeChat onBack={() => setScreen("today")} onShowToast={showToast} />,
+    settings: <TraineeSettings onShowToast={showToast} onNavigate={s => setScreen(s)} onLogout={() => setShowLogoutConfirm(true)} onLanguageChange={setAppLanguage} currentLanguage={appLanguage} />,
   };
 
   // Show splash animation before anything else (g. → guider.)
   if (showSplash) {
     return (
-      <div style={{ width: "100%", minHeight: "100vh", background: "#0A0A0F", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif" }}>
-        <div style={{ width: 390, height: 844, borderRadius: 40, overflow: "hidden", boxShadow: "0 25px 80px rgba(0,0,0,0.5)", position: "relative" }}>
+      <div style={{ width: "100%", minHeight: "100vh", background: "#1A1A2E", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif" }}>
+        <div style={{ width: 428, height: 926, borderRadius: 44, overflow: "hidden", boxShadow: "0 25px 80px rgba(0,0,0,0.5)", position: "relative", background: "#0A0A0F" }}>
           <SplashScreen onComplete={() => setShowSplash(false)} />
         </div>
       </div>
@@ -10506,27 +12178,56 @@ export default function FitCoachProPrototype() {
 
   if (!role) {
     return (
-      <div style={{ width: "100%", minHeight: "100vh", background: colors.surface, display: "flex", alignItems: "center", justifyContent: "center", padding: 20, fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif" }}>
-        <div style={{ width: 390, height: 844, borderRadius: 40, overflow: "hidden", boxShadow: "0 25px 80px rgba(0,0,0,0.5)", position: "relative" }}>
-          <LoginScreen onLogin={(r) => { setRole(r); setScreen(r === "coach" ? "home" : "today"); if (r === "trainee" && !intakeCompleted) setShowIntakeForm(true); if (!hasCompletedOnboarding) setShowOnboarding(true); }} />
+      <div style={{ width: "100%", minHeight: "100vh", background: "#1A1A2E", display: "flex", alignItems: "center", justifyContent: "center", padding: 20, fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif" }}>
+        <div style={{ width: 428, height: 926, borderRadius: 44, overflow: "hidden", boxShadow: "0 25px 80px rgba(0,0,0,0.5)", position: "relative" }}>
+          <LoginScreen onLogin={(r) => { setRole(r); setScreen(r === "coach" ? "home" : "today"); if (r === "trainee") { setTraineePhase("intake"); } if (!hasCompletedOnboarding) setShowOnboarding(true); }} onLanguageChange={setAppLanguage} currentLanguage={appLanguage} />
         </div>
       </div>
     );
   }
 
   return (
-    <div style={{ width: "100%", minHeight: "100vh", background: colors.surface, display: "flex", alignItems: "center", justifyContent: "center", padding: 20, fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif" }}>
-      <div style={{ width: 390, height: 844, borderRadius: 40, overflow: "hidden", boxShadow: "0 25px 80px rgba(0,0,0,0.5)", position: "relative", background: colors.background, display: "flex", flexDirection: "column" }}>
+    <div style={{ width: "100%", minHeight: "100vh", background: "#1A1A2E", display: "flex", alignItems: "center", justifyContent: "center", padding: 20, fontFamily: "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', Roboto, sans-serif" }}>
+      <div style={{ width: 428, height: 926, borderRadius: 44, overflow: "hidden", boxShadow: "0 25px 80px rgba(0,0,0,0.5)", position: "relative", background: colors.background, display: "flex", flexDirection: "column" }}>
 
         {/* Splash Screen */}
-        {showSplash && <SplashScreen onComplete={() => { setShowSplash(false); if (role && !hasCompletedOnboarding) setShowOnboarding(true); }} />}
+        {showSplash && <SplashScreen onComplete={() => setShowSplash(false)} />}
 
-        {/* Onboarding Overlay */}
-        {showOnboarding && <OnboardingOverlay role={role} onComplete={() => { setShowOnboarding(false); setHasCompletedOnboarding(true); }} />}
+        {/* Trainee Intake Flow — full screen */}
+        {role === "trainee" && traineePhase === "intake" && (
+          <TraineeIntakeFlow onComplete={(d) => {
+            setIntakeData(d);
+            setTraineePhase("tour");
+            setTourStep(0);
+            setScreen("today");
+            showToast("Profile saved! Let's show you around 🎉", "success");
+          }} />
+        )}
+
+        {/* Trainee Tour Guide Overlay */}
+        {role === "trainee" && traineePhase === "tour" && (
+          <TraineeTourOverlay
+            step={tourStep}
+            steps={tourSteps}
+            onNext={() => {
+              const next = tourStep + 1;
+              if (next >= tourSteps.length) {
+                setTraineePhase("app");
+              } else {
+                const nextPage = tourSteps[next].page;
+                setScreen(nextPage);
+                setTraineeTab(nextPage);
+                setTourStep(next);
+              }
+            }}
+            onSkip={() => setTraineePhase("app")}
+          />
+        )}
 
         {/* Status Bar */}
         <div style={{ height: 50, background: colors.card, display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 24px", flexShrink: 0, borderBottom: `1px solid ${colors.border}` }}>
           <span style={{ fontSize: 14, fontWeight: 700, color: colors.textPrimary }}>guider.</span>
+          {isArabic && <span style={{ fontSize: 10, fontWeight: 700, color: colors.primary, background: colors.primaryLight, padding: "2px 6px", borderRadius: 5 }}>AR</span>}
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <button onClick={() => setIsDarkMode(!isDarkMode)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0 }}>
               {isDarkMode ? <Sun size={18} color={colors.textSecondary} /> : <Moon size={18} color={colors.textSecondary} />}
@@ -10540,15 +12241,13 @@ export default function FitCoachProPrototype() {
               {showNotifDropdown && (
                 <div style={{ position: "absolute", top: 30, right: -60, width: 300, background: colors.card, borderRadius: 16, boxShadow: "0 12px 40px rgba(0,0,0,0.2)", border: `1px solid ${colors.border}`, zIndex: 300, overflow: "hidden", animation: "fadeScale 0.2s ease" }}>
                   <div style={{ padding: "14px 16px 10px", borderBottom: `1px solid ${colors.border}`, display: "flex", alignItems: "center", justifyContent: "space-between", flexShrink: 0 }}>
-                    <span style={{ fontSize: 14, fontWeight: 800, color: colors.textPrimary }}>Notifications</span>
-                    <span style={{ fontSize: 11, fontWeight: 600, color: colors.primary, cursor: "pointer" }}>Mark all read</span>
+                    <span style={{ fontSize: 14, fontWeight: 800, color: colors.textPrimary }}>{tr("Notifications")}</span>
+                    <span style={{ fontSize: 11, fontWeight: 600, color: colors.primary, cursor: "pointer" }}>{tr("Mark all read")}</span>
                   </div>
                   <div style={{ maxHeight: 320, overflowY: "scroll", WebkitOverflowScrolling: "touch", scrollbarWidth: "thin", scrollbarColor: `${colors.border} transparent` }}>
                     {notifItems.map(n => (
                       <div key={n.id} style={{ display: "flex", gap: 10, padding: "12px 16px", borderBottom: `1px solid ${colors.surface}`, background: n.unread ? `${n.color}06` : "transparent", cursor: "pointer", transition: "background 0.15s" }}>
-                        <div style={{ width: 32, height: 32, borderRadius: 8, background: `${n.color}12`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                          <n.icon size={14} color={n.color} />
-                        </div>
+                        <NotifIconBadge iconType={n.iconType} color={n.color} size={32} />
                         <div style={{ flex: 1, minWidth: 0 }}>
                           <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                             <span style={{ fontSize: 12, fontWeight: n.unread ? 700 : 500, color: colors.textPrimary, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{n.title}</span>
@@ -10568,67 +12267,23 @@ export default function FitCoachProPrototype() {
             {/* Settings Gear Icon — trainee only */}
             {role === "trainee" && <div style={{ position: "relative" }}>
               <button
-                onClick={() => { setShowSettingsMenu(!showSettingsMenu); setShowNotifDropdown(false); }}
+                onClick={() => { setScreen("settings"); setTraineeTab("settings"); setShowNotifDropdown(false); }}
                 style={{
                   width: 34, height: 34, borderRadius: "50%",
-                  background: showSettingsMenu ? `${colors.primary}15` : colors.primaryLight,
+                  background: screen === "settings" ? `${colors.primary}15` : colors.primaryLight,
                   display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer",
-                  border: showSettingsMenu ? `2px solid ${colors.primary}` : "2px solid transparent",
+                  border: screen === "settings" ? `2px solid ${colors.primary}` : "2px solid transparent",
                   transition: "all 0.2s"
                 }}
               >
-                <Settings size={16} color={colors.primary} style={{ transition: "transform 0.3s", transform: showSettingsMenu ? "rotate(90deg)" : "rotate(0)" }} />
+                <Settings size={16} color={colors.primary} style={{ transition: "transform 0.3s", transform: screen === "settings" ? "rotate(90deg)" : "rotate(0)" }} />
               </button>
-              {/* Settings Dropdown */}
-              {showSettingsMenu && (
-                <div style={{
-                  position: "absolute", top: 42, right: 0, width: 200, background: colors.card,
-                  borderRadius: 14, boxShadow: "0 12px 40px rgba(0,0,0,0.15)", border: `1px solid ${colors.border}`,
-                  padding: 6, zIndex: 200, animation: "fadeScale 0.2s ease"
-                }}>
-                  {/* Profile */}
-                  <button onClick={() => { setShowSettingsMenu(false); setShowProfileSheet(true); }} style={{
-                    width: "100%", padding: "11px 14px", display: "flex", alignItems: "center", gap: 10,
-                    background: "none", border: "none", cursor: "pointer", borderRadius: 10, fontSize: 13, fontWeight: 600, color: colors.textPrimary,
-                    transition: "background 0.15s"
-                  }}>
-                    <div style={{ width: 30, height: 30, borderRadius: 8, background: `${colors.primary}10`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <User size={15} color={colors.primary} />
-                    </div>
-                    Profile
-                  </button>
-                  {/* Change Password */}
-                  <button onClick={() => { setShowSettingsMenu(false); setShowChangePassword(true); }} style={{
-                    width: "100%", padding: "11px 14px", display: "flex", alignItems: "center", gap: 10,
-                    background: "none", border: "none", cursor: "pointer", borderRadius: 10, fontSize: 13, fontWeight: 600, color: colors.textPrimary,
-                    transition: "background 0.15s"
-                  }}>
-                    <div style={{ width: 30, height: 30, borderRadius: 8, background: `${colors.warning}10`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <Lock size={15} color={colors.warning} />
-                    </div>
-                    Change Password
-                  </button>
-                  {/* Divider */}
-                  <div style={{ height: 1, background: colors.border, margin: "4px 10px" }} />
-                  {/* Logout */}
-                  <button onClick={() => { setShowSettingsMenu(false); setShowLogoutConfirm(true); }} style={{
-                    width: "100%", padding: "11px 14px", display: "flex", alignItems: "center", gap: 10,
-                    background: "none", border: "none", cursor: "pointer", borderRadius: 10, fontSize: 13, fontWeight: 600, color: colors.error,
-                    transition: "background 0.15s"
-                  }}>
-                    <div style={{ width: 30, height: 30, borderRadius: 8, background: `${colors.error}10`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                      <LogOut size={15} color={colors.error} />
-                    </div>
-                    Logout
-                  </button>
-                </div>
-              )}
             </div>}
           </div>
         </div>
 
         {/* Content */}
-        <div style={{ flex: 1, overflow: "auto", paddingTop: 20, paddingBottom: 80 }}>
+        <div style={{ flex: 1, overflow: "auto", paddingTop: 20, paddingBottom: 80, direction: isArabic ? "rtl" : "ltr", fontFamily: isArabic ? "'Noto Sans Arabic', -apple-system, sans-serif" : undefined }}>
           {role === "coach" ? coachScreens[screen] || coachScreens.home : traineeScreens[screen] || traineeScreens.today}
         </div>
 
@@ -10636,24 +12291,24 @@ export default function FitCoachProPrototype() {
         <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 68, background: colors.card, borderTop: `1px solid ${colors.border}`, display: "flex", alignItems: "center", justifyContent: "space-around", padding: "0 8px" }}>
           {role === "coach" ? (
             <>
-              <button onClick={() => { setScreen("home"); setCoachTab("home"); }} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, background: "none", border: "none", cursor: "pointer", padding: "4px 12px" }}>
+              <button onClick={() => { setScreen("home"); setCoachTab("home"); setPendingTraineeId(null); }} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, background: "none", border: "none", cursor: "pointer", padding: "4px 12px" }}>
                 <Home size={20} color={coachTab === "home" ? colors.primary : colors.textMuted} />
-                <span style={{ fontSize: 10, fontWeight: 600, color: coachTab === "home" ? colors.primary : colors.textMuted }}>Home</span>
+                <span style={{ fontSize: 10, fontWeight: 600, color: coachTab === "home" ? colors.primary : colors.textMuted }}>{tr("Home")}</span>
               </button>
-              <button onClick={() => { setScreen("coach-trainees"); setCoachTab("trainees"); }} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, background: "none", border: "none", cursor: "pointer", padding: "4px 12px" }}>
+              <button onClick={() => { setScreen("coach-trainees"); setCoachTab("trainees"); setPendingTraineeId(null); }} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, background: "none", border: "none", cursor: "pointer", padding: "4px 12px" }}>
                 <Users size={20} color={coachTab === "trainees" ? colors.primary : colors.textMuted} />
-                <span style={{ fontSize: 10, fontWeight: 600, color: coachTab === "trainees" ? colors.primary : colors.textMuted }}>Trainees</span>
+                <span style={{ fontSize: 10, fontWeight: 600, color: coachTab === "trainees" ? colors.primary : colors.textMuted }}>{tr("Trainees")}</span>
               </button>
               <div style={{ position: "relative" }}>
                 <button onClick={() => setShowCreateMenu(!showCreateMenu)} style={{ width: 52, height: 52, borderRadius: 16, background: colors.primary, border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", boxShadow: "0 4px 14px rgba(79,70,229,0.4)", transform: "translateY(-8px)" }}>
                   <Plus size={24} color="#fff" />
                 </button>
-                <span style={{ fontSize: 10, fontWeight: 500, color: colors.textMuted, position: "absolute", bottom: -14, left: "50%", transform: "translateX(-50%)", whiteSpace: "nowrap" }}>Create</span>
+                <span style={{ fontSize: 10, fontWeight: 500, color: colors.textMuted, position: "absolute", bottom: -14, left: "50%", transform: "translateX(-50%)", whiteSpace: "nowrap" }}>{tr("Create")}</span>
                 {showCreateMenu && (
                   <div style={{ position: "absolute", bottom: 64, left: "50%", transform: "translateX(-50%)", background: colors.card, borderRadius: 14, boxShadow: "0 8px 32px rgba(0,0,0,0.18)", padding: 8, width: 200, zIndex: 100, animation: "fadeScale 0.15s ease" }}>
                     {[
-                      { label: "Workout Plan", icon: Dumbbell, color: colors.primary, action: () => { setShowCreateMenu(false); setScreen("workout-builder"); } },
-                      { label: "Nutrition Plan", icon: Apple, color: colors.success, action: () => { setShowCreateMenu(false); setScreen("nutrition-builder"); } }
+                      { label: tr("Workout Plan"), icon: Dumbbell, color: colors.primary, action: () => { setShowCreateMenu(false); setScreen("workout-builder"); } },
+                      { label: tr("Nutrition Plan"), icon: Apple, color: colors.success, action: () => { setShowCreateMenu(false); setScreen("nutrition-builder"); } }
                     ].map(item => (
                       <button key={item.label} onClick={item.action} style={{ width: "100%", padding: "12px 14px", display: "flex", alignItems: "center", gap: 10, background: "none", border: "none", cursor: "pointer", borderRadius: 10, fontSize: 13, fontWeight: 600, color: colors.textPrimary }}>
                         <item.icon size={18} color={item.color} />
@@ -10665,26 +12320,26 @@ export default function FitCoachProPrototype() {
               </div>
               <button onClick={() => { setCoachTab("chat"); setScreen("coach-chat"); }} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, background: "none", border: "none", cursor: "pointer", padding: "4px 12px", position: "relative" }}>
                 <MessageSquare size={20} color={coachTab === "chat" ? colors.primary : colors.textMuted} />
-                <span style={{ fontSize: 10, fontWeight: 600, color: coachTab === "chat" ? colors.primary : colors.textMuted }}>Chat</span>
+                <span style={{ fontSize: 10, fontWeight: 600, color: coachTab === "chat" ? colors.primary : colors.textMuted }}>{tr("Chat")}</span>
                 <div style={{ position: "absolute", top: 0, right: 8, width: 8, height: 8, borderRadius: "50%", background: colors.error }} />
               </button>
               <button onClick={() => { setCoachTab("more"); setScreen("coach-settings"); }} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, background: "none", border: "none", cursor: "pointer", padding: "4px 12px" }}>
                 <Settings size={20} color={coachTab === "more" ? colors.primary : colors.textMuted} />
-                <span style={{ fontSize: 10, fontWeight: 600, color: coachTab === "more" ? colors.primary : colors.textMuted }}>More</span>
+                <span style={{ fontSize: 10, fontWeight: 600, color: coachTab === "more" ? colors.primary : colors.textMuted }}>{tr("More")}</span>
               </button>
             </>
           ) : (
             <>
               {[
-                { icon: Home, label: "Today", key: "today" },
-                { icon: Dumbbell, label: "Workout", key: "workout" },
-                { icon: Apple, label: "Nutrition", key: "nutrition" },
-                { icon: TrendingUp, label: "Progress", key: "progress" },
-                { icon: MessageSquare, label: "Chat", key: "chat" },
-              ].map(({ icon: Icon, label, key }) => (
+                { icon: Home, label: "Today", labelKey: "Today", key: "today" },
+                { icon: Dumbbell, label: "Workout", labelKey: "Workout", key: "workout" },
+                { icon: Apple, label: "Nutrition", labelKey: "Nutrition", key: "nutrition" },
+                { icon: TrendingUp, label: "Progress", labelKey: "Progress", key: "progress" },
+                { icon: MessageSquare, label: "Chat", labelKey: "Chat", key: "chat" },
+              ].map(({ icon: Icon, label, labelKey, key }) => (
                 <button key={label} onClick={() => { setScreen(key); setTraineeTab(label.toLowerCase()); }} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 2, background: "none", border: "none", cursor: "pointer", padding: "4px 8px" }}>
                   <Icon size={20} color={traineeTab === label.toLowerCase() ? colors.primary : colors.textMuted} />
-                  <span style={{ fontSize: 10, fontWeight: 600, color: traineeTab === label.toLowerCase() ? colors.primary : colors.textMuted }}>{label}</span>
+                  <span style={{ fontSize: 10, fontWeight: 600, color: traineeTab === label.toLowerCase() ? colors.primary : colors.textMuted }}>{tr(labelKey || label)}</span>
                 </button>
               ))}
             </>
@@ -10704,8 +12359,8 @@ export default function FitCoachProPrototype() {
               </div>
             ))}
             <div style={{ display: "flex", gap: 10 }}>
-              <button onClick={() => setShowAddTrainee(false)} style={{ flex: 1, padding: "14px 0", borderRadius: 14, border: `1.5px solid ${colors.border}`, background: "#fff", fontSize: 14, fontWeight: 600, color: colors.textSecondary, cursor: "pointer" }}>Cancel</button>
-              <button onClick={() => { setShowAddTrainee(false); showToast("Invite sent!"); }} style={{ flex: 1, padding: "14px 0", borderRadius: 14, border: "none", background: colors.primary, color: "#fff", fontSize: 14, fontWeight: 600, cursor: "pointer" }}>Send Invite →</button>
+              <button onClick={() => setShowAddTrainee(false)} style={{ flex: 1, padding: "14px 0", borderRadius: 14, border: `1.5px solid ${colors.border}`, background: "#fff", fontSize: 14, fontWeight: 600, color: colors.textSecondary, cursor: "pointer" }}>{tr("Cancel")}</button>
+              <button onClick={() => { setShowAddTrainee(false); showToastr("Invite sent!"); }} style={{ flex: 1, padding: "14px 0", borderRadius: 14, border: "none", background: colors.primary, color: "#fff", fontSize: 14, fontWeight: 600, cursor: "pointer" }}>Send Invite →</button>
             </div>
           </BottomSheet>
         )}
@@ -10754,8 +12409,8 @@ export default function FitCoachProPrototype() {
             <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
               {profileEditing ? (
                 <>
-                  <button onClick={() => setProfileEditing(false)} style={{ flex: 1, padding: "12px 0", borderRadius: 12, border: `1.5px solid ${colors.border}`, background: "#fff", fontSize: 13, fontWeight: 600, color: colors.textSecondary, cursor: "pointer" }}>Cancel</button>
-                  <button onClick={() => { setProfileEditing(false); showToast("Profile saved!", "success"); }} style={{ flex: 1, padding: "12px 0", borderRadius: 12, border: "none", background: colors.primary, color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>Save Changes</button>
+                  <button onClick={() => setProfileEditing(false)} style={{ flex: 1, padding: "12px 0", borderRadius: 12, border: `1.5px solid ${colors.border}`, background: "#fff", fontSize: 13, fontWeight: 600, color: colors.textSecondary, cursor: "pointer" }}>{tr("Cancel")}</button>
+                  <button onClick={() => { setProfileEditing(false); showToast("Profile saved!", "success"); }} style={{ flex: 1, padding: "12px 0", borderRadius: 12, border: "none", background: colors.primary, color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer" }}>{tr("Save Changes")}</button>
                 </>
               ) : (
                 <button onClick={() => setProfileEditing(true)} style={{ flex: 1, padding: "12px 0", borderRadius: 12, border: "none", background: colors.primary, color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
@@ -10771,7 +12426,7 @@ export default function FitCoachProPrototype() {
           <BottomSheet title="Change Password" onClose={() => { setShowChangePassword(false); setPwData({ current: "", newPw: "", confirm: "" }); }}>
             {/* Current Password */}
             <div style={{ marginBottom: 14 }}>
-              <label style={{ fontSize: 11, fontWeight: 700, color: colors.textMuted, display: "block", marginBottom: 5, textTransform: "uppercase", letterSpacing: 0.5 }}>Current Password</label>
+              <label style={{ fontSize: 11, fontWeight: 700, color: colors.textMuted, display: "block", marginBottom: 5, textTransform: "uppercase", letterSpacing: 0.5 }}>{tr("Current Password")}</label>
               <div style={{ position: "relative" }}>
                 <input
                   type={showPwCurrent ? "text" : "password"} value={pwData.current}
@@ -10786,7 +12441,7 @@ export default function FitCoachProPrototype() {
             </div>
             {/* New Password */}
             <div style={{ marginBottom: 14 }}>
-              <label style={{ fontSize: 11, fontWeight: 700, color: colors.textMuted, display: "block", marginBottom: 5, textTransform: "uppercase", letterSpacing: 0.5 }}>New Password</label>
+              <label style={{ fontSize: 11, fontWeight: 700, color: colors.textMuted, display: "block", marginBottom: 5, textTransform: "uppercase", letterSpacing: 0.5 }}>{tr("New Password")}</label>
               <div style={{ position: "relative" }}>
                 <input
                   type={showPwNew ? "text" : "password"} value={pwData.newPw}
@@ -10817,7 +12472,7 @@ export default function FitCoachProPrototype() {
             </div>
             {/* Confirm Password */}
             <div style={{ marginBottom: 14 }}>
-              <label style={{ fontSize: 11, fontWeight: 700, color: colors.textMuted, display: "block", marginBottom: 5, textTransform: "uppercase", letterSpacing: 0.5 }}>Confirm New Password</label>
+              <label style={{ fontSize: 11, fontWeight: 700, color: colors.textMuted, display: "block", marginBottom: 5, textTransform: "uppercase", letterSpacing: 0.5 }}>{tr("Confirm New Password")}</label>
               <input
                 type="password" value={pwData.confirm}
                 onChange={e => setPwData(p => ({ ...p, confirm: e.target.value }))}
@@ -10828,11 +12483,11 @@ export default function FitCoachProPrototype() {
                 }}
               />
               {pwData.confirm && pwData.confirm !== pwData.newPw && (
-                <span style={{ fontSize: 11, color: colors.error, marginTop: 4, display: "block" }}>Passwords do not match</span>
+                <span style={{ fontSize: 11, color: colors.error, marginTop: 4, display: "block" }}>{tr("Passwords do not match")}</span>
               )}
             </div>
             <div style={{ display: "flex", gap: 10, marginTop: 4 }}>
-              <button onClick={() => { setShowChangePassword(false); setPwData({ current: "", newPw: "", confirm: "" }); }} style={{ flex: 1, padding: "12px 0", borderRadius: 12, border: `1.5px solid ${colors.border}`, background: "#fff", fontSize: 13, fontWeight: 600, color: colors.textSecondary, cursor: "pointer" }}>Cancel</button>
+              <button onClick={() => { setShowChangePassword(false); setPwData({ current: "", newPw: "", confirm: "" }); }} style={{ flex: 1, padding: "12px 0", borderRadius: 12, border: `1.5px solid ${colors.border}`, background: "#fff", fontSize: 13, fontWeight: 600, color: colors.textSecondary, cursor: "pointer" }}>{tr("Cancel")}</button>
               <button
                 onClick={() => {
                   if (!pwData.current || !pwData.newPw || !pwData.confirm) { showToast("Please fill all fields", "error"); return; }
@@ -10841,7 +12496,7 @@ export default function FitCoachProPrototype() {
                   setShowChangePassword(false); setPwData({ current: "", newPw: "", confirm: "" }); showToast("Password updated!", "success");
                 }}
                 style={{ flex: 1, padding: "12px 0", borderRadius: 12, border: "none", background: colors.primary, color: "#fff", fontSize: 13, fontWeight: 700, cursor: "pointer" }}
-              >Update Password</button>
+              >{tr("Update Password")}</button>
             </div>
           </BottomSheet>
         )}
@@ -10851,14 +12506,9 @@ export default function FitCoachProPrototype() {
           <ConfirmDialog
             title="Logout"
             message="Are you sure you want to logout? You'll need to sign in again to access your account."
-            onConfirm={() => { setShowLogoutConfirm(false); setRole(null); setScreen("home"); setCoachTab("home"); setTraineeTab("today"); showToast("Logged out successfully"); }}
+            onConfirm={() => { setShowLogoutConfirm(false); setRole(null); setScreen("home"); setCoachTab("home"); setTraineeTab("today"); showToastr("Logged out successfully"); }}
             onCancel={() => setShowLogoutConfirm(false)}
           />
-        )}
-
-        {/* Settings menu backdrop (click outside to close) */}
-        {showSettingsMenu && (
-          <div onClick={() => setShowSettingsMenu(false)} style={{ position: "fixed", inset: 0, zIndex: 199 }} />
         )}
 
         {/* ═══ Upgrade Modal ═══ */}
@@ -10867,76 +12517,6 @@ export default function FitCoachProPrototype() {
             onClose={() => setShowUpgradeModal(false)}
             onUpgrade={() => { setIsPremium(true); showToast("Welcome to Pro! Unlimited clients unlocked.", "success"); }}
           />
-        )}
-
-        {/* ═══ First-Login Trainee Intake Form ═══ */}
-        {showIntakeForm && (
-          <div style={{ position: "absolute", inset: 0, background: "rgba(0,0,0,0.6)", zIndex: 500, display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
-            <div style={{ width: "100%", maxHeight: "90%", background: colors.card, borderRadius: 24, overflow: "hidden", display: "flex", flexDirection: "column", boxShadow: "0 20px 60px rgba(0,0,0,0.3)" }}>
-              {/* Header */}
-              <div style={{ padding: "20px 20px 14px", borderBottom: `1px solid ${colors.border}`, flexShrink: 0 }}>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-                  <div style={{ fontSize: 18, fontWeight: 800, color: colors.textPrimary }}>Welcome! Let's Get Started</div>
-                  <button onClick={() => setShowIntakeForm(false)} style={{ width: 30, height: 30, borderRadius: "50%", background: colors.surface, border: "none", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}>
-                    <X size={16} color={colors.textMuted} />
-                  </button>
-                </div>
-                <p style={{ fontSize: 12, color: colors.textSecondary, lineHeight: 1.5 }}>Help your coach understand your background so they can create the perfect plan for you.</p>
-                {/* Progress */}
-                <div style={{ display: "flex", gap: 3, marginTop: 12 }}>
-                  {intakeFields.map((_, i) => (
-                    <div key={i} style={{ flex: 1, height: 3, borderRadius: 2, background: intakeData[intakeFields[i].key] ? colors.primary : colors.surface, transition: "background 0.3s" }} />
-                  ))}
-                </div>
-                <div style={{ fontSize: 10, color: colors.textMuted, marginTop: 4, textAlign: "right" }}>
-                  {Object.values(intakeData).filter(v => v.trim()).length} of {intakeFields.length} answered
-                </div>
-              </div>
-
-              {/* Scrollable Form */}
-              <div style={{ flex: 1, overflowY: "auto", padding: "16px 20px", WebkitOverflowScrolling: "touch" }}>
-                {intakeFields.map((field, fi) => (
-                  <div key={field.key} style={{ marginBottom: 16 }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
-                      <div style={{ width: 28, height: 28, borderRadius: 7, background: intakeData[field.key] ? `${colors.primary}15` : colors.surface, display: "flex", alignItems: "center", justifyContent: "center", transition: "background 0.3s" }}>
-                        <field.icon size={13} color={intakeData[field.key] ? colors.primary : colors.textMuted} />
-                      </div>
-                      <label style={{ fontSize: 12, fontWeight: 700, color: colors.textPrimary }}>{field.label}</label>
-                      {fi < 5 && <span style={{ fontSize: 9, fontWeight: 700, color: colors.error }}>*</span>}
-                    </div>
-                    {field.key === "notes" ? (
-                      <textarea
-                        value={intakeData[field.key]}
-                        onChange={e => setIntakeData(p => ({ ...p, [field.key]: e.target.value }))}
-                        placeholder={field.placeholder}
-                        rows={3}
-                        style={{ width: "100%", padding: "10px 14px", borderRadius: 10, border: `1.5px solid ${intakeData[field.key] ? colors.primary + "50" : colors.border}`, fontSize: 13, outline: "none", resize: "none", fontFamily: "inherit", boxSizing: "border-box", transition: "border 0.3s" }}
-                      />
-                    ) : (
-                      <input
-                        value={intakeData[field.key]}
-                        onChange={e => setIntakeData(p => ({ ...p, [field.key]: e.target.value }))}
-                        placeholder={field.placeholder}
-                        style={{ width: "100%", padding: "10px 14px", borderRadius: 10, border: `1.5px solid ${intakeData[field.key] ? colors.primary + "50" : colors.border}`, fontSize: 13, outline: "none", boxSizing: "border-box", transition: "border 0.3s" }}
-                      />
-                    )}
-                  </div>
-                ))}
-              </div>
-
-              {/* Footer */}
-              <div style={{ padding: "14px 20px 20px", borderTop: `1px solid ${colors.border}`, flexShrink: 0 }}>
-                <button onClick={submitIntake}
-                  style={{ width: "100%", padding: "14px 0", borderRadius: 14, border: "none", background: Object.values(intakeData).filter(v => v.trim()).length >= 5 ? colors.primary : colors.textMuted, color: "#fff", fontSize: 14, fontWeight: 800, cursor: "pointer", boxShadow: Object.values(intakeData).filter(v => v.trim()).length >= 5 ? "0 4px 14px rgba(52,211,153,0.3)" : "none", transition: "all 0.3s" }}>
-                  {Object.values(intakeData).filter(v => v.trim()).length >= 5 ? "Complete Profile" : `Answer at least ${5 - Object.values(intakeData).filter(v => v.trim()).length} more`}
-                </button>
-                <button onClick={() => setShowIntakeForm(false)}
-                  style={{ width: "100%", marginTop: 8, padding: "10px 0", borderRadius: 10, border: "none", background: "transparent", fontSize: 12, fontWeight: 600, color: colors.textMuted, cursor: "pointer" }}>
-                  Skip for now
-                </button>
-              </div>
-            </div>
-          </div>
         )}
 
         {/* ═══ Coach Profile Popup (Trainee Home) ═══ */}
@@ -10962,7 +12542,7 @@ export default function FitCoachProPrototype() {
                 <div style={{ marginBottom: 18 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
                     <Shield size={14} color="#34D399" />
-                    <span style={{ fontSize: 13, fontWeight: 700, color: colors.textPrimary }}>Certifications</span>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: colors.textPrimary }}>{tr("Certifications")}</span>
                   </div>
                   {coachProfileData.certifications.map((c, i) => (
                     <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", background: "#EDE9FE", borderRadius: 10, marginBottom: 6, border: "1px solid #DDD6FE" }}>
@@ -10979,7 +12559,7 @@ export default function FitCoachProPrototype() {
                 <div style={{ marginBottom: 18 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
                     <Award size={14} color="#F59E0B" />
-                    <span style={{ fontSize: 13, fontWeight: 700, color: colors.textPrimary }}>Championships & Awards</span>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: colors.textPrimary }}>{tr("Championships & Awards")}</span>
                   </div>
                   {coachProfileData.champions.map((c, i) => (
                     <div key={i} style={{ display: "flex", alignItems: "center", gap: 10, padding: "10px 12px", background: "#FEF3C7", borderRadius: 10, marginBottom: 6, border: "1px solid #FDE68A" }}>
@@ -10996,18 +12576,18 @@ export default function FitCoachProPrototype() {
                 <div style={{ marginBottom: 10 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 10 }}>
                     <TrendingUp size={14} color="#10B981" />
-                    <span style={{ fontSize: 13, fontWeight: 700, color: colors.textPrimary }}>Proven Transformations</span>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: colors.textPrimary }}>{tr("Proven Transformations")}</span>
                   </div>
                   {coachProfileData.transformations.map((t, i) => (
                     <div key={i} style={{ padding: "12px", background: "#D1FAE5", borderRadius: 10, marginBottom: 6, border: "1px solid #A7F3D0" }}>
                       <div style={{ fontSize: 12, fontWeight: 600, color: colors.textPrimary, marginBottom: 4 }}>{t.title}</div>
                       <div style={{ display: "flex", gap: 12 }}>
-                        <span style={{ fontSize: 11, color: "#EF4444", fontWeight: 600 }}>Before: {t.before}</span>
-                        <span style={{ fontSize: 11, color: "#10B981", fontWeight: 600 }}>After: {t.after}</span>
+                        <span style={{ fontSize: 11, color: "#EF4444", fontWeight: 600 }}>{tr("Before:")} {t.before}</span>
+                        <span style={{ fontSize: 11, color: "#10B981", fontWeight: 600 }}>{tr("After:")} {t.after}</span>
                       </div>
                       <div style={{ width: "100%", height: 60, background: "#A7F3D0", borderRadius: 8, marginTop: 8, display: "flex", alignItems: "center", justifyContent: "center", border: "1px dashed #6EE7B7" }}>
                         <Camera size={16} color="#10B981" />
-                        <span style={{ fontSize: 10, color: "#10B981", fontWeight: 600, marginLeft: 4 }}>Before/After Photo</span>
+                        <span style={{ fontSize: 10, color: "#10B981", fontWeight: 600, marginLeft: 4 }}>{tr("Before/After Photo")}</span>
                       </div>
                     </div>
                   ))}
@@ -11025,6 +12605,7 @@ export default function FitCoachProPrototype() {
         @keyframes fadeScale { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
         @keyframes bounce { 0% { transform: scale(0.3); } 50% { transform: scale(1.1); } 70% { transform: scale(0.95); } 100% { transform: scale(1); } }
         @keyframes typingDot { 0%, 100% { opacity: 0.3; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1); } }
+        @keyframes tourPulse { 0%, 100% { opacity: 0.7; transform: scale(1); box-shadow: 0 0 0 0 rgba(52,211,153,0.4); } 50% { opacity: 1; transform: scale(1.02); box-shadow: 0 0 0 8px rgba(52,211,153,0); } }
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         @keyframes confettiFall { 0% { transform: translateY(-10px) rotate(0deg); opacity: 1; } 100% { transform: translateY(100vh) rotate(720deg); opacity: 0; } }
         * { box-sizing: border-box; margin: 0; padding: 0; }
